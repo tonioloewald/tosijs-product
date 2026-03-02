@@ -1,4 +1,4 @@
-import { tosiProduct, tosiProductSection, tosiScrollMapper, tosiFilmstrip, tosiPanZoom, tosiLayer, tosiWaypoint, interpolateWaypoints } from '../src/index'
+import { tosiProduct, tosiProductSection, tosiScrollMapper, tosiFilmstrip, tosiPanZoom, tosiLayer, tosiWaypoint, interpolateWaypoints, tosiInterpolator } from '../src/index'
 import { markdownViewer, bodymovinPlayer, b3d, mapBox } from 'tosijs-ui'
 import { elements } from 'tosijs'
 
@@ -45,19 +45,15 @@ document.head.appendChild(style)
 const { div, h1, video } = elements
 const ease = (t: number) => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t
 
+// Declarative overlay using TosiInterpolator
 const overlay = (range: string, text: string, options: any = {}) => {
-  return div({
-    class: 'overlay',
-    'data-scroll-range': range,
-    ...options,
-    apply(el: any) {
-      el.setScrollProgress = (progress: number) => {
-        const opacity = Math.max(0, 1 - Math.abs(progress - 0.5) * 2)
-        el.style.opacity = opacity.toString()
-        el.style.transform = `translateY(${(1 - opacity) * 20}px)`
-      }
-    }
-  }, h1({ class: 'hero-text' }, text))
+  return tosiInterpolator(
+    { 'data-scroll-animate': 'interpolator', 'data-scroll-range': range },
+    tosiWaypoint({ progress: 0, style: 'opacity: 0; transform: translateY(20px)' }),
+    tosiWaypoint({ progress: 0.5, style: 'opacity: 1; transform: translateY(0px)' }),
+    tosiWaypoint({ progress: 1, style: 'opacity: 0; transform: translateY(-20px)' }),
+    div({ class: 'overlay', ...options }, h1({ class: 'hero-text' }, text))
+  )
 }
 
 // Programmatically generate a mosaic for the demo
@@ -216,8 +212,18 @@ const app = tosiProduct(
       mapStyle: "mapbox://styles/mapbox/dark-v11",
       style: { width: '100%', height: '100%', pointerEvents: 'none' }
     })),
-    overlay('0.0, 0.2', 'Half Moon Bay'),
-    overlay('0.8, 1.0', 'Oulu')
+    tosiInterpolator({ 'data-scroll-animate': 'interpolator' },
+      tosiWaypoint({ progress: 0.0, style: 'opacity: 0; transform: translateY(20px)' }),
+      tosiWaypoint({ progress: 0.1, style: 'opacity: 1; transform: translateY(0px)' }),
+      tosiWaypoint({ progress: 0.2, style: 'opacity: 0; transform: translateY(-20px)' }),
+      div({ class: 'overlay' }, h1({ class: 'hero-text' }, 'Half Moon Bay'))
+    ),
+    tosiInterpolator({ 'data-scroll-animate': 'interpolator' },
+      tosiWaypoint({ progress: 0.8, style: 'opacity: 0; transform: translateY(20px)' }),
+      tosiWaypoint({ progress: 0.9, style: 'opacity: 1; transform: translateY(0px)' }),
+      tosiWaypoint({ progress: 1.0, style: 'opacity: 0; transform: translateY(-20px)' }),
+      div({ class: 'overlay' }, h1({ class: 'hero-text' }, 'Oulu'))
+    )
   ),
 
   div({ style: { backgroundColor: '#fff', color: '#000' } },
@@ -225,21 +231,23 @@ const app = tosiProduct(
   ),
 
   tosiProductSection({ scroll: 4000, style: { backgroundColor: '#fff' } },
-    tosiPanZoom({ 'data-scroll-animate': 'pan-zoom' },
-      tosiLayer(
-        // Layer 1: Background Vector
-        elements.img({ src: 'https://tosijs.net/favicon.svg' }),
-        tosiWaypoint({ progress: 0.0, x: 0.5, y: 0.5, zoom: 1.0, opacity: 0.2 }),
-        tosiWaypoint({ progress: 0.5, x: 0.2, y: 0.2, zoom: 3.0, opacity: 1.0 }),
-        tosiWaypoint({ progress: 1.0, x: 0.8, y: 0.8, zoom: 0.5, opacity: 0.2 })
-      ),
-      tosiLayer(
-        // Layer 2: Floating logo
-        elements.img({ src: 'https://tosijs.net/favicon.svg' }),
-        tosiWaypoint({ progress: 0.0, x: 0.5, y: 0.5, zoom: 0.1, opacity: 1.0 }),
-        tosiWaypoint({ progress: 0.5, x: 0.5, y: 0.5, zoom: 1.5, opacity: 0.8 }),
-        tosiWaypoint({ progress: 1.0, x: 0.5, y: 0.5, zoom: 5.0, opacity: 0.0 })
-      )
+    tosiInterpolator({ 'data-scroll-animate': 'interpolator' },
+      tosiWaypoint({ progress: 0.0, style: 'transform: translate(0vw, 0vh) scale(1.0); opacity: 0.2;' }),
+      tosiWaypoint({ progress: 0.5, style: 'transform: translate(30vw, 30vh) scale(3.0); opacity: 1.0;' }),
+      tosiWaypoint({ progress: 1.0, style: 'transform: translate(-30vw, -30vh) scale(0.5); opacity: 0.2;' }),
+      elements.img({ 
+        src: 'https://tosijs.net/favicon.svg', 
+        style: { width: '100vw', height: '100vh', objectFit: 'contain', position: 'absolute', top: 0, left: 0 }
+      })
+    ),
+    tosiInterpolator({ 'data-scroll-animate': 'interpolator' },
+      tosiWaypoint({ progress: 0.0, style: 'transform: translate(0vw, 0vh) scale(0.1); opacity: 1.0;' }),
+      tosiWaypoint({ progress: 0.5, style: 'transform: translate(0vw, 0vh) scale(1.5); opacity: 0.8;' }),
+      tosiWaypoint({ progress: 1.0, style: 'transform: translate(0vw, 0vh) scale(5.0); opacity: 0.0;' }),
+      elements.img({ 
+        src: 'https://tosijs.net/favicon.svg', 
+        style: { width: '100vw', height: '100vh', objectFit: 'contain', position: 'absolute', top: 0, left: 0 }
+      })
     ),
     overlay('0.1, 0.4', 'Dynamic multi-layer interpolation', { style: { color: '#000' } }),
     overlay('0.6, 0.9', 'Frame-perfect scaling', { style: { color: '#000' } })

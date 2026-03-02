@@ -97,9 +97,9 @@ export const tosiProductSection = (options: any, ...children: any[]) => {
     })
   }
 
-  window.addEventListener('scroll', () => {
+  document.addEventListener('scroll', () => {
     requestAnimationFrame(updateProgress)
-  }, { passive: true })
+  }, { passive: true, capture: true })
 
   setTimeout(updateProgress, 100)
 

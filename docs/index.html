@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>TosiProduct Demo</title>
+  <style>
+    *, *:before, *:after {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: #000;
+      color: #fff;
+      overflow-x: hidden;
+    }
+    /* Explicitly override host styles of components in light DOM */
+    xin-map, xin-lottie, xin-3d, video {
+      width: 100vw !important;
+      height: 100vh !important;
+      display: block !important;
+    }
+    .overlay {
+       position: absolute;
+       top: 0;
+       left: 0;
+       width: 100vw;
+       height: 100vh;
+       display: flex;
+       align-items: center;
+       justify-content: center;
+       pointer-events: none;
+       z-index: 10;
+       opacity: 0;
+       transform: translateY(20px);
+       transition: opacity 0.5s, transform 0.5s;
+    }
+    .hero-text {
+       font-size: 5rem;
+       font-weight: 800;
+       text-align: center;
+       background: linear-gradient(to bottom, #fff, #999);
+       -webkit-background-clip: text;
+       -webkit-text-fill-color: transparent;
+       padding: 0 20px;
+    }
+  </style>
+</head>
+<body>
+  <script type="module" src="./index.js"></script>
+</body>
+</html>

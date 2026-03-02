@@ -72,7 +72,13 @@ export const tosiLayer = (...args: any[]) => {
     if (arg instanceof Node || typeof arg === 'string') {
       el.appendChild(typeof arg === 'string' ? document.createTextNode(arg) : arg)
     } else if (typeof arg === 'object') {
-      Object.assign(el, arg)
+      for (const k in arg) {
+        if (k.startsWith('data-')) {
+          el.setAttribute(k, arg[k])
+        } else {
+          el[k] = arg[k]
+        }
+      }
     }
   }
   return el
@@ -107,7 +113,13 @@ export const tosiPanZoom = (...args: any[]) => {
     if (arg instanceof Node || typeof arg === 'string') {
       el.appendChild(typeof arg === 'string' ? document.createTextNode(arg) : arg)
     } else if (typeof arg === 'object') {
-      Object.assign(el, arg)
+      for (const k in arg) {
+        if (k.startsWith('data-')) {
+          el.setAttribute(k, arg[k])
+        } else {
+          el[k] = arg[k]
+        }
+      }
     }
   }
   return el

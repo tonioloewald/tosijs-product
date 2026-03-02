@@ -1,4 +1,4 @@
-import { tosiProduct, tosiProductSection, tosiScrollMapper, tosiFilmstrip } from '../src/index'
+import { tosiProduct, tosiProductSection, tosiScrollMapper, tosiFilmstrip, tosiPanZoom, tosiLayer, tosiWaypoint, interpolateWaypoints } from '../src/index'
 import { markdownViewer, bodymovinPlayer, b3d, mapBox } from 'tosijs-ui'
 import { elements } from 'tosijs'
 
@@ -7,7 +7,7 @@ const style = document.createElement('style')
 style.textContent = `
   body { margin: 0; padding: 0; background: #000; color: #fff; overflow-x: hidden; }
   tosi-product-section { display: block !important; width: 100% !important; position: relative !important; }
-  tosi-lottie, tosi-3d, tosi-map, video, tosi-filmstrip {
+  tosi-lottie, tosi-3d, tosi-map, video, tosi-filmstrip, tosi-pan-zoom {
     position: absolute !important;
     top: 0 !important;
     left: 0 !important;
@@ -45,10 +45,11 @@ document.head.appendChild(style)
 const { div, h1, video } = elements
 const ease = (t: number) => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t
 
-const overlay = (range: string, text: string) => {
+const overlay = (range: string, text: string, options: any = {}) => {
   return div({
     class: 'overlay',
     'data-scroll-range': range,
+    ...options,
     apply(el: any) {
       el.setScrollProgress = (progress: number) => {
         const opacity = Math.max(0, 1 - Math.abs(progress - 0.5) * 2)
@@ -155,20 +156,32 @@ const app = tosiProduct(
         scene.activeCamera = camera
         camera.minZ = 0.1
         new BABYLON.HemisphericLight('light', new BABYLON.Vector3(0, 1, 0), scene)
+        
         const body = BABYLON.MeshBuilder.CreateBox('body', { width: 4, height: 8, depth: 0.5 }, scene)
         body.material = new BABYLON.StandardMaterial('bodyMat', scene)
         body.material.diffuseColor = new BABYLON.Color3(0.05, 0.05, 0.05)
+
         const parts: any[] = []
         for (let i = 0; i < 3; i++) {
           const lens = BABYLON.MeshBuilder.CreateCylinder('lens' + i, { diameter: 1.2, height: 0.4 }, scene)
           lens.position.x = 1; lens.position.y = 3 - i * 1.5; lens.position.z = -0.6
           lens.parent = body; parts.push(lens)
         }
+
+        const b3dWaypoints = [
+          { progress: 0.0, rotY: -Math.PI / 2, radius: 15, partOffset: 3 },
+          { progress: 0.5, rotY: 0, radius: 12.5, partOffset: 1.5 },
+          { progress: 1.0, rotY: Math.PI / 2, radius: 10, partOffset: 0 }
+        ]
+
         element.setScrollProgress = (progress: number) => {
-          const e = ease(progress)
-          body.rotation.y = (e - 0.5) * Math.PI
-          parts.forEach((part, i) => { part.position.z = -0.6 - (1 - e) * (i + 1) * 3 })
-          camera.radius = 15 - e * 5
+          const current = interpolateWaypoints(progress, b3dWaypoints)
+          if (!current) return
+          body.rotation.y = current.rotY
+          parts.forEach((part, i) => { 
+            part.position.z = -0.6 - current.partOffset * (i + 1) 
+          })
+          camera.radius = current.radius
         }
       }
     })
@@ -206,6 +219,31 @@ const app = tosiProduct(
     })),
     overlay('0.0, 0.2', 'Half Moon Bay'),
     overlay('0.8, 1.0', 'Oulu')
+  ),
+
+  div({ style: { backgroundColor: '#fff', color: '#000' } },
+    markdownViewer('# Cinematic SVG Pan & Zoom.\n## Explore high-resolution vectors via waypoints.')
+  ),
+
+  tosiProductSection({ scroll: 4000, style: { backgroundColor: '#fff' } },
+    tosiPanZoom({ 'data-scroll-animate': 'pan-zoom' },
+      tosiLayer(
+        // Layer 1: Background Vector
+        elements.img({ src: 'https://tosijs.net/favicon.svg' }),
+        tosiWaypoint({ progress: 0.0, x: 0.5, y: 0.5, zoom: 1.0, opacity: 0.2 }),
+        tosiWaypoint({ progress: 0.5, x: 0.2, y: 0.2, zoom: 3.0, opacity: 1.0 }),
+        tosiWaypoint({ progress: 1.0, x: 0.8, y: 0.8, zoom: 0.5, opacity: 0.2 })
+      ),
+      tosiLayer(
+        // Layer 2: Floating logo
+        elements.img({ src: 'https://tosijs.net/favicon.svg' }),
+        tosiWaypoint({ progress: 0.0, x: 0.5, y: 0.5, zoom: 0.1, opacity: 1.0 }),
+        tosiWaypoint({ progress: 0.5, x: 0.5, y: 0.5, zoom: 1.5, opacity: 0.8 }),
+        tosiWaypoint({ progress: 1.0, x: 0.5, y: 0.5, zoom: 5.0, opacity: 0.0 })
+      )
+    ),
+    overlay('0.1, 0.4', 'Dynamic multi-layer interpolation', { style: { color: '#000' } }),
+    overlay('0.6, 0.9', 'Frame-perfect scaling', { style: { color: '#000' } })
   ),
 
   div({ style: { backgroundColor: '#fff', color: '#000' } },

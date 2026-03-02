@@ -126,31 +126,82 @@ const app = tosiProduct(
   ),
 
   div({ style: { backgroundColor: '#fff', color: '#000' } }, 
+    markdownViewer('# Ray Tracing\n## Hardware-accelerated gaming.')
+  ),
+
+  tosiProductSection({ 
+    scroll: 3000,
+    style: { backgroundColor: '#fff', color: '#000' }
+  },
+    video({
+      src: 'https://www.w3schools.com/html/mov_bbb.mp4',
+      'data-scroll-animate': 'currentTime',
+      muted: true,
+      playsinline: true,
+      autoplay: true,
+      loop: true
+    }),
+    overlay('0.1, 0.5', 'Standard Video Scrubbing.')
+  ),
+
+  tosiProductSection({ scroll: 4000, style: { backgroundColor: '#fff' } },
+    overlay('0, 0.5', 'A professional camera system.'),
+    overlay('0.5, 1.0', 'In the palm of your hand.'),
+    b3d({
+      'data-scroll-animate': 'babylon',
+      async sceneCreated(element: any, BABYLON: any) {
+        const { scene } = element
+        const camera = new BABYLON.ArcRotateCamera('camera', -Math.PI / 2, Math.PI / 2.5, 15, BABYLON.Vector3.Zero(), scene)
+        scene.activeCamera = camera
+        camera.minZ = 0.1
+        new BABYLON.HemisphericLight('light', new BABYLON.Vector3(0, 1, 0), scene)
+        const body = BABYLON.MeshBuilder.CreateBox('body', { width: 4, height: 8, depth: 0.5 }, scene)
+        body.material = new BABYLON.StandardMaterial('bodyMat', scene)
+        body.material.diffuseColor = new BABYLON.Color3(0.05, 0.05, 0.05)
+        const parts: any[] = []
+        for (let i = 0; i < 3; i++) {
+          const lens = BABYLON.MeshBuilder.CreateCylinder('lens' + i, { diameter: 1.2, height: 0.4 }, scene)
+          lens.position.x = 1; lens.position.y = 3 - i * 1.5; lens.position.z = -0.6
+          lens.parent = body; parts.push(lens)
+        }
+        element.setScrollProgress = (progress: number) => {
+          const e = ease(progress)
+          body.rotation.y = (e - 0.5) * Math.PI
+          parts.forEach((part, i) => { part.position.z = -0.6 - (1 - e) * (i + 1) * 3 })
+          camera.radius = 15 - e * 5
+        }
+      }
+    })
+  ),
+
+  div({ style: { backgroundColor: '#fff', color: '#000' } },
     markdownViewer('# Explore the world.\n## From Half Moon Bay to Oulu in a single scroll.')
   ),
 
   tosiProductSection({ scroll: 5000, style: { backgroundColor: '#fff' } },
     tosiScrollMapper({
       onProgress(progress: number) {
-        // Direct property update on the child element
         const map = (this as any).firstElementChild as any
         if (!map || !map.tagName.includes('MAP')) return
-        
         const minZoom = 2
         const maxZoom = 12
-        const moveP = progress > 0.1 && progress < 0.9 ? ease((progress - 0.1) / 0.8) : (progress >= 0.9 ? 1 : 0)
+        let moveP = 0
+        if (progress > 0.1 && progress < 0.9) {
+          moveP = ease((progress - 0.1) / 0.8)
+        } else if (progress >= 0.9) {
+          moveP = 1
+        }
         const zp = Math.abs(progress - 0.5) * 2
         const zoom = minZoom + (zp * zp) * (maxZoom - minZoom)
-          
         const lat = hmb.lat + (oulu.lat - hmb.lat) * moveP
         const lng = hmb.lng + (oulu.lng - hmb.lng) * moveP
-        map.coords = `${lat.toFixed(6)},${lng.toFixed(6)},${zoom.toFixed(1)}`
+        map.coords = `${lat.toFixed(6)},${lng.toFixed(6)},${zoom.toFixed(4)}`
       }
     },
     mapBox({
       token: "pk.eyJ1IjoicG9kcGVyc29uIiwiYSI6ImNqc2JlbWU0bjA1ZmY0YW5ycHZod3VhbWcifQ.arvqfpOqMgFYkKgQ35UScA",
       coords: `${hmb.lat},${hmb.lng},12`,
-      mapStyle: "mapbox://styles/mapbox/light-v11",
+      mapStyle: "mapbox://styles/mapbox/dark-v11",
       style: { width: '100%', height: '100%', pointerEvents: 'none' }
     })),
     overlay('0.0, 0.2', 'Half Moon Bay'),

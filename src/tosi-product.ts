@@ -90,14 +90,6 @@ export const tosiProductSection = (options: any, ...children: any[]) => {
         if (el.scene.activeCamera && el.scene.activeCamera.alpha !== undefined) {
           el.scene.activeCamera.alpha = localProgress * Math.PI * 2
         }
-      } else if (el instanceof MapBox || el.tagName.includes('MAP')) {
-        const london = { lat: 37.4636, lng: -122.4286 }
-        const paris = { lat: 65.0121, lng: 25.4651 }
-        const zp = Math.abs(localProgress - 0.5) * 2
-        const zoom = 2 + (zp * zp) * 10
-        const lat = london.lat + (paris.lat - london.lat) * localProgress
-        const lng = london.lng + (paris.lng - london.lng) * localProgress
-        el.coords = `${lat.toFixed(6)},${lng.toFixed(6)},${zoom.toFixed(1)}`
       }
     })
   }
@@ -105,9 +97,6 @@ export const tosiProductSection = (options: any, ...children: any[]) => {
   window.addEventListener('scroll', () => {
     requestAnimationFrame(updateProgress)
   }, { passive: true })
-
-  // Force updateProgress into global window for debugging
-  ;(window as any).UPDATE_PROGRESS = updateProgress;
 
   setTimeout(updateProgress, 100)
 

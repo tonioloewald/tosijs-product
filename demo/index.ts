@@ -31,6 +31,7 @@ style.textContent = `
     width: 100vw;
     height: 100vh;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     pointer-events: none;
@@ -55,6 +56,10 @@ style.textContent = `
     margin: 0 auto;
     text-align: center;
   }
+
+  .overlay-debug {
+    display: none;
+  }
 `
 document.head.appendChild(style)
 
@@ -69,11 +74,8 @@ const overlay = (range: string, text: string) => {
     'data-scroll-range': range,
     apply(el: any) {
       el.setScrollProgress = (progress: number) => {
-        const e = ease(progress)
-        let opacity = 0
-        if (e < 0.2) opacity = e / 0.2
-        else if (e < 0.8) opacity = 1
-        else opacity = (1 - e) / 0.2
+        // Linear Pulse: 0 at 0, 1 at 0.5, 0 at 1
+        const opacity = Math.max(0, 1 - Math.abs(progress - 0.5) * 2)
         
         el.style.opacity = opacity.toString()
         el.style.transform = `translateY(${(1 - opacity) * 20}px)`
@@ -82,8 +84,8 @@ const overlay = (range: string, text: string) => {
   }, h1({ class: 'hero-text' }, text))
 }
 
-const london = { lat: 51.5074, lng: -0.1278 }
-const paris = { lat: 48.8566, lng: 2.3522 }
+const london = { lat: 37.4636, lng: -122.4286 }
+const paris = { lat: 65.0121, lng: 25.4651 }
 
 const app = tosiProduct(
   markdownViewer('# iPhone 17 Pro\n## Titanium. So strong. So light. So Pro.\nScroll down to explore.'),
@@ -102,8 +104,8 @@ const app = tosiProduct(
       'data-scroll-animate': 'lottie',
       style: { opacity: '0.7' }
     }),
-    overlay('0,0.4', 'The first 100% recycled titanium.'),
-    overlay('0.5,0.9', 'Lighter than ever before.')
+    overlay('0, 0.4', 'The first 100% recycled titanium.'),
+    overlay('0.6, 1.0', 'Lighter than ever before.')
   ),
 
   div({ style: { backgroundColor: '#fff', color: '#000' } }, 
@@ -122,12 +124,12 @@ const app = tosiProduct(
       autoplay: true,
       loop: true
     }),
-    overlay('0.1,0.5', 'Hardware-accelerated ray tracing.')
+    overlay('0.1, 0.5', 'Hardware-accelerated ray tracing.')
   ),
 
   tosiProductSection({ scroll: 4000, style: { backgroundColor: '#fff' } },
-    overlay('0,0.5', 'A professional camera system.'),
-    overlay('0.6,1', 'In the palm of your hand.'),
+    overlay('0, 0.5', 'A professional camera system.'),
+    overlay('0.5, 1.0', 'In the palm of your hand.'),
     b3d({
       'data-scroll-animate': 'babylon',
       async sceneCreated(element: any, BABYLON: any) {
@@ -171,7 +173,7 @@ const app = tosiProduct(
   ),
 
   div({ style: { backgroundColor: '#fff', color: '#000' } },
-    markdownViewer('# Explore the world.\n## From London to Paris in a single scroll.')
+    markdownViewer('# Explore the world.\n## From Half Moon Bay to Oulu in a single scroll.')
   ),
 
   tosiProductSection({ scroll: 5000, style: { backgroundColor: '#fff' } },
@@ -180,16 +182,23 @@ const app = tosiProduct(
         const map = this.querySelector('tosi-map') as any
         if (!map) return
         
-        const e = ease(progress)
-        const minZoom = 4
+        const minZoom = 2
         const maxZoom = 12
         
-        const zoom = e < 0.5 
-          ? maxZoom - (e * 2) * (maxZoom - minZoom)
-          : minZoom + (e - 0.5) * 2 * (maxZoom - minZoom)
+        // Movement logic
+        let moveP = 0
+        if (progress > 0.1 && progress < 0.9) {
+          moveP = ease((progress - 0.1) / 0.8)
+        } else if (progress >= 0.9) {
+          moveP = 1
+        }
+
+        // Zoom logic
+        const zp = Math.abs(progress - 0.5) * 2
+        const zoom = minZoom + (zp * zp) * (maxZoom - minZoom)
           
-        const lat = london.lat + (paris.lat - london.lat) * e
-        const lng = london.lng + (paris.lng - london.lng) * e
+        const lat = london.lat + (paris.lat - london.lat) * moveP
+        const lng = london.lng + (paris.lng - london.lng) * moveP
         map.coords = `${lat.toFixed(6)},${lng.toFixed(6)},${zoom.toFixed(1)}`
       }
     },
@@ -199,8 +208,8 @@ const app = tosiProduct(
       mapStyle: "mapbox://styles/mapbox/dark-v11",
       style: { width: '100%', height: '100%', pointerEvents: 'none' }
     })),
-    overlay('0.05,0.45', 'London'),
-    overlay('0.55,0.95', 'Paris')
+    overlay('0.0, 0.2', 'Half Moon Bay'),
+    overlay('0.8, 1.0', 'Oulu')
   ),
 
   div({ style: { backgroundColor: '#fff', color: '#000' } },

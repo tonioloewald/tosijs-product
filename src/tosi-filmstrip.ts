@@ -1,5 +1,6 @@
-import { Component, elements } from 'tosijs'
+import { BodymovinPlayer, B3d, MapBox, tosijs } from 'tosijs-ui'
 
+const { Component, elements } = tosijs
 const { canvas } = elements
 
 export class TosiFilmstrip extends Component {
@@ -12,7 +13,8 @@ export class TosiFilmstrip extends Component {
 
   private _img: HTMLImageElement | null = null
   private _ctx: CanvasRenderingContext2D | null = null
-  private _loading: Promise<void> | null = null
+  private _lastProgress: number = 0
+  private _canvas: HTMLCanvasElement | null = null
 
   static styleSpec = {
     ':host': {
@@ -24,54 +26,66 @@ export class TosiFilmstrip extends Component {
     'canvas': {
       width: '100%',
       height: '100%',
-      objectFit: 'contain'
+      objectFit: 'contain',
+      display: 'block'
     }
   }
 
-  content = canvas({ part: 'canvas' })
+  content = ({canvas}: any) => {
+    this._canvas = canvas({ part: 'canvas' }) as HTMLCanvasElement
+    return this._canvas
+  }
 
   private async load() {
-    if (!this.src) return
+    const src = this.getAttribute('src') || (this as any).src
+    if (!src) return
     
-    // Auto-parse config from filename if not provided
-    // format: name_WxH_total.webp
-    if (!this.cols || !this.rows || !this.total) {
-      const match = this.src.match(/(\d+)x(\d+)_(\d+)\.(webp|jpg|png)$/i)
+    let cols = Number(this.getAttribute('cols')) || (this as any).cols
+    let rows = Number(this.getAttribute('rows')) || (this as any).rows
+    let total = Number(this.getAttribute('total')) || (this as any).total
+
+    if (!cols || !rows || !total) {
+      const match = src.match(/(\d+)x(\d+)_(\d+)\.(webp|jpg|png|data)/i)
       if (match) {
-        if (!this.cols) this.cols = parseInt(match[1])
-        if (!this.rows) this.rows = parseInt(match[2])
-        if (!this.total) this.total = parseInt(match[3])
+        if (!cols) cols = parseInt(match[1])
+        if (!rows) rows = parseInt(match[2])
+        if (!total) total = parseInt(match[3])
       }
     }
 
-    this._loading = new Promise((resolve, reject) => {
-      const img = new Image()
-      img.onload = () => {
-        this._img = img
-        this.render()
-        resolve()
-      }
-      img.onerror = reject
-      img.src = this.src
-    })
-    return this._loading
+    if (!total || !cols || !rows) return
+
+    const img = new Image()
+    img.onload = () => {
+      this._img = img
+      this.setScrollProgress(this._lastProgress)
+    }
+    img.src = src
   }
 
   setScrollProgress(progress: number) {
-    if (!this._img || !this.total) return
+    this._lastProgress = progress
+    if (!this._img) return
     
-    const { canvas } = this.parts as { canvas: HTMLCanvasElement }
+    const total = Number(this.getAttribute('total')) || (this as any).total
+    const cols = Number(this.getAttribute('cols')) || (this as any).cols
+    const rows = Number(this.getAttribute('rows')) || (this as any).rows
+    
+    if (!total || !cols || !rows) return
+    
+    const canvas = this._canvas || (this.parts && this.parts.canvas as HTMLCanvasElement)
+    if (!canvas) return
+    
     if (!this._ctx) this._ctx = canvas.getContext('2d')
     if (!this._ctx) return
 
-    const frameIndex = Math.max(0, Math.min(this.total - 1, Math.floor(progress * this.total)))
-    const col = frameIndex % this.cols
-    const row = Math.floor(frameIndex / this.cols)
+    const frameIndex = Math.max(0, Math.min(total - 1, Math.floor(progress * total)))
+    const col = frameIndex % cols
+    const row = Math.floor(frameIndex / cols)
     
-    const fw = this._img.width / this.cols
-    const fh = this._img.height / this.rows
+    const fw = this._img.width / cols
+    const fh = this._img.height / rows
 
-    // Update canvas resolution if needed
     if (canvas.width !== fw || canvas.height !== fh) {
       canvas.width = fw
       canvas.height = fh
@@ -92,8 +106,11 @@ export class TosiFilmstrip extends Component {
 
   render() {
     super.render()
-    if (this._img && (this as any)._progress !== undefined) {
-      this.setScrollProgress((this as any)._progress)
+    const currentSrc = this.getAttribute('src') || (this as any).src
+    if (!this._img || this._img.src !== currentSrc) {
+      this.load()
+    } else {
+      this.setScrollProgress(this._lastProgress)
     }
   }
 }

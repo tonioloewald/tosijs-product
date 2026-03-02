@@ -59,8 +59,9 @@ export const tosiProductSection = (options: any, ...children: any[]) => {
   Object.assign(section, otherOptions)
 
   const updateProgress = () => {
+    if (!section.isConnected) return
+
     const rect = section.getBoundingClientRect()
-    // Progress starts exactly when the top of the section touches the top of the viewport
     const progress = Math.max(0, Math.min(1, -rect.top / scrollAmount))
     
     section.dataset.progress = progress.toFixed(3)
@@ -83,18 +84,20 @@ export const tosiProductSection = (options: any, ...children: any[]) => {
 
       if (typeof el.setScrollProgress === 'function') {
         el.setScrollProgress(localProgress)
-        return
-      }
-
-      const attr = el.getAttribute('data-scroll-animate')
-      if (attr === 'currentTime' && el.duration) {
-        el.currentTime = localProgress * el.duration
       } else if (el.animation && (el instanceof BodymovinPlayer || el.tagName.includes('LOTTIE'))) {
         el.animation.goToAndStop(localProgress * el.animation.totalFrames, true)
       } else if (el.scene && (el instanceof B3d || el.tagName.includes('3D'))) {
         if (el.scene.activeCamera && el.scene.activeCamera.alpha !== undefined) {
           el.scene.activeCamera.alpha = localProgress * Math.PI * 2
         }
+      } else if (el instanceof MapBox || el.tagName.includes('MAP')) {
+        const london = { lat: 37.4636, lng: -122.4286 }
+        const paris = { lat: 65.0121, lng: 25.4651 }
+        const zp = Math.abs(localProgress - 0.5) * 2
+        const zoom = 2 + (zp * zp) * 10
+        const lat = london.lat + (paris.lat - london.lat) * localProgress
+        const lng = london.lng + (paris.lng - london.lng) * localProgress
+        el.coords = `${lat.toFixed(6)},${lng.toFixed(6)},${zoom.toFixed(1)}`
       }
     })
   }
@@ -102,6 +105,9 @@ export const tosiProductSection = (options: any, ...children: any[]) => {
   window.addEventListener('scroll', () => {
     requestAnimationFrame(updateProgress)
   }, { passive: true })
+
+  // Force updateProgress into global window for debugging
+  ;(window as any).UPDATE_PROGRESS = updateProgress;
 
   setTimeout(updateProgress, 100)
 
@@ -125,6 +131,10 @@ export const tosiScrollMapper = (options: any, ...children: any[]) => {
     'data-scroll-animate': 'mapper',
     style: { display: 'block', width: '100%', height: '100%' } 
   }, ...children) as any
-  el.setScrollProgress = options.onProgress
+  
+  if (options.onProgress) {
+    el.setScrollProgress = options.onProgress.bind(el)
+  }
+  
   return el
 }

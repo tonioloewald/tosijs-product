@@ -27,22 +27,26 @@ bun install tosijs-product
 
 ### Usage
 
+#### As an ES Module (Modern)
+
 ```typescript
 import { tosiProduct, tosiProductSection } from 'tosijs-product'
-import { xinMd, bodymovinPlayer } from 'tosijs-ui'
-
-const app = tosiProduct(
-  xinMd('# My Product'),
-  tosiProductSection({ scroll: 2000 },
-    bodymovinPlayer({
-      src: '/my-animation.json',
-      'data-scroll-animate': 'lottie'
-    })
-  )
-)
-
-document.body.append(app)
+// ...
 ```
+
+#### Via Script Tag (IIFE)
+
+For quick prototypes or simple HTML pages, you can include the library directly:
+
+```html
+<script src="node_modules/tosijs-product/dist/index.js"></script>
+<script>
+  const { tosiProduct, tosiProductSection } = TosiProduct;
+  // ...
+</script>
+```
+
+Note: The IIFE version exports everything under the `TosiProduct` global namespace.
 
 ## License
 

@@ -3,14 +3,31 @@
   "version": "0.0.1",
   "description": "Scroll-linked animation components for tosijs",
   "source": "src/index.ts",
+  "type": "module",
   "types": "dist/index.d.ts",
+  "main": "./dist/index.js",
+  "module": "./dist/module.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/module.js",
+      "browser": "./dist/index.js",
+      "default": "./dist/module.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "start": "bun --watch dev.ts",
     "format": "bun eslint src demo --fix && bun prettier --write .",
-    "test": "bun test"
+    "test": "bun test",
+    "build": "bun dev.ts --build"
   },
   "author": "Tonio Loewald",
-  "license": "BSD-3-CLAUSE",
+  "license": "Apache-2.0",
   "peerDependencies": {
     "tosijs": ">=1.4.0",
     "tosijs-ui": ">=1.0.6"

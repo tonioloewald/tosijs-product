@@ -8,17 +8,34 @@ const PORT = 8788
 const PROJECT_ROOT = import.meta.dir
 const PUBLIC = path.resolve(PROJECT_ROOT, 'demo')
 const DIST = path.resolve(PROJECT_ROOT, 'dist')
+const buildOnly = process.argv.includes('--build')
 
 async function build() {
   console.time('build')
+  await $`rm -rf ${DIST} || true`
   await $`mkdir -p ${DIST}`
 
-  // Build the library
+  // Generate .d.ts files
+  await $`bun tsc --declaration --emitDeclarationOnly --target es2022 --outDir dist`
+  await $`mv dist/src/index.d.ts dist/index.d.ts || true`
+  await $`mv dist/src/tosi-product.d.ts dist/tosi-product.d.ts || true`
+  await $`rm -rf dist/src dist/demo dist/dev.d.ts || true`
+
+  // Build the library (ESM)
   await Bun.build({
     entrypoints: ['./src/index.ts'],
     outdir: DIST,
     target: 'browser',
     format: 'esm',
+    naming: 'module.js',
+  })
+
+  // Build the library (IIFE)
+  await Bun.build({
+    entrypoints: ['./src/index.ts'],
+    outdir: DIST,
+    target: 'browser',
+    format: 'iife',
     naming: 'index.js',
   })
 
@@ -34,6 +51,10 @@ async function build() {
 }
 
 await build()
+
+if (buildOnly) {
+  process.exit(0)
+}
 
 function serveFromDir(config: {
   directory: string

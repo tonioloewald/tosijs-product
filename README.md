@@ -42,9 +42,9 @@ const app = tosiProduct(
 document.body.append(app)
 ```
 
-### 2. Simple HTML Page (IIFE / CDN)
+### 2. Pure HTML Page (Zero JS Orchestration)
 
-For quick prototypes or traditional websites, you can drop the library right into your HTML via jsDelivr:
+For quick prototypes or CMS-driven websites, you can drop the library into your HTML via CDN and build the entire experience using just declarative HTML tags:
 
 ```html
 <!DOCTYPE html>
@@ -52,17 +52,15 @@ For quick prototypes or traditional websites, you can drop the library right int
 <head>
   <meta charset="utf-8">
   <title>My Product</title>
-  <!-- Global styles required for full-screen media -->
   <style>
-    body { margin: 0; padding: 0; background: #000; color: #fff; }
+    body { margin: 0; padding: 0; background: #000; color: #fff; overflow-x: hidden; }
     tosi-product-section { display: block; width: 100%; position: relative; }
-    tosi-lottie, video {
+    tosi-lottie, video, img.bg {
       position: absolute !important;
       top: 0; left: 0;
       width: 100vw !important;
       height: 100vh !important;
       object-fit: cover !important;
-      display: block !important;
     }
   </style>
   
@@ -71,23 +69,25 @@ For quick prototypes or traditional websites, you can drop the library right int
   <script src="https://cdn.jsdelivr.net/npm/tosijs-product/dist/index.js"></script>
 </head>
 <body>
-  <script>
-    // Extract what we need from the global namespaces
-    const { tosiProduct, tosiProductSection } = TosiProduct;
-    const { markdownViewer, bodymovinPlayer } = TosiUi;
-
-    const app = tosiProduct(
-      markdownViewer('# My Product\nScroll to explore.'),
+  <!-- The entire experience is defined purely in HTML. No JS required! -->
+  <tosi-product>
+    <tosi-product-section scroll="2000">
+      <tosi-lottie src="https://tosijs.net/tosi.json" data-scroll-animate="lottie"></tosi-lottie>
       
-      tosiProductSection({ scroll: 2000 },
-        bodymovinPlayer({
-          src: 'https://tosijs.net/tosi.json',
-          'data-scroll-animate': 'lottie'
-        })
-      )
-    )
+      <!-- Declarative Text Interpolation -->
+      <tosi-interpolator data-scroll-animate="interpolator">
+        <tosi-waypoint progress="0.0" style="opacity: 0; transform: translateY(50px)"></tosi-waypoint>
+        <tosi-waypoint progress="0.3" style="opacity: 1; transform: translateY(0px)"></tosi-waypoint>
+        <tosi-waypoint progress="0.7" style="opacity: 1; transform: translateY(0px)"></tosi-waypoint>
+        <tosi-waypoint progress="1.0" style="opacity: 0; transform: translateY(-50px)"></tosi-waypoint>
+        <h1 style="position: absolute; width: 100vw; text-align: center;">Pure HTML. Zero JS.</h1>
+      </tosi-interpolator>
+    </tosi-product-section>
+  </tosi-product>
 
-    document.body.append(app)
+  <script>
+    // Just ensure the components from tosijs-ui are registered
+    TosiUi.bodymovinPlayer();
   </script>
 </body>
 </html>
@@ -107,38 +107,28 @@ bunx tosi-mosaic my-video.mp4 --frames 100 --width 1280
 This produces `my-video_10x10_100.webp`. The filename contains the grid dimensions (`10x10`) and total frames (`100`), which the component uses for automatic configuration.
 
 **2. Use the Component:**
-```typescript
-import { tosiFilmstrip } from 'tosijs-product'
-
-tosiFilmstrip({
-  src: 'my-video_10x10_100.webp',
-  'data-scroll-animate': 'true'
-})
+```html
+<tosi-filmstrip src="my-video_10x10_100.webp" data-scroll-animate="true"></tosi-filmstrip>
 ```
 
 *Note: A Matrix (Grid) is used rather than a single long strip because browsers have maximum image dimension limits (often 16,384px). A 10x10 matrix keeps the dimensions well within GPU limits while delivering 100 frames in a single network request.*
 
-### Declarative SVG Pan & Zoom
+### Declarative CSS Interpolation
 
-You can choreograph multi-layered vector animations using the Waypoints system. Set starting, middle, and ending coordinates, and the orchestrator handles the easing.
+You can choreograph complex, multi-layered animations (like SVG pan & zoom or text reveals) using the `<tosi-interpolator>` and `<tosi-waypoint>` system. Set starting, middle, and ending CSS styles, and the orchestrator handles the easing.
 
-```typescript
-tosiProductSection({ scroll: 4000 },
-  tosiPanZoom({ 'data-scroll-animate': 'pan-zoom' },
-    // Layer 1
-    tosiLayer(
-      elements.img({ src: 'background.svg' }),
-      tosiWaypoint({ progress: 0.0, x: 0.5, y: 0.5, zoom: 1.0 }),
-      tosiWaypoint({ progress: 1.0, x: 0.8, y: 0.8, zoom: 0.5 })
-    ),
-    // Layer 2
-    tosiLayer(
-      elements.img({ src: 'foreground.svg' }),
-      tosiWaypoint({ progress: 0.0, x: 0.5, y: 0.5, zoom: 0.1 }),
-      tosiWaypoint({ progress: 1.0, x: 0.5, y: 0.5, zoom: 5.0 })
-    )
-  )
-)
+```html
+<tosi-product-section scroll="4000">
+  <tosi-interpolator data-scroll-animate="interpolator">
+    <!-- Waypoints define the timeline -->
+    <tosi-waypoint progress="0.0" style="transform: scale(1.0); opacity: 0.2;"></tosi-waypoint>
+    <tosi-waypoint progress="0.5" style="transform: scale(3.0); opacity: 1.0;"></tosi-waypoint>
+    <tosi-waypoint progress="1.0" style="transform: scale(0.5); opacity: 0.2;"></tosi-waypoint>
+    
+    <!-- The target element receives the interpolated styles -->
+    <img src="background.svg" class="bg">
+  </tosi-interpolator>
+</tosi-product-section>
 ```
 
 ## License

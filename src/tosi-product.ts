@@ -84,6 +84,9 @@ export const tosiProductSection = (options: any, ...children: any[]) => {
 
       if (typeof el.setScrollProgress === 'function') {
         el.setScrollProgress(localProgress)
+      } else if (el.getAttribute('data-scroll-animate') === 'currentTime' && el.duration) {
+        // Handle Video scrubbing
+        el.currentTime = localProgress * el.duration
       } else if (el.animation && (el instanceof BodymovinPlayer || el.tagName.includes('LOTTIE'))) {
         el.animation.goToAndStop(localProgress * el.animation.totalFrames, true)
       } else if (el.scene && (el instanceof B3d || el.tagName.includes('3D'))) {

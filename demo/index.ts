@@ -139,8 +139,7 @@ const app = tosiProduct(
       'data-scroll-animate': 'currentTime',
       muted: true,
       playsinline: true,
-      autoplay: true,
-      loop: true
+      preload: 'auto'
     }),
     overlay('0.1, 0.5', 'Standard Video Scrubbing.')
   ),

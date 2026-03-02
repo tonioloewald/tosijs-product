@@ -17,9 +17,13 @@
   },
   "files": [
     "dist",
+    "bin",
     "README.md",
     "LICENSE"
   ],
+  "bin": {
+    "tosi-mosaic": "./bin/tosi-mosaic.ts"
+  },
   "scripts": {
     "start": "bun --watch dev.ts",
     "format": "bun eslint src demo --fix && bun prettier --write .",

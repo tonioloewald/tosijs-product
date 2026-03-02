@@ -9,6 +9,38 @@ A cinematic product page component library for `tosijs`.
 - **`tosiProduct`**: The main orchestrator that manages application state and coordinate space.
 - **`tosiProductSection`**: A container that pins content to the viewport using `sticky` positioning and translates scroll position into a normalized `0..1` progress value.
 - **`tosiScrollMapper`**: A general-purpose wrapper that maps scroll progress to custom elements via an `onProgress` callback.
+- **`tosiFilmstrip`**: A high-performance frame-based animator that uses WebP mosaics (grids) instead of standard video for buttery-smooth scrolling.
+
+## Frame-Based Animation (The Apple Way)
+
+Standard video scrubbing often stutters. `tosijs-product` provides a CLI tool to convert videos into a single WebP mosaic grid, which the `tosiFilmstrip` component then scrubs through using a Canvas.
+
+### 1. Create a Mosaic
+
+Use the included CLI tool to convert your video:
+
+```bash
+bunx tosi-mosaic my-video.mp4 --frames 60 --width 1280
+```
+
+This will produce a file named `my-video_8x8_60.webp`. The filename contains the grid dimensions (`8x8`) and total frames (`60`), which the component uses for automatic configuration.
+
+### 2. Use the Component
+
+```typescript
+import { tosiFilmstrip } from 'tosijs-product'
+
+tosiFilmstrip({
+  src: 'my-video_8x8_60.webp',
+  'data-scroll-animate': 'true'
+})
+```
+
+The component automatically parses the filename to configure its internal grid math.
+
+### Why Matrix vs. Strip?
+
+`tosi-mosaic` produces a **Matrix (Grid)** rather than a horizontal/vertical strip. Browsers have maximum image dimension limits (often 16,384px). A 100-frame strip of a 1080p video would be 192,000 pixels long and would fail to render. A 10x10 matrix keeps the dimensions well within GPU and browser limits.
 
 ## Features
 

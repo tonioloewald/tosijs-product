@@ -1,16 +1,47 @@
-import { BodymovinPlayer, B3d, MapBox, tosijs } from 'tosijs-ui'
+import { BodymovinPlayer, B3d } from 'tosijs-ui'
+import { Component, elements } from 'tosijs'
 
-const { elements } = tosijs
-const { div, span } = elements
+const { div, span, slot } = elements
 
-export const tosiProductSection = (options: any, ...children: any[]) => {
-  const scrollAmount = options.scroll || 1000
-  const onProgress = options.onProgress
-  const debug = options.debug || false
-  
-  const debugInfo = debug ? span({
-    class: 'tosi-debug',
-    style: {
+let scrollHandlerInitialized = false
+const sections: TosiProductSection[] = []
+
+function onGlobalScroll() {
+  requestAnimationFrame(() => {
+    for (const section of sections) {
+      section.updateProgress()
+    }
+  })
+}
+
+export class TosiProductSection extends Component {
+  static initAttributes = {
+    scroll: 1000,
+    debug: false
+  }
+
+  private _debugInfo: HTMLElement | null = null
+
+  static styleSpec = {
+    ':host': {
+      display: 'block',
+      position: 'relative',
+      width: '100%',
+      height: 'calc(100vh + var(--scroll-amount, 1000px))',
+      backgroundColor: '#000',
+      color: '#fff'
+    },
+    '.tosi-sticky': {
+      position: 'sticky',
+      top: 0,
+      left: 0,
+      height: '100vh',
+      width: '100vw',
+      overflow: 'hidden',
+      zIndex: 1,
+      backgroundColor: 'inherit'
+    },
+    '.tosi-debug': {
       position: 'absolute',
       top: '10px',
       left: '10px',
@@ -23,57 +54,61 @@ export const tosiProductSection = (options: any, ...children: any[]) => {
       borderRadius: '4px',
       pointerEvents: 'none'
     }
-  }) : []
-
-  const stickyContainer = div({
-    class: 'tosi-sticky',
-    style: {
-      position: 'sticky',
-      top: 0,
-      left: 0,
-      height: '100vh',
-      width: '100vw',
-      overflow: 'hidden',
-      zIndex: 1,
-      backgroundColor: 'inherit'
-    }
-  }, ...children, debugInfo)
-
-  const section = div({
-    class: 'tosi-section',
-    style: {
-      display: 'block',
-      position: 'relative',
-      width: '100%',
-      height: `calc(100vh + ${scrollAmount}px)`,
-      backgroundColor: '#000',
-      color: '#fff'
-    }
-  }, stickyContainer)
-
-  const { scroll, onProgress: _, debug: __, ...otherOptions } = options
-  if (otherOptions.style) {
-    Object.assign(section.style, otherOptions.style)
-    delete otherOptions.style
   }
-  Object.assign(section, otherOptions)
 
-  const updateProgress = () => {
-    if (!section.isConnected) return
+  content = () => [
+    div({ class: 'tosi-sticky' }, 
+      slot(),
+      span({ class: 'tosi-debug', part: 'debug-info', hidden: true })
+    )
+  ]
 
-    const rect = section.getBoundingClientRect()
+  connectedCallback() {
+    super.connectedCallback()
+    this._debugInfo = this.shadowRoot?.querySelector('.tosi-debug') as HTMLElement
+    
+    sections.push(this)
+    if (!scrollHandlerInitialized) {
+      document.addEventListener('scroll', onGlobalScroll, { passive: true, capture: true })
+      scrollHandlerInitialized = true
+    }
+    
+    this.updateProgress()
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback()
+    const index = sections.indexOf(this)
+    if (index > -1) {
+      sections.splice(index, 1)
+    }
+  }
+
+  render() {
+    super.render()
+    const scrollAmount = this.getAttribute('scroll') || '1000'
+    this.style.setProperty('--scroll-amount', scrollAmount + 'px')
+    if (this._debugInfo) {
+      this._debugInfo.hidden = this.getAttribute('debug') !== 'true'
+    }
+  }
+
+  updateProgress() {
+    if (!this.isConnected) return
+
+    const scrollAmount = Number(this.getAttribute('scroll') || 1000)
+    const rect = this.getBoundingClientRect()
+    
+    // Progress is 0 when the top of the section is at the top of the viewport
+    // Progress is 1 when the bottom of the section (minus 100vh) is at the top of the viewport
     const progress = Math.max(0, Math.min(1, -rect.top / scrollAmount))
     
-    section.dataset.progress = progress.toFixed(3)
-    if (debug && !Array.isArray(debugInfo)) {
-      (debugInfo as HTMLElement).textContent = `Section: ${progress.toFixed(3)}`
+    this.dataset.progress = progress.toFixed(3)
+    if (this._debugInfo && !this._debugInfo.hidden) {
+      this._debugInfo.textContent = `Section: ${progress.toFixed(3)}`
     }
     
-    if (typeof onProgress === 'function') {
-      onProgress(progress, section)
-    }
-    
-    const animators = section.querySelectorAll('[data-scroll-animate], [data-scroll-range]')
+    const animators = this.querySelectorAll('[data-scroll-animate], [data-scroll-range]')
     animators.forEach((el: any) => {
       const rangeStr = el.getAttribute('data-scroll-range') || '0,1'
       const [start, end] = rangeStr.split(',').map(Number)
@@ -87,7 +122,7 @@ export const tosiProductSection = (options: any, ...children: any[]) => {
       } else if (el.getAttribute('data-scroll-animate') === 'currentTime' && el.duration) {
         // Handle Video scrubbing
         el.currentTime = localProgress * el.duration
-      } else if (el.animation && (el instanceof BodymovinPlayer || el.tagName.includes('LOTTIE'))) {
+      } else if (el.getAttribute('data-scroll-animate') === 'lottie' && el.animation && (el instanceof BodymovinPlayer || el.tagName.includes('LOTTIE'))) {
         el.animation.goToAndStop(localProgress * el.animation.totalFrames, true)
       } else if (el.scene && (el instanceof B3d || el.tagName.includes('3D'))) {
         if (el.scene.activeCamera && el.scene.activeCamera.alpha !== undefined) {
@@ -95,38 +130,44 @@ export const tosiProductSection = (options: any, ...children: any[]) => {
         }
       }
     })
+
+    // Support for onProgress callback if set via JS
+    if (typeof (this as any).onProgress === 'function') {
+      (this as any).onProgress(progress, this)
+    }
   }
-
-  document.addEventListener('scroll', () => {
-    requestAnimationFrame(updateProgress)
-  }, { passive: true, capture: true })
-
-  setTimeout(updateProgress, 100)
-
-  return section
 }
 
-export const tosiProduct = (...children: any[]) => {
-  return div({
-    style: {
+export class TosiProduct extends Component {
+  static styleSpec = {
+    ':host': {
       display: 'block',
       position: 'relative',
       width: '100%',
       background: '#000',
       color: '#fff'
     }
-  }, ...children)
+  }
+  content = () => slot()
 }
 
-export const tosiScrollMapper = (options: any, ...children: any[]) => {
-  const el = div({ 
-    'data-scroll-animate': 'mapper',
-    style: { display: 'block', width: '100%', height: '100%' } 
-  }, ...children) as any
-  
-  if (options.onProgress) {
-    el.setScrollProgress = options.onProgress.bind(el)
+export class TosiScrollMapper extends Component {
+  static styleSpec = {
+    ':host': {
+      display: 'block',
+      width: '100%',
+      height: '100%'
+    }
   }
-  
-  return el
+  content = () => slot()
+
+  setScrollProgress(progress: number) {
+    if (typeof (this as any).onProgress === 'function') {
+      (this as any).onProgress(progress)
+    }
+  }
 }
+
+export const tosiProduct = TosiProduct.elementCreator({ tag: 'tosi-product' })
+export const tosiProductSection = TosiProductSection.elementCreator({ tag: 'tosi-product-section' })
+export const tosiScrollMapper = TosiScrollMapper.elementCreator({ tag: 'tosi-scroll-mapper' })

@@ -1,4 +1,4 @@
-import { Component } from 'tosijs'
+import { Component, elements } from 'tosijs'
 
 export const interpolateStrings = (a: string, b: string, t: number) => {
   const numRegex = /-?\d*\.?\d+/g
@@ -53,13 +53,16 @@ export class TosiInterpolator extends Component {
     if (waypointsNodes.length === 0) return
 
     // Parse waypoints
-    const waypoints = waypointsNodes.map((w: Element) => {
+    const waypoints = waypointsNodes.map((w: any) => {
       const styles: Record<string, string> = {}
       const htmlEl = w as HTMLElement
+      
+      // Get styles from both attribute and direct style property
       for (let i = 0; i < htmlEl.style.length; i++) {
         const prop = htmlEl.style[i]
         styles[prop] = htmlEl.style.getPropertyValue(prop)
       }
+      
       return {
         progress: Number(w.getAttribute('progress') || 0),
         styles
@@ -116,21 +119,12 @@ export class TosiInterpolator extends Component {
   }
 }
 
-if (!customElements.get('tosi-interpolator')) {
-  customElements.define('tosi-interpolator', TosiInterpolator)
+export class TosiWaypoint extends Component {
+  static initAttributes = {
+    progress: 0
+  }
+  content = null
 }
 
-export const tosiInterpolator = (...args: any[]) => {
-  const el = document.createElement('tosi-interpolator') as any
-  for (const arg of args) {
-    if (arg instanceof Node || typeof arg === 'string') {
-      el.appendChild(typeof arg === 'string' ? document.createTextNode(arg) : arg)
-    } else if (typeof arg === 'object') {
-      for (const k in arg) {
-        if (k.startsWith('data-')) el.setAttribute(k, arg[k])
-        else el[k] = arg[k]
-      }
-    }
-  }
-  return el
-}
+export const tosiInterpolator = TosiInterpolator.elementCreator({ tag: 'tosi-interpolator' })
+export const tosiWaypoint = TosiWaypoint.elementCreator({ tag: 'tosi-waypoint' })

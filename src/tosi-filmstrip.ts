@@ -1,6 +1,6 @@
-import { BodymovinPlayer, B3d, MapBox, tosijs } from 'tosijs-ui'
+import { BodymovinPlayer, B3d, MapBox } from 'tosijs-ui'
+import { Component, elements } from 'tosijs'
 
-const { Component, elements } = tosijs
 const { canvas } = elements
 
 export class TosiFilmstrip extends Component {

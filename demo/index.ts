@@ -135,7 +135,7 @@ const app = tosiProduct(
     style: { backgroundColor: '#fff', color: '#000' }
   },
     video({
-      src: 'https://www.w3schools.com/html/mov_bbb.mp4',
+      src: 'https://firebasestorage.googleapis.com/v0/b/liquid-force-425209-g2.appspot.com/o/blog%2Fmanta-trailer.m4v?alt=media&token=e6a88d30-9765-4a7f-a6d8-7e903250eb76',
       'data-scroll-animate': 'currentTime',
       muted: true,
       playsinline: true,

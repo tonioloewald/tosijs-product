@@ -1,6 +1,6 @@
 {
   "name": "tosijs-product",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Scroll-linked animation components for tosijs",
   "source": "src/index.ts",
   "type": "module",

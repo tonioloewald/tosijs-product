@@ -2,49 +2,23 @@
 
 A cinematic product page component library for `tosijs`.
 
-`tosijs-product` provides high-performance, scroll-linked animation components designed to create immersive, "Apple-style" product stories with minimal code. It unifies Lottie, Video, BabylonJS 3D, Mapbox flights, and multi-layer SVG Pan & Zoom under a single, declarative "Downhill" scrolling model.
+`tosijs-product` provides high-performance, scroll-linked animation components designed to create immersive, "Apple-style" product stories with minimal code. It unifies Lottie, Video, BabylonJS 3D, Mapbox flights, and declarative CSS interpolation under a single, declarative scrolling model.
 
 [**View the Live Demo**](https://tonioloewald.github.io/tosijs-product/)
 
 ## Key Components
 
-- **`tosiProduct`**: The main orchestrator that manages application state and coordinate space.
-- **`tosiProductSection`**: A container that pins content to the viewport using `sticky` positioning and translates scroll position into a normalized `0..1` progress value. It provides an `onProgress` callback for creating dynamic background transitions.
-- **`tosiScrollMapper`**: A general-purpose wrapper that maps scroll progress to custom elements via an `onProgress` callback (ideal for things like programmatic Mapbox flights).
+- **`tosiProduct`**: The main container that wraps your product page.
+- **`tosiProductSection`**: A container that pins content to the viewport using `sticky` positioning and translates scroll position into a normalized `0..1` progress value.
+- **`tosiInterpolator` & `tosiWaypoint`**: A declarative system for interpolating CSS properties between keyframes as the user scrolls.
 - **`tosiFilmstrip`**: A high-performance frame-based animator that uses WebP/PNG mosaics (grids) instead of standard video for buttery-smooth scrubbing.
-- **`tosiPanZoom` & `tosiWaypoint`**: A declarative system for animating layers of images or SVGs across the viewport as the user scrolls.
+- **`tosiScrollMapper`**: A general-purpose wrapper that maps scroll progress to custom elements via an `onProgress` callback (ideal for things like programmatic Mapbox flights).
 
 ## Getting Started
 
-### 1. Modern Web App (ESM)
+### 1. Pure HTML Page (Zero JS Orchestration)
 
-If you are building a modern web application with a bundler (Vite, Webpack, etc.):
-
-```bash
-bun install tosijs-product
-```
-
-```typescript
-import { tosiProduct, tosiProductSection } from 'tosijs-product'
-import { markdownViewer, bodymovinPlayer } from 'tosijs-ui'
-
-const app = tosiProduct(
-  markdownViewer('# My Cinematic Product\nScroll to explore.'),
-  
-  tosiProductSection({ scroll: 2000 },
-    bodymovinPlayer({
-      src: '/my-animation.json',
-      'data-scroll-animate': 'lottie'
-    })
-  )
-)
-
-document.body.append(app)
-```
-
-### 2. Pure HTML Page (Zero JS Orchestration)
-
-For quick prototypes or CMS-driven websites, you can drop the library into your HTML via CDN and build the entire experience using just declarative HTML tags:
+The IIFE build is self-contained — a single script tag gives you `tosijs`, `tosijsUi`, and `tosijsProduct` as globals, with all custom elements registered automatically:
 
 ```html
 <!DOCTYPE html>
@@ -53,44 +27,52 @@ For quick prototypes or CMS-driven websites, you can drop the library into your 
   <meta charset="utf-8">
   <title>My Product</title>
   <style>
-    body { margin: 0; padding: 0; background: #000; color: #fff; overflow-x: hidden; }
-    tosi-product-section { display: block; width: 100%; position: relative; }
-    tosi-lottie, video, img.bg {
-      position: absolute !important;
-      top: 0; left: 0;
-      width: 100vw !important;
-      height: 100vh !important;
-      object-fit: cover !important;
-    }
+    body { margin: 0; background: #000; color: #fff; overflow-x: hidden; }
   </style>
-  
-  <!-- Load tosijs-ui and tosijs-product -->
-  <script src="https://cdn.jsdelivr.net/npm/tosijs-ui/dist/index.js"></script>
+  <!-- One script tag — includes everything -->
   <script src="https://cdn.jsdelivr.net/npm/tosijs-product/dist/index.js"></script>
 </head>
 <body>
-  <!-- The entire experience is defined purely in HTML. No JS required! -->
   <tosi-product>
     <tosi-product-section scroll="2000">
-      <tosi-lottie src="https://tosijs.net/tosi.json" data-scroll-animate="lottie"></tosi-lottie>
-      
-      <!-- Declarative Text Interpolation -->
-      <tosi-interpolator data-scroll-animate="interpolator">
-        <tosi-waypoint progress="0.0" style="opacity: 0; transform: translateY(50px)"></tosi-waypoint>
-        <tosi-waypoint progress="0.3" style="opacity: 1; transform: translateY(0px)"></tosi-waypoint>
-        <tosi-waypoint progress="0.7" style="opacity: 1; transform: translateY(0px)"></tosi-waypoint>
-        <tosi-waypoint progress="1.0" style="opacity: 0; transform: translateY(-50px)"></tosi-waypoint>
-        <h1 style="position: absolute; width: 100vw; text-align: center;">Pure HTML. Zero JS.</h1>
+      <tosi-interpolator data-scroll-animate easing="ease-in-out">
+        <tosi-waypoint progress="0.0" style="opacity: 0; transform: translateY(50px);"></tosi-waypoint>
+        <tosi-waypoint progress="0.3" style="opacity: 1; transform: translateY(0px);"></tosi-waypoint>
+        <tosi-waypoint progress="0.7" style="opacity: 1; transform: translateY(0px);"></tosi-waypoint>
+        <tosi-waypoint progress="1.0" style="opacity: 0; transform: translateY(-50px);"></tosi-waypoint>
+        <h1 style="position: absolute; width: 100vw; text-align: center;">
+          Pure HTML. Zero JS.
+        </h1>
       </tosi-interpolator>
     </tosi-product-section>
   </tosi-product>
-
-  <script>
-    // Just ensure the components from tosijs-ui are registered
-    TosiUi.bodymovinPlayer();
-  </script>
 </body>
 </html>
+```
+
+### 2. Modern Web App (ESM)
+
+For bundled apps (Vite, Webpack, etc.), install the package and its peer dependencies:
+
+```bash
+bun install tosijs tosijs-ui tosijs-product
+```
+
+```typescript
+import { tosiProduct, tosiProductSection, tosiInterpolator, tosiWaypoint } from 'tosijs-product'
+
+const app = tosiProduct(
+  tosiProductSection({ scroll: 2000 },
+    tosiInterpolator({ 'data-scroll-animate': '', easing: 'ease-in-out' },
+      tosiWaypoint({ progress: 0, style: 'opacity: 0; transform: translateY(50px)' }),
+      tosiWaypoint({ progress: 0.5, style: 'opacity: 1; transform: translateY(0px)' }),
+      tosiWaypoint({ progress: 1, style: 'opacity: 0; transform: translateY(-50px)' }),
+      document.createElement('h1')  // your content here
+    )
+  )
+)
+
+document.body.append(app)
 ```
 
 ## Features

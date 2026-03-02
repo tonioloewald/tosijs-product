@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>tosijs-product — Pure HTML Demo</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: #000;
+      color: #fff;
+      overflow-x: hidden;
+    }
+
+    .hero {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .hero h1 {
+      font-size: clamp(2rem, 8vw, 6rem);
+      font-weight: 800;
+      text-align: center;
+      margin: 0;
+      background: linear-gradient(to bottom, #fff, #aaa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      font-size: clamp(1rem, 2.5vw, 1.5rem);
+      text-align: center;
+      color: #999;
+      margin: 0.5em 0 0;
+      max-width: 600px;
+      padding: 0 20px;
+    }
+
+    .feature-text {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .feature-text h2 {
+      font-size: clamp(1.5rem, 5vw, 3.5rem);
+      font-weight: 700;
+      text-align: center;
+      margin: 0;
+      padding: 0 20px;
+    }
+
+    .feature-text p {
+      font-size: clamp(0.875rem, 2vw, 1.25rem);
+      text-align: center;
+      color: #aaa;
+      margin: 0.5em 0 0;
+      max-width: 500px;
+      padding: 0 20px;
+    }
+
+    .gradient-bg {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+    }
+
+    .code-block {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+    }
+
+    .code-block pre {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 2em;
+      font-size: clamp(0.75rem, 1.5vw, 1rem);
+      line-height: 1.6;
+      max-width: 90vw;
+      overflow-x: auto;
+      backdrop-filter: blur(20px);
+    }
+
+    .code-block code {
+      color: #e0e0e0;
+    }
+
+    .code-block .tag { color: #7ec8e3; }
+    .code-block .attr { color: #c792ea; }
+    .code-block .val { color: #c3e88d; }
+    .code-block .comment { color: #666; }
+  </style>
+
+  <!-- Single script tag — includes tosijs, tosijs-ui, and tosijs-product -->
+  <script src="/dist/index.js"></script>
+</head>
+<body>
+
+<tosi-product>
+
+  <!-- Section 1: Hero -->
+  <tosi-product-section scroll="1500">
+    <div class="gradient-bg" style="background: radial-gradient(ellipse at center, #1a1a2e 0%, #000 70%);"></div>
+    <tosi-interpolator data-scroll-animate>
+      <tosi-waypoint progress="0.0" style="opacity: 1; transform: translateY(0px) scale(1);"></tosi-waypoint>
+      <tosi-waypoint progress="0.8" style="opacity: 0; transform: translateY(-100px) scale(0.9);"></tosi-waypoint>
+      <div class="hero">
+        <h1>tosijs-product</h1>
+        <p>Cinematic scroll-linked product pages. Pure HTML. Zero JS orchestration.</p>
+      </div>
+    </tosi-interpolator>
+  </tosi-product-section>
+
+  <!-- Section 2: Feature — Scroll Progress -->
+  <tosi-product-section scroll="2000" style="background: #0a0a0a;">
+    <tosi-interpolator data-scroll-animate easing="ease-in-out">
+      <tosi-waypoint progress="0.0" style="opacity: 0; transform: translateY(60px);"></tosi-waypoint>
+      <tosi-waypoint progress="0.3" style="opacity: 1; transform: translateY(0px);"></tosi-waypoint>
+      <tosi-waypoint progress="0.7" style="opacity: 1; transform: translateY(0px);"></tosi-waypoint>
+      <tosi-waypoint progress="1.0" style="opacity: 0; transform: translateY(-60px);"></tosi-waypoint>
+      <div class="feature-text" style="flex-direction: column;">
+        <h2>Scroll = Progress</h2>
+        <p>Every section converts scroll position into a normalized 0→1 value. Child elements animate in lockstep — no JavaScript required.</p>
+      </div>
+    </tosi-interpolator>
+  </tosi-product-section>
+
+  <!-- Section 3: Feature — Declarative Interpolation -->
+  <tosi-product-section scroll="2500" style="background: #050510;">
+    <tosi-interpolator data-scroll-animate easing="ease-in-out">
+      <tosi-waypoint progress="0.0" style="opacity: 0; transform: scale(0.8);"></tosi-waypoint>
+      <tosi-waypoint progress="0.2" style="opacity: 1; transform: scale(1.0);"></tosi-waypoint>
+      <tosi-waypoint progress="0.8" style="opacity: 1; transform: scale(1.0);"></tosi-waypoint>
+      <tosi-waypoint progress="1.0" style="opacity: 0; transform: scale(1.1);"></tosi-waypoint>
+      <div class="code-block">
+        <pre><code><span class="comment">&lt;!-- Define waypoints, apply styles. That's it. --&gt;</span>
+<span class="tag">&lt;tosi-interpolator</span> <span class="attr">data-scroll-animate</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;tosi-waypoint</span> <span class="attr">progress=</span><span class="val">"0.0"</span> <span class="attr">style=</span><span class="val">"opacity: 0;"</span><span class="tag">&gt;&lt;/tosi-waypoint&gt;</span>
+  <span class="tag">&lt;tosi-waypoint</span> <span class="attr">progress=</span><span class="val">"0.5"</span> <span class="attr">style=</span><span class="val">"opacity: 1;"</span><span class="tag">&gt;&lt;/tosi-waypoint&gt;</span>
+  <span class="tag">&lt;tosi-waypoint</span> <span class="attr">progress=</span><span class="val">"1.0"</span> <span class="attr">style=</span><span class="val">"opacity: 0;"</span><span class="tag">&gt;&lt;/tosi-waypoint&gt;</span>
+  <span class="tag">&lt;div&gt;</span>Your content here<span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/tosi-interpolator&gt;</span></code></pre>
+      </div>
+    </tosi-interpolator>
+  </tosi-product-section>
+
+  <!-- Section 4: Feature — Multiple Ranges -->
+  <tosi-product-section scroll="3000" style="background: #0a0a0a;">
+    <!-- First half: text fades in -->
+    <tosi-interpolator data-scroll-range="0,0.5" easing="ease-in-out">
+      <tosi-waypoint progress="0.0" style="opacity: 0; transform: translateX(-80px);"></tosi-waypoint>
+      <tosi-waypoint progress="0.5" style="opacity: 1; transform: translateX(0px);"></tosi-waypoint>
+      <tosi-waypoint progress="1.0" style="opacity: 1; transform: translateX(0px);"></tosi-waypoint>
+      <div class="feature-text" style="flex-direction: column; align-items: flex-start; padding-left: 10vw;">
+        <h2>Scroll Ranges</h2>
+        <p>Constrain animations to any portion of a section's scroll using <code>data-scroll-range</code>.</p>
+      </div>
+    </tosi-interpolator>
+
+    <!-- Second half: another element -->
+    <tosi-interpolator data-scroll-range="0.5,1" easing="ease-in-out">
+      <tosi-waypoint progress="0.0" style="opacity: 0; transform: translateX(80px);"></tosi-waypoint>
+      <tosi-waypoint progress="0.5" style="opacity: 1; transform: translateX(0px);"></tosi-waypoint>
+      <tosi-waypoint progress="1.0" style="opacity: 0; transform: translateX(0px);"></tosi-waypoint>
+      <div class="feature-text" style="flex-direction: column; align-items: flex-end; padding-right: 10vw;">
+        <h2>Layer by Layer</h2>
+        <p>Choreograph multiple elements within a single section, each with its own timing.</p>
+      </div>
+    </tosi-interpolator>
+  </tosi-product-section>
+
+  <!-- Section 5: Feature — One Script Tag -->
+  <tosi-product-section scroll="2000" style="background: radial-gradient(ellipse at center, #1a1a2e 0%, #000 70%);">
+    <tosi-interpolator data-scroll-animate easing="ease-in-out">
+      <tosi-waypoint progress="0.0" style="opacity: 0; transform: translateY(40px);"></tosi-waypoint>
+      <tosi-waypoint progress="0.3" style="opacity: 1; transform: translateY(0px);"></tosi-waypoint>
+      <tosi-waypoint progress="0.7" style="opacity: 1; transform: translateY(0px);"></tosi-waypoint>
+      <tosi-waypoint progress="1.0" style="opacity: 0; transform: translateY(-40px);"></tosi-waypoint>
+      <div class="feature-text" style="flex-direction: column;">
+        <h2>One Script Tag</h2>
+        <p>The IIFE build includes tosijs, tosijs-ui, and tosijs-product. Load it from a CDN and start building.</p>
+        <pre style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 1em; margin-top: 1em; font-size: clamp(0.7rem, 1.2vw, 0.9rem);"><code><span class="tag">&lt;script</span> <span class="attr">src=</span><span class="val">"https://cdn.jsdelivr.net/npm/tosijs-product/dist/index.js"</span><span class="tag">&gt;&lt;/script&gt;</span></code></pre>
+      </div>
+    </tosi-interpolator>
+  </tosi-product-section>
+
+  <!-- Footer section -->
+  <div style="text-align: center; padding: 4em 1em; background: #000; color: #555; font-size: 0.9rem;">
+    <p>Built with <a href="https://tosijs.net" style="color: #7ec8e3; text-decoration: none;">tosijs</a></p>
+  </div>
+
+</tosi-product>
+
+</body>
+</html>

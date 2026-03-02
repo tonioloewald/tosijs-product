@@ -1,0 +1,7 @@
+node_modules/
+dist/
+demo/index.js
+demo/bundle.js
+.haltija/
+.DS_Store
+*.log

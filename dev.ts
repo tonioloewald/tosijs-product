@@ -15,13 +15,11 @@ async function build() {
   await $`rm -rf ${DIST} || true`;
   await $`mkdir -p ${DIST}`;
 
-  // Generate .d.ts files
   await $`bun tsc --declaration --emitDeclarationOnly --target es2022 --outDir dist`;
   await $`mv dist/src/index.d.ts dist/index.d.ts || true`;
   await $`mv dist/src/tosi-product.d.ts dist/tosi-product.d.ts || true`;
   await $`rm -rf dist/src dist/demo dist/dev.d.ts || true`;
 
-  // Build the library (ESM) — peer deps are external for bundler consumers
   await Bun.build({
     entrypoints: ["./src/index.ts"],
     outdir: DIST,
@@ -31,7 +29,6 @@ async function build() {
     external: ["tosijs", "tosijs-ui"],
   });
 
-  // Build the library (IIFE) — separate entry point that assigns to globalThis
   await Bun.build({
     entrypoints: ["./src/index-iife.ts"],
     outdir: DIST,
@@ -40,7 +37,6 @@ async function build() {
     naming: "index.js",
   });
 
-  // Build the demo
   await Bun.build({
     entrypoints: ["./demo/index.ts"],
     outdir: PUBLIC,
@@ -61,7 +57,7 @@ function serveFromDir(config: {
   directory: string;
   path: string;
 }): Response | null {
-  let basePath = path.join(config.directory, config.path);
+  const basePath = path.join(config.directory, config.path);
   const suffixes = ["", ".html", "index.html"];
 
   for (const suffix of suffixes) {
@@ -89,7 +85,6 @@ Bun.serve({
     });
     if (publicResponse) return publicResponse;
 
-    // Allow serving from dist
     if (reqPath.startsWith("/dist/")) {
       const distResponse = serveFromDir({
         directory: PROJECT_ROOT,

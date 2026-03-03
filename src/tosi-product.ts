@@ -4,6 +4,7 @@ import { Component, elements } from "tosijs";
 const { div, span, slot } = elements;
 
 const scrollTargets = new Map<EventTarget, Set<TosiProductSection>>();
+const scrollHandlers = new Map<EventTarget, (e: Event) => void>();
 
 function getScrollParent(el: HTMLElement): EventTarget {
   let node: HTMLElement | null = el.parentElement;
@@ -31,6 +32,8 @@ function onScroll(target: EventTarget) {
   });
 }
 
+const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
 export class TosiProductSection extends Component {
   scrollCallback: ((progress: number, el: HTMLElement) => void) | null = null;
 
@@ -41,6 +44,9 @@ export class TosiProductSection extends Component {
   };
 
   private _debugInfo: HTMLElement | null = null;
+  private _scrollTarget: EventTarget | null = null;
+  private _animators: Element[] | null = null;
+  private _observer: MutationObserver | null = null;
 
   static styleSpec = {
     ":host": {
@@ -81,10 +87,20 @@ export class TosiProductSection extends Component {
     ),
   ];
 
-  private _scrollTarget: EventTarget | null = null;
+  private _getAnimators(): Element[] {
+    if (this._animators === null) {
+      this._animators = Array.from(
+        this.querySelectorAll("[data-scroll-animate], [data-scroll-range]")
+      );
+    }
+    return this._animators;
+  }
+
+  private _invalidateAnimators() {
+    this._animators = null;
+  }
 
   connectedCallback() {
-    // Set scroll target before super so render() can use it
     this._scrollTarget = getScrollParent(this);
 
     super.connectedCallback();
@@ -97,15 +113,22 @@ export class TosiProductSection extends Component {
       sections = new Set();
       scrollTargets.set(this._scrollTarget, sections);
       const target = this._scrollTarget;
-      target.addEventListener("scroll", () => onScroll(target), {
-        passive: true,
-      });
+      const handler = () => onScroll(target);
+      scrollHandlers.set(target, handler);
+      target.addEventListener("scroll", handler, { passive: true });
     }
     sections.add(this);
 
-    this.updateProgress();
+    // Observe child mutations to invalidate animator cache
+    this._observer = new MutationObserver(() => this._invalidateAnimators());
+    this._observer.observe(this, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["data-scroll-animate", "data-scroll-range"],
+    });
 
-    // Re-render after layout in case container dimensions weren't ready
+    // Render and update after layout is ready
     requestAnimationFrame(() => {
       this.render();
       this.updateProgress();
@@ -114,17 +137,30 @@ export class TosiProductSection extends Component {
 
   disconnectedCallback() {
     super.disconnectedCallback();
+    if (this._observer) {
+      this._observer.disconnect();
+      this._observer = null;
+    }
+    this._animators = null;
     if (this._scrollTarget) {
       const sections = scrollTargets.get(this._scrollTarget);
       if (sections) {
         sections.delete(this);
+        if (sections.size === 0) {
+          scrollTargets.delete(this._scrollTarget);
+          const handler = scrollHandlers.get(this._scrollTarget);
+          if (handler) {
+            this._scrollTarget.removeEventListener("scroll", handler);
+            scrollHandlers.delete(this._scrollTarget);
+          }
+        }
       }
     }
   }
 
   render() {
     super.render();
-    const scrollPct = this.getAttribute("scroll") || "100";
+    const scrollPct = this._getScrollPct();
     const horizontal = this.getAttribute("direction") === "horizontal";
     const sticky = this.shadowRoot?.querySelector(
       ".tosi-sticky"
@@ -136,7 +172,7 @@ export class TosiProductSection extends Component {
     const viewH = container ? container.clientHeight + "px" : "100vh";
     const scrollDim = container
       ? `${
-          (Number(scrollPct) / 100) *
+          (scrollPct / 100) *
           (horizontal ? container.clientWidth : container.clientHeight)
         }px`
       : `${scrollPct}${horizontal ? "vw" : "vh"}`;
@@ -166,8 +202,13 @@ export class TosiProductSection extends Component {
     }
   }
 
+  private _getScrollPct(): number {
+    const raw = Number(this.getAttribute("scroll"));
+    return Number.isFinite(raw) && raw > 0 ? raw : 100;
+  }
+
   private _getScrollAmountPx(): number {
-    const scrollPct = Number(this.getAttribute("scroll") || 100);
+    const scrollPct = this._getScrollPct();
     const horizontal = this.getAttribute("direction") === "horizontal";
     const container =
       this._scrollTarget instanceof HTMLElement ? this._scrollTarget : null;
@@ -186,7 +227,7 @@ export class TosiProductSection extends Component {
     if (!this.isConnected) return;
 
     const scrollAmount = this._getScrollAmountPx();
-    if (scrollAmount <= 0) return; // Container not laid out yet
+    if (scrollAmount <= 0) return;
 
     const rect = this.getBoundingClientRect();
     const horizontal = this.getAttribute("direction") === "horizontal";
@@ -204,46 +245,61 @@ export class TosiProductSection extends Component {
       this._debugInfo.textContent = `Section: ${progress.toFixed(3)}`;
     }
 
-    const animators = this.querySelectorAll(
-      "[data-scroll-animate], [data-scroll-range]"
-    );
-    animators.forEach((el: any) => {
+    if (reducedMotion.matches) {
+      // Skip animations, just set progress data
+      if (this.scrollCallback) {
+        this.scrollCallback(progress, this);
+      }
+      return;
+    }
+
+    const animators = this._getAnimators();
+    for (const el of animators) {
       const rangeStr = el.getAttribute("data-scroll-range") || "0,1";
       const [start, end] = rangeStr.split(",").map(Number);
-      const localProgress = Math.max(
-        0,
-        Math.min(1, (progress - start) / (end - start))
+      const range = end - start;
+      const localProgress =
+        range <= 0
+          ? progress >= end
+            ? 1
+            : 0
+          : Math.max(0, Math.min(1, (progress - start) / range));
+
+      (el as HTMLElement).style.setProperty(
+        "--local-progress",
+        localProgress.toString()
       );
+      (el as any).dataset.localProgress = localProgress.toFixed(3);
 
-      el.style.setProperty("--local-progress", localProgress.toString());
-      el.dataset.localProgress = localProgress.toFixed(3);
-
-      if (typeof el.setScrollProgress === "function") {
-        el.setScrollProgress(localProgress);
+      if (typeof (el as any).setScrollProgress === "function") {
+        (el as any).setScrollProgress(localProgress);
       } else if (
         el.getAttribute("data-scroll-animate") === "currentTime" &&
-        el.duration
+        (el as any).duration
       ) {
-        // Handle Video scrubbing
-        el.currentTime = localProgress * el.duration;
+        (el as HTMLVideoElement).currentTime =
+          localProgress * (el as HTMLVideoElement).duration;
       } else if (
         el.getAttribute("data-scroll-animate") === "lottie" &&
-        el.animation &&
+        (el as any).animation &&
         (el instanceof BodymovinPlayer || el.tagName.includes("LOTTIE"))
       ) {
-        el.animation.goToAndStop(
-          localProgress * el.animation.totalFrames,
+        (el as any).animation.goToAndStop(
+          localProgress * (el as any).animation.totalFrames,
           true
         );
-      } else if (el.scene && (el instanceof B3d || el.tagName.includes("3D"))) {
+      } else if (
+        (el as any).scene &&
+        (el instanceof B3d || el.tagName.includes("3D"))
+      ) {
         if (
-          el.scene.activeCamera &&
-          el.scene.activeCamera.alpha !== undefined
+          (el as any).scene.activeCamera &&
+          (el as any).scene.activeCamera.alpha !== undefined
         ) {
-          el.scene.activeCamera.alpha = localProgress * Math.PI * 2;
+          (el as any).scene.activeCamera.alpha = localProgress * Math.PI * 2;
         }
       }
-    });
+    }
 
     if (this.scrollCallback) {
       this.scrollCallback(progress, this);
@@ -278,7 +334,6 @@ export class TosiScrollMapper extends Component {
 
   connectedCallback() {
     super.connectedCallback();
-    // Ensure the section's querySelectorAll finds this element
     if (!this.hasAttribute("data-scroll-animate")) {
       this.setAttribute("data-scroll-animate", "mapper");
     }

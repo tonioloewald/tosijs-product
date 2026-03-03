@@ -1,11 +1,10 @@
 import { Component } from "tosijs";
 
 export const interpolateStrings = (a: string, b: string, t: number) => {
-  const numRegex = /-?\d*\.?\d+/g;
+  const numRegex = /-?\d+(?:\.\d+)?/g;
   const aNums = Array.from(a.matchAll(numRegex));
   const bNums = Array.from(b.matchAll(numRegex));
 
-  // If we have matching numbers, interpolate them
   if (aNums.length > 0 && aNums.length === bNums.length) {
     let result = "";
     let lastIndex = 0;
@@ -18,7 +17,6 @@ export const interpolateStrings = (a: string, b: string, t: number) => {
       const n2 = parseFloat(bMatch[0]);
       const interpolated = n1 + (n2 - n1) * t;
 
-      // Format number to avoid scientific notation and keep it clean
       let numStr = interpolated.toFixed(4);
       if (numStr.includes(".")) {
         numStr = numStr.replace(/0+$/, "").replace(/\.$/, "");
@@ -31,7 +29,6 @@ export const interpolateStrings = (a: string, b: string, t: number) => {
     return result;
   }
 
-  // Color fallback using modern CSS color-mix
   const isColor = (s: string) =>
     s.startsWith("#") ||
     s.startsWith("rgb") ||
@@ -41,14 +38,13 @@ export const interpolateStrings = (a: string, b: string, t: number) => {
     return `color-mix(in srgb, ${a} ${Math.round((1 - t) * 100)}%, ${b})`;
   }
 
-  // Step fallback
   return t < 0.5 ? a : b;
 };
 
 export class TosiInterpolator extends Component {
   static styleSpec = {
     ":host": {
-      display: "contents", // don't affect layout
+      display: "contents",
     },
   };
 
@@ -56,13 +52,11 @@ export class TosiInterpolator extends Component {
     const waypointsNodes = Array.from(this.querySelectorAll("tosi-waypoint"));
     if (waypointsNodes.length === 0) return;
 
-    // Parse waypoints
     const waypoints = waypointsNodes
-      .map((w: any) => {
+      .map((w) => {
         const styles: Record<string, string> = {};
         const htmlEl = w as HTMLElement;
 
-        // Get styles from both attribute and direct style property
         for (let i = 0; i < htmlEl.style.length; i++) {
           const prop = htmlEl.style[i];
           styles[prop] = htmlEl.style.getPropertyValue(prop);
@@ -75,7 +69,6 @@ export class TosiInterpolator extends Component {
       })
       .sort((a, b) => a.progress - b.progress);
 
-    // Find bounding waypoints
     let wp1 = waypoints[0];
     let wp2 = waypoints[waypoints.length - 1];
     let t = 0;
@@ -101,24 +94,21 @@ export class TosiInterpolator extends Component {
           if (easing === "ease-in-out") {
             t = rawT < 0.5 ? 2 * rawT * rawT : -1 + (4 - 2 * rawT) * rawT;
           } else {
-            t = rawT; // linear by default
+            t = rawT;
           }
           break;
         }
       }
     }
 
-    // Interpolate styles
     const currentStyles: Record<string, string> = {};
 
-    // We only interpolate properties defined in wp1
     for (const prop in wp1.styles) {
       const val1 = wp1.styles[prop];
       const val2 = wp2.styles[prop] || val1;
       currentStyles[prop] = interpolateStrings(val1, val2, t);
     }
 
-    // Apply to all non-waypoint children
     const targets = Array.from(this.children).filter(
       (c) => c.tagName !== "TOSI-WAYPOINT"
     );

@@ -10,7 +10,6 @@ import {
 import { markdownViewer, bodymovinPlayer, b3d, mapBox } from "tosijs-ui";
 import { elements } from "tosijs";
 
-// Global styles to ensure full-screen media and correct layering
 const style = document.createElement("style");
 style.textContent = `
   body { margin: 0; padding: 0; background: #000; color: #fff; overflow-x: hidden; }
@@ -53,7 +52,6 @@ document.head.appendChild(style);
 const { div, h1, video } = elements;
 const ease = (t: number) => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t);
 
-// Declarative overlay using TosiInterpolator
 const overlay = (range: string, text: string, options: any = {}) => {
   return tosiInterpolator(
     { "data-scroll-animate": "interpolator", "data-scroll-range": range },
@@ -73,13 +71,12 @@ const overlay = (range: string, text: string, options: any = {}) => {
   );
 };
 
-// Programmatically generate a mosaic for the demo
 const generateMosaic = () => {
   const c = document.createElement("canvas");
-  const fw = 320,
-    fh = 180;
-  const cols = 10,
-    rows = 10;
+  const fw = 320;
+  const fh = 180;
+  const cols = 10;
+  const rows = 10;
   c.width = fw * cols;
   c.height = fh * rows;
   const ctx = c.getContext("2d")!;

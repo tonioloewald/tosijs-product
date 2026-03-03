@@ -112,7 +112,7 @@ const app = tosiProduct(
 
   tosiProductSection(
     {
-      scroll: 2000,
+      scroll: 200,
       scrollCallback(progress: number, el: HTMLElement) {
         const color = Math.round(progress * 255);
         el.style.backgroundColor = `rgb(${color}, ${color}, ${color})`;
@@ -138,7 +138,7 @@ const app = tosiProduct(
   ),
 
   tosiProductSection(
-    { scroll: 3000, style: { backgroundColor: "#000" } },
+    { scroll: 300, style: { backgroundColor: "#000" } },
     tosiFilmstrip({
       src: mosaicData,
       cols: 10,
@@ -156,7 +156,7 @@ const app = tosiProduct(
 
   tosiProductSection(
     {
-      scroll: 3000,
+      scroll: 300,
       style: { backgroundColor: "#fff", color: "#000" },
     },
     video({
@@ -170,7 +170,7 @@ const app = tosiProduct(
   ),
 
   tosiProductSection(
-    { scroll: 4000, style: { backgroundColor: "#fff" } },
+    { scroll: 400, style: { backgroundColor: "#fff" } },
     overlay("0, 0.5", "A professional camera system."),
     overlay("0.5, 1.0", "In the palm of your hand."),
     b3d({
@@ -242,7 +242,7 @@ const app = tosiProduct(
   ),
 
   tosiProductSection(
-    { scroll: 5000, style: { backgroundColor: "#fff" } },
+    { scroll: 500, style: { backgroundColor: "#fff" } },
     tosiScrollMapper(
       {
         scrollCallback(progress: number) {
@@ -313,7 +313,7 @@ const app = tosiProduct(
   ),
 
   tosiProductSection(
-    { scroll: 4000, style: { backgroundColor: "#fff" } },
+    { scroll: 400, style: { backgroundColor: "#fff" } },
     tosiInterpolator(
       { "data-scroll-animate": "interpolator" },
       tosiWaypoint({

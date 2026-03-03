@@ -3,13 +3,30 @@ import { Component, elements } from "tosijs";
 
 const { div, span, slot } = elements;
 
-let scrollHandlerInitialized = false;
-const sections: TosiProductSection[] = [];
+const scrollTargets = new Map<EventTarget, Set<TosiProductSection>>();
 
-function onGlobalScroll() {
+function getScrollParent(el: HTMLElement): EventTarget {
+  let node: HTMLElement | null = el.parentElement;
+  while (node) {
+    if (node === document.body || node === document.documentElement) {
+      break;
+    }
+    const { overflow, overflowX, overflowY } = getComputedStyle(node);
+    if (/(auto|scroll)/.test(overflow + overflowX + overflowY)) {
+      return node;
+    }
+    node = node.parentElement;
+  }
+  return window;
+}
+
+function onScroll(target: EventTarget) {
   requestAnimationFrame(() => {
-    for (const section of sections) {
-      section.updateProgress();
+    const sections = scrollTargets.get(target);
+    if (sections) {
+      for (const section of sections) {
+        section.updateProgress();
+      }
     }
   });
 }
@@ -18,8 +35,9 @@ export class TosiProductSection extends Component {
   scrollCallback: ((progress: number, el: HTMLElement) => void) | null = null;
 
   static initAttributes = {
-    scroll: 1000,
+    scroll: 100,
     debug: false,
+    direction: "vertical",
   };
 
   private _debugInfo: HTMLElement | null = null;
@@ -28,17 +46,14 @@ export class TosiProductSection extends Component {
     ":host": {
       display: "block",
       position: "relative",
-      width: "100%",
-      height: "calc(100vh + var(--scroll-amount, 1000px))",
       backgroundColor: "#000",
       color: "#fff",
     },
+    ":host([direction=horizontal])": {
+      display: "inline-block",
+    },
     ".tosi-sticky": {
       position: "sticky",
-      top: 0,
-      left: 0,
-      height: "100vh",
-      width: "100vw",
       overflow: "hidden",
       zIndex: 1,
       backgroundColor: "inherit",
@@ -66,50 +81,123 @@ export class TosiProductSection extends Component {
     ),
   ];
 
+  private _scrollTarget: EventTarget | null = null;
+
   connectedCallback() {
+    // Set scroll target before super so render() can use it
+    this._scrollTarget = getScrollParent(this);
+
     super.connectedCallback();
     this._debugInfo = this.shadowRoot?.querySelector(
       ".tosi-debug"
     ) as HTMLElement;
 
-    sections.push(this);
-    if (!scrollHandlerInitialized) {
-      window.addEventListener("scroll", onGlobalScroll, {
+    let sections = scrollTargets.get(this._scrollTarget);
+    if (!sections) {
+      sections = new Set();
+      scrollTargets.set(this._scrollTarget, sections);
+      const target = this._scrollTarget;
+      target.addEventListener("scroll", () => onScroll(target), {
         passive: true,
-        capture: true,
       });
-      scrollHandlerInitialized = true;
     }
+    sections.add(this);
 
     this.updateProgress();
+
+    // Re-render after layout in case container dimensions weren't ready
+    requestAnimationFrame(() => {
+      this.render();
+      this.updateProgress();
+    });
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
-    const index = sections.indexOf(this);
-    if (index > -1) {
-      sections.splice(index, 1);
+    if (this._scrollTarget) {
+      const sections = scrollTargets.get(this._scrollTarget);
+      if (sections) {
+        sections.delete(this);
+      }
     }
   }
 
   render() {
     super.render();
-    const scrollAmount = this.getAttribute("scroll") || "1000";
-    this.style.setProperty("--scroll-amount", scrollAmount + "px");
+    const scrollPct = this.getAttribute("scroll") || "100";
+    const horizontal = this.getAttribute("direction") === "horizontal";
+    const sticky = this.shadowRoot?.querySelector(
+      ".tosi-sticky"
+    ) as HTMLElement;
+
+    const container =
+      this._scrollTarget instanceof HTMLElement ? this._scrollTarget : null;
+    const viewW = container ? container.clientWidth + "px" : "100vw";
+    const viewH = container ? container.clientHeight + "px" : "100vh";
+    const scrollDim = container
+      ? `${
+          (Number(scrollPct) / 100) *
+          (horizontal ? container.clientWidth : container.clientHeight)
+        }px`
+      : `${scrollPct}${horizontal ? "vw" : "vh"}`;
+
+    if (horizontal) {
+      this.style.width = `calc(${viewW} + ${scrollDim})`;
+      this.style.height = "100%";
+      if (sticky) {
+        sticky.style.left = "0";
+        sticky.style.top = "0";
+        sticky.style.width = viewW;
+        sticky.style.height = "100%";
+      }
+    } else {
+      this.style.height = `calc(${viewH} + ${scrollDim})`;
+      this.style.width = "100%";
+      if (sticky) {
+        sticky.style.top = "0";
+        sticky.style.left = "0";
+        sticky.style.height = viewH;
+        sticky.style.width = "100%";
+      }
+    }
+
     if (this._debugInfo) {
       this._debugInfo.hidden = this.getAttribute("debug") !== "true";
     }
   }
 
+  private _getScrollAmountPx(): number {
+    const scrollPct = Number(this.getAttribute("scroll") || 100);
+    const horizontal = this.getAttribute("direction") === "horizontal";
+    const container =
+      this._scrollTarget instanceof HTMLElement ? this._scrollTarget : null;
+    if (container) {
+      return (
+        (scrollPct / 100) *
+        (horizontal ? container.clientWidth : container.clientHeight)
+      );
+    }
+    return (
+      (scrollPct / 100) * (horizontal ? window.innerWidth : window.innerHeight)
+    );
+  }
+
   updateProgress() {
     if (!this.isConnected) return;
 
-    const scrollAmount = Number(this.getAttribute("scroll") || 1000);
-    const rect = this.getBoundingClientRect();
+    const scrollAmount = this._getScrollAmountPx();
+    if (scrollAmount <= 0) return; // Container not laid out yet
 
-    // Progress is 0 when the top of the section is at the top of the viewport
-    // Progress is 1 when the bottom of the section (minus 100vh) is at the top of the viewport
-    const progress = Math.max(0, Math.min(1, -rect.top / scrollAmount));
+    const rect = this.getBoundingClientRect();
+    const horizontal = this.getAttribute("direction") === "horizontal";
+
+    let offset = horizontal ? rect.left : rect.top;
+    if (this._scrollTarget instanceof HTMLElement) {
+      const containerRect = this._scrollTarget.getBoundingClientRect();
+      offset -= horizontal ? containerRect.left : containerRect.top;
+    }
+
+    const progress = Math.max(0, Math.min(1, -offset / scrollAmount));
 
     this.dataset.progress = progress.toFixed(3);
     if (this._debugInfo && !this._debugInfo.hidden) {

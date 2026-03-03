@@ -135,6 +135,11 @@ export class TosiWaypoint extends Component {
   static initAttributes = {
     progress: 0,
   };
+  static styleSpec = {
+    ":host": {
+      display: "none",
+    },
+  };
   content = null;
 }
 

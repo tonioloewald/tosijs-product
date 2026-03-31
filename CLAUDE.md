@@ -34,14 +34,31 @@ All components extend `tosijs`'s `Component` class (Custom Elements with shadow 
 | `TosiInterpolator` | `<tosi-interpolator>` | `tosiInterpolator` | Declarative CSS property interpolation between waypoints |
 | `TosiWaypoint` | `<tosi-waypoint>` | `tosiWaypoint` | Keyframe definition for interpolator (hidden; defines `progress` + inline styles) |
 | `TosiScrollMapper` | `<tosi-scroll-mapper>` | `tosiScrollMapper` | Generic scroll progress wrapper with `scrollCallback` property |
+| `TosiScrollCamera` | `<tosi-scroll-camera>` | `tosiScrollCamera` | Waypoint-driven camera controller for B3d scenes (alpha/beta/radius/position/fov) |
+| `TosiScrollTime` | `<tosi-scroll-time>` | `tosiScrollTime` | Maps scroll progress to day/night cycle on B3d skybox (`from`/`to` hours) |
+| `TosiScrollAnimation` | `<tosi-scroll-animation>` | `tosiScrollAnimation` | Scrubs a named BabylonJS AnimationGroup to scroll-driven frame |
 
 ### Scroll progress flow
 
-1. A single global `scroll` event listener (RAF-throttled) drives all `TosiProductSection` instances.
-2. Each section calculates `progress = clamp(-rect.top / scrollAmount, 0, 1)`.
-3. Section queries children with `[data-scroll-animate]` or `[data-scroll-range]` and dispatches progress.
-4. Child elements receive progress via `setScrollProgress(localProgress)` if they implement it, or are handled by type detection (Lottie → `goToAndStop`, video → `currentTime`, B3d → camera rotation).
-5. `data-scroll-range="start,end"` constrains an element's animation to a sub-range of the section's progress.
+1. Per-scroll-parent listeners (via `Map<EventTarget, Set<TosiProductSection>>`) drive sections. `getScrollParent()` walks DOM checking `overflow`, skips body/documentElement, falls back to `window`.
+2. Each section calculates `progress = clamp(-offset / scrollAmount, 0, 1)` (RAF-throttled). Guards against `scrollAmount <= 0` to prevent NaN/Infinity.
+3. Section queries children with `[data-scroll-animate]` or `[data-scroll-range]` (cached, invalidated by MutationObserver).
+4. Child elements receive progress via priority:
+   - `setScrollProgress(localProgress)` if the element implements it (custom components)
+   - `data-scroll-animate="currentTime"` → sets `el.currentTime` on video elements
+   - `data-scroll-animate="lottie"` → `animation.goToAndStop(frame, true)` on Lottie players
+   - B3d scroll components (`TosiScrollCamera`, `TosiScrollTime`, `TosiScrollAnimation`) → waypoint-interpolated camera/animation control
+5. `data-scroll-range="start,end"` constrains animation to a sub-range of section progress.
+6. `--local-progress` CSS custom property is set on every animated child (usable in CSS `calc()`).
+7. `prefers-reduced-motion: reduce` skips all child animations (only fires `scrollCallback`).
+
+### Key attributes
+
+- **`scroll`** (on `tosi-product-section`): viewport-relative percentage (not pixels). `100` = 1× container dimension of scroll distance. Default: `100`.
+- **`direction`** (on `tosi-product-section`): `"vertical"` (default) or `"horizontal"`.
+- **`debug`** (on `tosi-product-section`): shows an overlay with current progress value.
+- **`easing`** (on `tosi-interpolator`): `"ease-in-out"` applies easeInOutQuad between waypoints. Default: linear.
+- **`progress`** (on `tosi-waypoint`): 0→1 value defining the keyframe position.
 
 ### Key conventions
 
@@ -49,7 +66,8 @@ All components extend `tosijs`'s `Component` class (Custom Elements with shadow 
 - **Progress is always 0→1**: all animation values are normalized.
 - **Mosaic filenames encode grid info**: `name_COLSxROWS_TOTAL.webp` — `TosiFilmstrip` auto-parses this.
 - **IIFE build** (`dist/index.js`) is self-contained (bundles tosijs + tosijs-ui) and exposes `globalThis.tosijs`, `globalThis.tosijsUi`, and `globalThis.tosijsProduct`. Entry point: `src/index-iife.ts`.
-- **Peer dependencies**: `tosijs` (>=1.4.0) and `tosijs-ui` (>=1.0.6) are required. Dev uses local `file:` links to sibling directories `../tosijs` and `../tosijs-ui`.
+- **Peer dependencies**: `tosijs` (^1.4.0) and `tosijs-ui` (^1.3.0) are required. Dev uses local `file:` links to sibling directories `../tosijs` and `../tosijs-ui`.
+- **Horizontal scroll layout**: parent `tosi-product` needs `display: inline-flex; width: max-content`; sections need `flex-shrink: 0`; sticky uses `left: 0`.
 
 ### CLI tool
 
@@ -65,6 +83,7 @@ bunx tosi-mosaic <video-file> [-f frames] [-w width] [-q quality] [-r fps]
 - `src/tosi-filmstrip.ts` — `TosiFilmstrip` (canvas mosaic renderer)
 - `src/tosi-interpolator.ts` — `TosiInterpolator`, `TosiWaypoint`, `interpolateStrings`
 - `src/waypoints.ts` — `interpolateWaypoints` helper (numeric interpolation with easeInOutQuad)
+- `src/tosi-b3d-scroll.ts` — `TosiScrollCamera`, `TosiScrollTime`, `TosiScrollAnimation` (B3d scroll controllers; use `<tosi-waypoint>` children for camera keyframes)
 - `src/index.ts` — re-exports all public API
 - `src/index-iife.ts` — IIFE entry point; assigns `tosijs`, `tosijsUi`, `tosijsProduct` to `globalThis`
 - `dev.ts` — build script + dev server (ESM build marks tosijs/tosijs-ui as external; IIFE bundles everything)

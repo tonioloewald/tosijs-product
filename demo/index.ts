@@ -4,8 +4,8 @@ import {
   tosiScrollMapper,
   tosiFilmstrip,
   tosiWaypoint,
-  interpolateWaypoints,
   tosiInterpolator,
+  tosiScrollCamera,
 } from "../src/index";
 import { markdownViewer, bodymovinPlayer, b3d, mapBox } from "tosijs-ui";
 import { elements } from "tosijs";
@@ -42,8 +42,10 @@ style.textContent = `
     background: linear-gradient(to bottom, #fff, #999);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    background-clip: text;
     padding: 0 20px;
     margin: 0;
+    filter: drop-shadow(0 2px 12px rgba(0,0,0,0.8)) drop-shadow(0 0 40px rgba(0,0,0,0.6));
   }
   tosi-md { display: block; padding: 100px 20px; max-width: 800px; margin: 0 auto; text-align: center; }
 `;
@@ -167,9 +169,9 @@ const app = tosiProduct(
   ),
 
   tosiProductSection(
-    { scroll: 400, style: { backgroundColor: "#fff" } },
-    overlay("0, 0.5", "A professional camera system."),
-    overlay("0.5, 1.0", "In the palm of your hand."),
+    { scroll: 400, style: { backgroundColor: "#111" } },
+    overlay("0, 0.5", "MacBook Neo."),
+    overlay("0.5, 1.0", "Every angle. Pure elegance."),
     b3d({
       "data-scroll-animate": "babylon",
       async sceneCreated(element: any, BABYLON: any) {
@@ -177,58 +179,41 @@ const app = tosiProduct(
         const camera = new BABYLON.ArcRotateCamera(
           "camera",
           -Math.PI / 2,
-          Math.PI / 2.5,
-          15,
-          BABYLON.Vector3.Zero(),
+          Math.PI / 3,
+          80,
+          new BABYLON.Vector3(0, 10, 0),
           scene
         );
         scene.activeCamera = camera;
         camera.minZ = 0.1;
+        camera.fov = camera.fov * 0.6;
+
+        scene.clearColor = new BABYLON.Color4(0, 0, 0, 0);
+
         new BABYLON.HemisphericLight(
-          "light",
+          "hemi",
           new BABYLON.Vector3(0, 1, 0),
           scene
-        );
-
-        const body = BABYLON.MeshBuilder.CreateBox(
-          "body",
-          { width: 4, height: 8, depth: 0.5 },
+        ).intensity = 0.6;
+        const dir = new BABYLON.DirectionalLight(
+          "dir",
+          new BABYLON.Vector3(-1, -2, 1),
           scene
         );
-        body.material = new BABYLON.StandardMaterial("bodyMat", scene);
-        body.material.diffuseColor = new BABYLON.Color3(0.05, 0.05, 0.05);
+        dir.intensity = 0.8;
 
-        const parts: any[] = [];
-        for (let i = 0; i < 3; i++) {
-          const lens = BABYLON.MeshBuilder.CreateCylinder(
-            "lens" + i,
-            { diameter: 1.2, height: 0.4 },
-            scene
-          );
-          lens.position.x = 1;
-          lens.position.y = 3 - i * 1.5;
-          lens.position.z = -0.6;
-          lens.parent = body;
-          parts.push(lens);
-        }
-
-        const b3dWaypoints = [
-          { progress: 0.0, rotY: -Math.PI / 2, radius: 15, partOffset: 3 },
-          { progress: 0.5, rotY: 0, radius: 12.5, partOffset: 1.5 },
-          { progress: 1.0, rotY: Math.PI / 2, radius: 10, partOffset: 0 },
-        ];
-
-        element.setScrollProgress = (progress: number) => {
-          const current = interpolateWaypoints(progress, b3dWaypoints);
-          if (!current) return;
-          body.rotation.y = current.rotY;
-          parts.forEach((part, i) => {
-            part.position.z = -0.6 - current.partOffset * (i + 1);
-          });
-          camera.radius = current.radius;
-        };
+        element.loadScene("assets/", "macbook_neo.glb");
       },
-    })
+    }),
+    tosiScrollCamera(
+      {
+        "data-scroll-animate": true,
+        easing: "ease-in-out",
+      },
+      tosiWaypoint({ progress: 0, alpha: -1.57, beta: 1.2, radius: 110 }),
+      tosiWaypoint({ progress: 0.5, alpha: 0, beta: 1.0, radius: 70 }),
+      tosiWaypoint({ progress: 1, alpha: 1.57, beta: 1.55, radius: 76 })
+    )
   ),
 
   div(

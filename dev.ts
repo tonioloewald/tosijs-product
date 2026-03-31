@@ -26,7 +26,7 @@ async function build() {
     target: "browser",
     format: "esm",
     naming: "module.js",
-    external: ["tosijs", "tosijs-ui"],
+    external: ["tosijs", "tosijs-ui", "tosijs-3d"],
   });
 
   await Bun.build({

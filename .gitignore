@@ -1,6 +1,4 @@
 node_modules/
-dist/
-demo/index.js
 .haltija/
 .DS_Store
 *.log

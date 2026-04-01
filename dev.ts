@@ -53,24 +53,43 @@ if (buildOnly) {
   process.exit(0);
 }
 
-function serveFromDir(config: {
-  directory: string;
-  path: string;
-}): Response | null {
-  const basePath = path.join(config.directory, config.path);
+function findFile(directory: string, reqPath: string): string | null {
+  const basePath = path.join(directory, reqPath);
   const suffixes = ["", ".html", "index.html"];
 
   for (const suffix of suffixes) {
     try {
       const pathWithSuffix = path.join(basePath, suffix);
       const stat = statSync(pathWithSuffix);
-      if (stat && stat.isFile()) {
-        return new Response(Bun.file(pathWithSuffix));
-      }
+      if (stat && stat.isFile()) return pathWithSuffix;
     } catch (err) {}
   }
 
   return null;
+}
+
+function serveFile(filePath: string, request: any): Response {
+  const file = Bun.file(filePath);
+  const range = request.headers.get("range");
+  if (range) {
+    const match = range.match(/bytes=(\d+)-(\d*)/);
+    if (match) {
+      const start = parseInt(match[1]);
+      const end = match[2] ? parseInt(match[2]) : file.size - 1;
+      return new Response(file.slice(start, end + 1), {
+        status: 206,
+        headers: {
+          "Content-Range": `bytes ${start}-${end}/${file.size}`,
+          "Accept-Ranges": "bytes",
+          "Content-Length": String(end - start + 1),
+          "Content-Type": file.type,
+        },
+      });
+    }
+  }
+  return new Response(file, {
+    headers: { "Accept-Ranges": "bytes" },
+  });
 }
 
 Bun.serve({
@@ -79,19 +98,13 @@ Bun.serve({
     let reqPath = new URL(request.url).pathname;
     if (reqPath === "/") reqPath = "/index.html";
 
-    const publicResponse = serveFromDir({
-      directory: PUBLIC,
-      path: reqPath,
-    });
-    if (publicResponse) return publicResponse;
+    // Serve from project root first (for root index.html, demo/*, dist/*)
+    const rootFile = findFile(PROJECT_ROOT, reqPath);
+    if (rootFile) return serveFile(rootFile, request);
 
-    if (reqPath.startsWith("/dist/")) {
-      const distResponse = serveFromDir({
-        directory: PROJECT_ROOT,
-        path: reqPath,
-      });
-      if (distResponse) return distResponse;
-    }
+    // Fallback to demo/ dir (for legacy /index.html -> demo/index.html)
+    const publicFile = findFile(PUBLIC, reqPath);
+    if (publicFile) return serveFile(publicFile, request);
 
     return new Response("File not found", {
       status: 404,

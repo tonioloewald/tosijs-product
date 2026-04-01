@@ -35,7 +35,8 @@ class TosiProductSection extends Component {
   static initAttributes = {
     scroll: 100,
     debug: false,
-    direction: "vertical"
+    direction: "vertical",
+    overflow: false
   };
   _debugInfo = null;
   _scrollTarget = null;
@@ -189,7 +190,9 @@ class TosiProductSection extends Component {
       const containerRect = this._scrollTarget.getBoundingClientRect();
       offset -= horizontal ? containerRect.left : containerRect.top;
     }
-    const progress = Math.max(0, Math.min(1, -offset / scrollAmount));
+    const raw = -offset / scrollAmount;
+    const overflow = this.hasAttribute("overflow");
+    const progress = overflow ? Math.max(-1, Math.min(2, raw)) : Math.max(0, Math.min(1, raw));
     this.dataset.progress = progress.toFixed(3);
     if (this._debugInfo && !this._debugInfo.hidden) {
       this._debugInfo.textContent = `Section: ${progress.toFixed(3)}`;
@@ -717,6 +720,82 @@ var tosiScrollTime = TosiScrollTime.elementCreator({
 var tosiScrollAnimation = TosiScrollAnimation.elementCreator({
   tag: "tosi-scroll-animation"
 });
+// src/tosi-code.ts
+import { Component as Component5 } from "tosijs";
+var prismLoaded = null;
+function loadPrism() {
+  if (prismLoaded)
+    return prismLoaded;
+  prismLoaded = new Promise((resolve) => {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = "https://cdn.jsdelivr.net/npm/prismjs@1/themes/prism-tomorrow.min.css";
+    document.head.appendChild(link);
+    const script = document.createElement("script");
+    script.src = "https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-core.min.js";
+    script.onload = () => {
+      const markup = document.createElement("script");
+      markup.src = "https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-markup.min.js";
+      markup.onload = () => resolve();
+      document.head.appendChild(markup);
+    };
+    document.head.appendChild(script);
+  });
+  return prismLoaded;
+}
+
+class TosiCode extends Component5 {
+  static initAttributes = {
+    language: "html"
+  };
+  static lightStyleSpec = {
+    ":host": {
+      display: "block"
+    },
+    ":host pre": {
+      background: "rgba(255,255,255,0.05)",
+      border: "1px solid rgba(255,255,255,0.1)",
+      borderRadius: "12px",
+      padding: "1.5em",
+      fontSize: "clamp(0.75rem, 1.5vw, 1rem)",
+      lineHeight: 1.6,
+      maxWidth: "90vw",
+      overflowX: "auto",
+      backdropFilter: "blur(20px)",
+      margin: "1em 0 0",
+      textAlign: "left"
+    },
+    ":host code": {
+      fontFamily: "Consolas, Monaco, 'Courier New', monospace",
+      whiteSpace: "pre"
+    }
+  };
+  content = null;
+  connectedCallback() {
+    super.connectedCallback();
+    this._highlight();
+  }
+  async _highlight() {
+    const raw = this.textContent || "";
+    if (!raw.trim())
+      return;
+    await loadPrism();
+    const lang = this.language || "html";
+    const grammar = globalThis.Prism?.languages?.[lang];
+    const codeEl = document.createElement("code");
+    codeEl.className = `language-${lang}`;
+    if (grammar) {
+      codeEl.innerHTML = globalThis.Prism.highlight(raw.trim(), grammar, lang);
+    } else {
+      codeEl.textContent = raw.trim();
+    }
+    const preEl = document.createElement("pre");
+    preEl.appendChild(codeEl);
+    this.textContent = "";
+    this.appendChild(preEl);
+  }
+}
+var tosiCode = TosiCode.elementCreator({ tag: "tosi-code" });
 export {
   tosiWaypoint,
   tosiScrollTime,
@@ -727,6 +806,7 @@ export {
   tosiProduct,
   tosiInterpolator,
   tosiFilmstrip,
+  tosiCode,
   interpolateWaypoints,
   interpolateStrings,
   TosiWaypoint,
@@ -737,5 +817,6 @@ export {
   TosiProductSection,
   TosiProduct,
   TosiInterpolator,
-  TosiFilmstrip
+  TosiFilmstrip,
+  TosiCode
 };

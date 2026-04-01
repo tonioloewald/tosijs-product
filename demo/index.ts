@@ -523,10 +523,7 @@ const app = tosiProduct(
                 progress: 1.0,
                 style: {
                   opacity: i === arr.length - 1 ? 1 : 0,
-                  transform:
-                    i === arr.length - 1
-                      ? "translateY(0px)"
-                      : "translateY(-40px)",
+                  transform: i === arr.length - 1 ? "translateY(0px)" : "translateY(-40px)",
                 },
               }),
               div(
@@ -612,7 +609,7 @@ const app = tosiProduct(
           tosiProductSection(
             {
               direction: "horizontal",
-              scroll: 200,
+              scroll: i === arr.length - 1 ? 0 : 200,
               style: { background: bg, height: "100%", flexShrink: 0 },
             },
             tosiInterpolator(
@@ -636,10 +633,7 @@ const app = tosiProduct(
                 progress: 1.0,
                 style: {
                   opacity: i === arr.length - 1 ? 1 : 0,
-                  transform:
-                    i === arr.length - 1
-                      ? "translateX(0px)"
-                      : "translateX(-60px)",
+                  transform: i === arr.length - 1 ? "translateX(0px)" : "translateX(-60px)",
                 },
               }),
               div(

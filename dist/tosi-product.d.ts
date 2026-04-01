@@ -5,6 +5,7 @@ export declare class TosiProductSection extends Component {
         scroll: number;
         debug: boolean;
         direction: string;
+        overflow: boolean;
     };
     private _debugInfo;
     private _scrollTarget;

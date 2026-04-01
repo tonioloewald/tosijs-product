@@ -12,6 +12,7 @@ import {
   tosiWaypoint,
   tosiInterpolator,
   tosiScrollCamera,
+  tosiCode,
 } from "../src/index";
 import { markdownViewer, bodymovinPlayer, b3d, mapBox } from "tosijs-ui";
 import { elements } from "tosijs";
@@ -57,20 +58,6 @@ style.textContent = `
   }
   .feature-text h2 { font-size: clamp(1.5rem, 5vw, 3.5rem); font-weight: 700; text-align: center; margin: 0; padding: 0 20px; }
   .feature-text p { font-size: clamp(0.875rem, 2vw, 1.25rem); text-align: center; color: #aaa; margin: 0.5em 0 0; max-width: 500px; padding: 0 20px; }
-  .code-block {
-    position: absolute; inset: 0;
-    display: flex; align-items: center; justify-content: center; z-index: 10;
-  }
-  .code-block pre {
-    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 12px; padding: 2em; font-size: clamp(0.75rem, 1.5vw, 1rem);
-    line-height: 1.6; max-width: 90vw; overflow-x: auto; backdrop-filter: blur(20px);
-  }
-  .code-block code { color: #e0e0e0; }
-  .code-block .tag { color: #7ec8e3; }
-  .code-block .attr { color: #c792ea; }
-  .code-block .val { color: #c3e88d; }
-  .code-block .comment { color: #666; }
   .gradient-bg { position: absolute; inset: 0; z-index: 0; }
   .nested-scroll { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.2) transparent; }
   .nested-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -87,45 +74,52 @@ const ease = (t: number) => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t);
 const overlay = (range: string, text: string, options: any = {}) =>
   tosiInterpolator(
     { "data-scroll-animate": "interpolator", "data-scroll-range": range },
-    tosiWaypoint({ progress: 0, style: { opacity: 0, transform: "translateY(20px)" } }),
-    tosiWaypoint({ progress: 0.5, style: { opacity: 1, transform: "translateY(0px)" } }),
-    tosiWaypoint({ progress: 1, style: { opacity: 0, transform: "translateY(-20px)" } }),
+    tosiWaypoint({
+      progress: 0,
+      style: { opacity: 0, transform: "translateY(20px)" },
+    }),
+    tosiWaypoint({
+      progress: 0.5,
+      style: { opacity: 1, transform: "translateY(0px)" },
+    }),
+    tosiWaypoint({
+      progress: 1,
+      style: { opacity: 0, transform: "translateY(-20px)" },
+    }),
     div({ class: "overlay", ...options }, h1({ class: "hero-text" }, text))
   );
 
-const featureIntro = (title: string, description: string, codeHtml: string, bg = "#0a0a0a") =>
+const featureIntro = (
+  title: string,
+  description: string,
+  codeText: string,
+  bg = "#0a0a0a"
+) =>
   tosiProductSection(
     { scroll: 250, style: { background: bg } },
     tosiInterpolator(
       { "data-scroll-animate": true, easing: "ease-in-out" },
-      tosiWaypoint({ progress: 0.0, style: { opacity: 0, transform: "translateY(60px)" } }),
-      tosiWaypoint({ progress: 0.3, style: { opacity: 1, transform: "translateY(0px)" } }),
-      tosiWaypoint({ progress: 0.7, style: { opacity: 1, transform: "translateY(0px)" } }),
-      tosiWaypoint({ progress: 1.0, style: { opacity: 0, transform: "translateY(-60px)" } }),
+      tosiWaypoint({
+        progress: 0.0,
+        style: { opacity: 0, transform: "translateY(60px)" },
+      }),
+      tosiWaypoint({
+        progress: 0.3,
+        style: { opacity: 1, transform: "translateY(0px)" },
+      }),
+      tosiWaypoint({
+        progress: 0.7,
+        style: { opacity: 1, transform: "translateY(0px)" },
+      }),
+      tosiWaypoint({
+        progress: 1.0,
+        style: { opacity: 0, transform: "translateY(-60px)" },
+      }),
       div(
         { class: "feature-text", style: { flexDirection: "column" } },
         h2(title),
         p(description),
-        ...(codeHtml
-          ? [
-              pre({
-                style: {
-                  background: "rgba(255,255,255,0.05)",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  borderRadius: "8px",
-                  padding: "1em",
-                  marginTop: "1em",
-                  fontSize: "clamp(0.7rem, 1.2vw, 0.9rem)",
-                  lineHeight: "1.6",
-                  backdropFilter: "blur(20px)",
-                  maxWidth: "90vw",
-                  overflowX: "auto",
-                  textAlign: "left",
-                },
-                innerHTML: codeHtml,
-              }),
-            ]
-          : [])
+        ...(codeText ? [tosiCode({ language: "html" }, codeText)] : [])
       )
     )
   );
@@ -143,12 +137,20 @@ const app = tosiProduct(
     { scroll: 150 },
     div({
       class: "gradient-bg",
-      style: { background: "radial-gradient(ellipse at center, #1a1a2e 0%, #000 120%)" },
+      style: {
+        background: "radial-gradient(ellipse at center, #1a1a2e 0%, #000 120%)",
+      },
     }),
     tosiInterpolator(
       { "data-scroll-animate": true },
-      tosiWaypoint({ progress: 0.0, style: { opacity: 1, transform: "translateY(0px) scale(1)" } }),
-      tosiWaypoint({ progress: 0.8, style: { opacity: 0, transform: "translateY(-100px) scale(0.9)" } }),
+      tosiWaypoint({
+        progress: 0.0,
+        style: { opacity: 1, transform: "translateY(0px) scale(1)" },
+      }),
+      tosiWaypoint({
+        progress: 0.8,
+        style: { opacity: 0, transform: "translateY(-100px) scale(0.9)" },
+      }),
       div(
         { class: "hero" },
         h1("tosijs-product"),
@@ -161,12 +163,12 @@ const app = tosiProduct(
   featureIntro(
     "<tosi-interpolator>",
     "Scrolling is progress. Orchestrate layers with declarative waypoints — opacity, transforms, any CSS property.",
-    `<code><span class="tag">&lt;tosi-interpolator</span> <span class="attr">data-scroll-animate</span><span class="tag">&gt;</span>
-  <span class="tag">&lt;tosi-waypoint</span> <span class="attr">progress=</span><span class="val">"0.0"</span> <span class="attr">style=</span><span class="val">"opacity: 0"</span><span class="tag">/&gt;</span>
-  <span class="tag">&lt;tosi-waypoint</span> <span class="attr">progress=</span><span class="val">"0.5"</span> <span class="attr">style=</span><span class="val">"opacity: 1"</span><span class="tag">/&gt;</span>
-  <span class="tag">&lt;tosi-waypoint</span> <span class="attr">progress=</span><span class="val">"1.0"</span> <span class="attr">style=</span><span class="val">"opacity: 0"</span><span class="tag">/&gt;</span>
-  <span class="tag">&lt;div&gt;</span>Your content here<span class="tag">&lt;/div&gt;</span>
-<span class="tag">&lt;/tosi-interpolator&gt;</span></code>`,
+    `<tosi-interpolator data-scroll-animate>
+  <tosi-waypoint progress="0.0" style="opacity: 0"></tosi-waypoint>
+  <tosi-waypoint progress="0.5" style="opacity: 1"></tosi-waypoint>
+  <tosi-waypoint progress="1.0" style="opacity: 0"></tosi-waypoint>
+  <div>Your content here</div>
+</tosi-interpolator>`,
     "#050510"
   ),
 
@@ -174,13 +176,26 @@ const app = tosiProduct(
     { scroll: 300, style: { background: "#0a0a0a" } },
     tosiInterpolator(
       { "data-scroll-range": "0,0.5", easing: "ease-in-out" },
-      tosiWaypoint({ progress: 0.0, style: { opacity: 0, transform: "translateX(-80px)" } }),
-      tosiWaypoint({ progress: 0.4, style: { opacity: 1, transform: "translateX(0px)" } }),
-      tosiWaypoint({ progress: 1.0, style: { opacity: 0, transform: "translateX(-80px)" } }),
+      tosiWaypoint({
+        progress: 0.0,
+        style: { opacity: 0, transform: "translateX(-80px)" },
+      }),
+      tosiWaypoint({
+        progress: 0.4,
+        style: { opacity: 1, transform: "translateX(0px)" },
+      }),
+      tosiWaypoint({
+        progress: 1.0,
+        style: { opacity: 0, transform: "translateX(-80px)" },
+      }),
       div(
         {
           class: "feature-text",
-          style: { flexDirection: "column", alignItems: "flex-start", paddingLeft: "10vw" },
+          style: {
+            flexDirection: "column",
+            alignItems: "flex-start",
+            paddingLeft: "10vw",
+          },
         },
         h2("Scroll Ranges"),
         p("Constrain animations to any portion of a section's scroll.")
@@ -188,13 +203,26 @@ const app = tosiProduct(
     ),
     tosiInterpolator(
       { "data-scroll-range": "0.5,1", easing: "ease-in-out" },
-      tosiWaypoint({ progress: 0.0, style: { opacity: 0, transform: "translateX(80px)" } }),
-      tosiWaypoint({ progress: 0.5, style: { opacity: 1, transform: "translateX(0px)" } }),
-      tosiWaypoint({ progress: 1.0, style: { opacity: 0, transform: "translateX(80px)" } }),
+      tosiWaypoint({
+        progress: 0.0,
+        style: { opacity: 0, transform: "translateX(80px)" },
+      }),
+      tosiWaypoint({
+        progress: 0.5,
+        style: { opacity: 1, transform: "translateX(0px)" },
+      }),
+      tosiWaypoint({
+        progress: 1.0,
+        style: { opacity: 0, transform: "translateX(80px)" },
+      }),
       div(
         {
           class: "feature-text",
-          style: { flexDirection: "column", alignItems: "flex-end", paddingRight: "10vw" },
+          style: {
+            flexDirection: "column",
+            alignItems: "flex-end",
+            paddingRight: "10vw",
+          },
         },
         h2("Layer by Layer"),
         p("Choreograph multiple elements, each with its own timing.")
@@ -205,8 +233,8 @@ const app = tosiProduct(
   // ===== 2. VIDEO SCRUBBING =====
   featureIntro(
     "Video Scrubbing",
-    "Scrub any video frame-by-frame via scroll position. Just add data-scroll-animate=\"currentTime\" — you'll want a fast server or CDN.",
-    `<code><span class="tag">&lt;video</span> <span class="attr">src=</span><span class="val">"clip.mp4"</span> <span class="attr">data-scroll-animate=</span><span class="val">"currentTime"</span> <span class="attr">muted</span> <span class="attr">playsinline</span><span class="tag">&gt;&lt;/video&gt;</span></code>`
+    'Scrub any video frame-by-frame via scroll position. Just add data-scroll-animate="currentTime" — you\'ll want a fast server or CDN.',
+    `<video src="clip.mp4" data-scroll-animate="currentTime" muted playsinline></video>`
   ),
 
   tosiProductSection(
@@ -225,11 +253,11 @@ const app = tosiProduct(
   featureIntro(
     "Filmstrip Mosaic",
     "Convert video into a single mosaic image. No video decode, instant seeking, works everywhere. Use the tosi-mosaic CLI to generate.",
-    `<code><span class="tag">&lt;tosi-filmstrip</span>
-  <span class="attr">src=</span><span class="val">"clip_10x10_100.jpg"</span>
-  <span class="attr">cols=</span><span class="val">"10"</span> <span class="attr">rows=</span><span class="val">"10"</span> <span class="attr">total=</span><span class="val">"100"</span>
-  <span class="attr">data-scroll-animate</span>
-<span class="tag">&gt;&lt;/tosi-filmstrip&gt;</span></code>`
+    `<tosi-filmstrip
+  src="clip_10x10_100.jpg"
+  cols="10" rows="10" total="100"
+  data-scroll-animate
+></tosi-filmstrip>`
   ),
 
   tosiProductSection(
@@ -248,11 +276,12 @@ const app = tosiProduct(
   featureIntro(
     "Mapbox Integration",
     "Travel the world with scroll-linked map navigation. Zoom out, pan across continents, zoom back in.",
-    `<code><span class="tag">&lt;tosi-scroll-mapper&gt;</span>
-  <span class="tag">&lt;tosi-map</span> <span class="attr">token=</span><span class="val">"pk.ey..."</span>
-    <span class="attr">coords=</span><span class="val">"37.46,-122.43,12"</span>
-    <span class="attr">map-style=</span><span class="val">"mapbox://styles/mapbox/dark-v11"</span><span class="tag">/&gt;</span>
-<span class="tag">&lt;/tosi-scroll-mapper&gt;</span></code>`
+    `<tosi-scroll-mapper>
+  <tosi-map token="pk.ey..."
+    coords="37.46,-122.43,12"
+    map-style="mapbox://styles/mapbox/dark-v11">
+  </tosi-map>
+</tosi-scroll-mapper>`
   ),
 
   tosiProductSection(
@@ -276,7 +305,8 @@ const app = tosiProduct(
         },
       },
       mapBox({
-        token: "pk.eyJ1IjoicG9kcGVyc29uIiwiYSI6ImNqc2JlbWU0bjA1ZmY0YW5ycHZod3VhbWcifQ.arvqfpOqMgFYkKgQ35UScA",
+        token:
+          "pk.eyJ1IjoicG9kcGVyc29uIiwiYSI6ImNqc2JlbWU0bjA1ZmY0YW5ycHZod3VhbWcifQ.arvqfpOqMgFYkKgQ35UScA",
         coords: `${hmb.lat},${hmb.lng},12`,
         mapStyle: "mapbox://styles/mapbox/dark-v11",
         style: { width: "100%", height: "100%", pointerEvents: "none" },
@@ -290,10 +320,10 @@ const app = tosiProduct(
   featureIntro(
     "3D Scenes",
     "Animate BabylonJS scenes with scroll-driven camera waypoints. Load any GLB/glTF model.",
-    `<code><span class="tag">&lt;tosi-scroll-camera</span> <span class="attr">data-scroll-animate</span> <span class="attr">easing=</span><span class="val">"ease-in-out"</span><span class="tag">&gt;</span>
-  <span class="tag">&lt;tosi-waypoint</span> <span class="attr">progress=</span><span class="val">"0"</span> <span class="attr">alpha=</span><span class="val">"-1.57"</span> <span class="attr">radius=</span><span class="val">"110"</span><span class="tag">/&gt;</span>
-  <span class="tag">&lt;tosi-waypoint</span> <span class="attr">progress=</span><span class="val">"1"</span> <span class="attr">alpha=</span><span class="val">"1.57"</span> <span class="attr">radius=</span><span class="val">"76"</span><span class="tag">/&gt;</span>
-<span class="tag">&lt;/tosi-scroll-camera&gt;</span></code>`
+    `<tosi-scroll-camera data-scroll-animate easing="ease-in-out">
+  <tosi-waypoint progress="0" alpha="-1.57" radius="110"></tosi-waypoint>
+  <tosi-waypoint progress="1" alpha="1.57" radius="76"></tosi-waypoint>
+</tosi-scroll-camera>`
   ),
 
   tosiProductSection(
@@ -316,8 +346,16 @@ const app = tosiProduct(
         camera.minZ = 0.1;
         camera.fov = camera.fov * 0.6;
         scene.clearColor = new BABYLON.Color4(0, 0, 0, 0);
-        new BABYLON.HemisphericLight("hemi", new BABYLON.Vector3(0, 1, 0), scene).intensity = 0.6;
-        const dir = new BABYLON.DirectionalLight("dir", new BABYLON.Vector3(-1, -2, 1), scene);
+        new BABYLON.HemisphericLight(
+          "hemi",
+          new BABYLON.Vector3(0, 1, 0),
+          scene
+        ).intensity = 0.6;
+        const dir = new BABYLON.DirectionalLight(
+          "dir",
+          new BABYLON.Vector3(-1, -2, 1),
+          scene
+        );
         dir.intensity = 0.8;
         element.loadScene("demo/assets/", "macbook_neo.glb");
       },
@@ -334,10 +372,10 @@ const app = tosiProduct(
   featureIntro(
     "Lottie Animations",
     "Scrub Lottie/Bodymovin animations with scroll progress. Frame-perfect control over vector animations.",
-    `<code><span class="tag">&lt;tosi-lottie</span>
-  <span class="attr">src=</span><span class="val">"animation.json"</span>
-  <span class="attr">data-scroll-animate=</span><span class="val">"lottie"</span>
-<span class="tag">&gt;&lt;/tosi-lottie&gt;</span></code>`
+    `<tosi-lottie
+  src="animation.json"
+  data-scroll-animate="lottie"
+></tosi-lottie>`
   ),
 
   tosiProductSection(
@@ -358,29 +396,38 @@ const app = tosiProduct(
   tosiProductSection(
     {
       scroll: 200,
-      style: { background: "radial-gradient(ellipse at center, #1a1a2e 0%, #000 70%)" },
+      style: {
+        background: "radial-gradient(ellipse at center, #1a1a2e 0%, #000 70%)",
+      },
     },
     tosiInterpolator(
       { "data-scroll-animate": true, easing: "ease-in-out" },
-      tosiWaypoint({ progress: 0.0, style: { opacity: 0, transform: "translateY(40px)" } }),
-      tosiWaypoint({ progress: 0.3, style: { opacity: 1, transform: "translateY(0px)" } }),
-      tosiWaypoint({ progress: 0.7, style: { opacity: 1, transform: "translateY(0px)" } }),
-      tosiWaypoint({ progress: 1.0, style: { opacity: 0, transform: "translateY(-40px)" } }),
+      tosiWaypoint({
+        progress: 0.0,
+        style: { opacity: 0, transform: "translateY(40px)" },
+      }),
+      tosiWaypoint({
+        progress: 0.3,
+        style: { opacity: 1, transform: "translateY(0px)" },
+      }),
+      tosiWaypoint({
+        progress: 0.7,
+        style: { opacity: 1, transform: "translateY(0px)" },
+      }),
+      tosiWaypoint({
+        progress: 1.0,
+        style: { opacity: 0, transform: "translateY(-40px)" },
+      }),
       div(
         { class: "feature-text", style: { flexDirection: "column" } },
         h2("One Script Tag"),
-        p("The IIFE build includes tosijs, tosijs-ui, and tosijs-product. Load it from a CDN and start building."),
-        pre({
-          style: {
-            background: "rgba(255,255,255,0.05)",
-            border: "1px solid rgba(255,255,255,0.1)",
-            borderRadius: "8px",
-            padding: "1em",
-            marginTop: "1em",
-            fontSize: "clamp(0.7rem, 1.2vw, 0.9rem)",
-          },
-          innerHTML: `<code><span class="tag">&lt;script</span> <span class="attr">src=</span><span class="val">"https://cdn.jsdelivr.net/npm/tosijs-product/dist/index.js"</span><span class="tag">&gt;&lt;/script&gt;</span></code>`,
-        })
+        p(
+          "The IIFE build includes tosijs, tosijs-ui, and tosijs-product. Load it from a CDN and start building."
+        ),
+        tosiCode(
+          { language: "html" },
+          `<script src="https://cdn.jsdelivr.net/npm/tosijs-product/dist/index.js"></script>`
+        )
       )
     )
   ),
@@ -388,11 +435,16 @@ const app = tosiProduct(
   // ===== 8. NESTED SCROLLING =====
   div(
     { style: { padding: "4em 1em", background: "#111", textAlign: "center" } },
-    h2({ style: { fontSize: "clamp(1.5rem, 4vw, 2.5rem)", margin: "0 0 0.5em" } }, "Nested Scroll Containers"),
+    h2(
+      {
+        style: { fontSize: "clamp(1.5rem, 4vw, 2.5rem)", margin: "0 0 0.5em" },
+      },
+      "Nested Scroll Containers"
+    ),
     p({
       style: { color: "#999", margin: "0 auto 2em", maxWidth: "500px" },
       innerHTML:
-        'A <code>tosi-product</code> inside an <code>overflow-y: auto</code> div detects its scroll parent automatically.',
+        "A <code>tosi-product</code> inside an <code>overflow-y: auto</code> div detects its scroll parent automatically.",
     }),
     div(
       {
@@ -408,22 +460,75 @@ const app = tosiProduct(
         },
       },
       tosiProduct(
-        ...([
-          ["tosi-product", "Top-level container. Wraps your scroll story.", "#0a0a1a", "#7ec8e3"],
-          ["tosi-product-section", "Converts scroll offset to 0\u21921 progress. Sticky viewport pinning.", "#1a0a1a", "#c792ea"],
-          ["tosi-interpolator", "Declarative CSS interpolation between waypoints.", "#0a1a0a", "#88e0a0"],
-          ["tosi-filmstrip", "Canvas-based frame animator from a single mosaic image.", "#1a1a0a", "#e0d888"],
-          ["tosi-scroll-mapper", "Generic scroll progress wrapper with a callback.", "#0a0a1a", "#e08888"],
-          ["tosi-scroll-camera", "Waypoint-driven camera controller for BabylonJS.", "#1a0a0a", "#c0a0e0"],
-        ] as [string, string, string, string][]).map(([name, desc, bg, color], i, arr) =>
+        ...(
+          [
+            [
+              "tosi-product",
+              "Top-level container. Wraps your scroll story.",
+              "#0a0a1a",
+              "#7ec8e3",
+            ],
+            [
+              "tosi-product-section",
+              "Converts scroll offset to 0\u21921 progress. Sticky viewport pinning.",
+              "#1a0a1a",
+              "#c792ea",
+            ],
+            [
+              "tosi-interpolator",
+              "Declarative CSS interpolation between waypoints.",
+              "#0a1a0a",
+              "#88e0a0",
+            ],
+            [
+              "tosi-filmstrip",
+              "Canvas-based frame animator from a single mosaic image.",
+              "#1a1a0a",
+              "#e0d888",
+            ],
+            [
+              "tosi-scroll-mapper",
+              "Generic scroll progress wrapper with a callback.",
+              "#0a0a1a",
+              "#e08888",
+            ],
+            [
+              "tosi-scroll-camera",
+              "Waypoint-driven camera controller for BabylonJS.",
+              "#1a0a0a",
+              "#c0a0e0",
+            ],
+          ] as [string, string, string, string][]
+        ).map(([name, desc, bg, color], i, arr) =>
           tosiProductSection(
             { scroll: 200, style: { background: bg } },
             tosiInterpolator(
               { "data-scroll-animate": true },
-              tosiWaypoint({ progress: 0.0, style: { opacity: i === 0 ? 1 : 0, transform: i === 0 ? "translateY(0px)" : "translateY(40px)" } }),
-              tosiWaypoint({ progress: 0.3, style: { opacity: 1, transform: "translateY(0px)" } }),
-              tosiWaypoint({ progress: 0.7, style: { opacity: 1, transform: "translateY(0px)" } }),
-              tosiWaypoint({ progress: 1.0, style: { opacity: i === arr.length - 1 ? 1 : 0, transform: i === arr.length - 1 ? "translateY(0px)" : "translateY(-40px)" } }),
+              tosiWaypoint({
+                progress: 0.0,
+                style: {
+                  opacity: i === 0 ? 1 : 0,
+                  transform: i === 0 ? "translateY(0px)" : "translateY(40px)",
+                },
+              }),
+              tosiWaypoint({
+                progress: 0.3,
+                style: { opacity: 1, transform: "translateY(0px)" },
+              }),
+              tosiWaypoint({
+                progress: 0.7,
+                style: { opacity: 1, transform: "translateY(0px)" },
+              }),
+              tosiWaypoint({
+                progress: 1.0,
+                style: {
+                  opacity: i === arr.length - 1 ? 1 : 0,
+                  transform:
+                    i === arr.length - 1
+                      ? "translateY(0px)"
+                      : "translateY(-40px)",
+                },
+              }),
               div(
                 { class: "feature-text", style: { flexDirection: "column" } },
                 h2({ style: { color } }, `<${name}>`),
@@ -438,11 +543,19 @@ const app = tosiProduct(
 
   // ===== 9. HORIZONTAL SCROLLING =====
   div(
-    { style: { padding: "4em 1em", background: "#0a0a0a", textAlign: "center" } },
-    h2({ style: { fontSize: "clamp(1.5rem, 4vw, 2.5rem)", margin: "0 0 0.5em" } }, "Horizontal Scrolling"),
+    {
+      style: { padding: "4em 1em", background: "#0a0a0a", textAlign: "center" },
+    },
+    h2(
+      {
+        style: { fontSize: "clamp(1.5rem, 4vw, 2.5rem)", margin: "0 0 0.5em" },
+      },
+      "Horizontal Scrolling"
+    ),
     p({
       style: { color: "#999", margin: "0 auto 2em", maxWidth: "500px" },
-      innerHTML: 'Set <code>direction="horizontal"</code> for side-scrolling sections.',
+      innerHTML:
+        'Set <code>direction="horizontal"</code> for side-scrolling sections.',
     }),
     div(
       {
@@ -461,33 +574,41 @@ const app = tosiProduct(
         },
       },
       tosiProduct(
-        { style: { display: "inline-flex", width: "max-content", height: "100%" } },
-        ...([
+        {
+          style: {
+            display: "inline-flex",
+            width: "max-content",
+            height: "100%",
+          },
+        },
+        ...(
           [
-            "tosijs",
-            "A front-end library for leveraging web components and CSS3 with proxy-based state management and O(1) virtual lists.",
-            "#0a1a0a",
-            "#88e0a0",
-          ],
-          [
-            "tosijs-ui",
-            "Web components that complement the DOM instead of fighting it.",
-            "#1a1a0a",
-            "#e0d888",
-          ],
-          [
-            "tosijs-3d",
-            "A declarative 3D library built on BabylonJS.",
-            "#1a0a1a",
-            "#c792ea",
-          ],
-          [
-            "tjs-lang",
-            "Fulfills the promise of JavaScript, Lisp, and Dylan. Transpiles TypeScript, turns types into runtime contracts, provides safe eval.",
-            "#0a0a1a",
-            "#7ec8e3",
-          ],
-        ] as [string, string, string, string][]).map(([name, desc, bg, color], i, arr) =>
+            [
+              "tosijs",
+              "A front-end library for leveraging web components and CSS3 with proxy-based state management and O(1) virtual lists.",
+              "#0a1a0a",
+              "#88e0a0",
+            ],
+            [
+              "tosijs-ui",
+              "Web components that complement the DOM instead of fighting it.",
+              "#1a1a0a",
+              "#e0d888",
+            ],
+            [
+              "tosijs-3d",
+              "A declarative 3D library built on BabylonJS.",
+              "#1a0a1a",
+              "#c792ea",
+            ],
+            [
+              "tjs-lang",
+              "Fulfills the promise of JavaScript, Lisp, and Dylan. Transpiles TypeScript, turns types into runtime contracts, provides safe eval.",
+              "#0a0a1a",
+              "#7ec8e3",
+            ],
+          ] as [string, string, string, string][]
+        ).map(([name, desc, bg, color], i, arr) =>
           tosiProductSection(
             {
               direction: "horizontal",
@@ -496,12 +617,36 @@ const app = tosiProduct(
             },
             tosiInterpolator(
               { "data-scroll-animate": true },
-              tosiWaypoint({ progress: 0.0, style: { opacity: i === 0 ? 1 : 0, transform: i === 0 ? "translateX(0px)" : "translateX(60px)" } }),
-              tosiWaypoint({ progress: 0.3, style: { opacity: 1, transform: "translateX(0px)" } }),
-              tosiWaypoint({ progress: 0.7, style: { opacity: 1, transform: "translateX(0px)" } }),
-              tosiWaypoint({ progress: 1.0, style: { opacity: i === arr.length - 1 ? 1 : 0, transform: i === arr.length - 1 ? "translateX(0px)" : "translateX(-60px)" } }),
+              tosiWaypoint({
+                progress: 0.0,
+                style: {
+                  opacity: i === 0 ? 1 : 0,
+                  transform: i === 0 ? "translateX(0px)" : "translateX(60px)",
+                },
+              }),
+              tosiWaypoint({
+                progress: 0.3,
+                style: { opacity: 1, transform: "translateX(0px)" },
+              }),
+              tosiWaypoint({
+                progress: 0.7,
+                style: { opacity: 1, transform: "translateX(0px)" },
+              }),
+              tosiWaypoint({
+                progress: 1.0,
+                style: {
+                  opacity: i === arr.length - 1 ? 1 : 0,
+                  transform:
+                    i === arr.length - 1
+                      ? "translateX(0px)"
+                      : "translateX(-60px)",
+                },
+              }),
               div(
-                { class: "feature-text", style: { flexDirection: "column", whiteSpace: "normal" } },
+                {
+                  class: "feature-text",
+                  style: { flexDirection: "column", whiteSpace: "normal" },
+                },
                 h2({ style: { color } }, name),
                 p(desc)
               )
@@ -514,10 +659,24 @@ const app = tosiProduct(
 
   // ===== FOOTER =====
   div(
-    { style: { textAlign: "center", padding: "4em 1em", background: "#000", color: "#555", fontSize: "0.9rem" } },
+    {
+      style: {
+        textAlign: "center",
+        padding: "4em 1em",
+        background: "#000",
+        color: "#555",
+        fontSize: "0.9rem",
+      },
+    },
     p(
       "Built with ",
-      elements.a({ href: "https://tosijs.net", style: { color: "#7ec8e3", textDecoration: "none" } }, "tosijs")
+      elements.a(
+        {
+          href: "https://tosijs.net",
+          style: { color: "#7ec8e3", textDecoration: "none" },
+        },
+        "tosijs"
+      )
     )
   )
 );

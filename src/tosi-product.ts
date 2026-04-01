@@ -41,6 +41,7 @@ export class TosiProductSection extends Component {
     scroll: 100,
     debug: false,
     direction: "vertical",
+    overflow: false,
   };
 
   private _debugInfo: HTMLElement | null = null;
@@ -238,7 +239,11 @@ export class TosiProductSection extends Component {
       offset -= horizontal ? containerRect.left : containerRect.top;
     }
 
-    const progress = Math.max(0, Math.min(1, -offset / scrollAmount));
+    const raw = -offset / scrollAmount;
+    const overflow = this.hasAttribute("overflow");
+    const progress = overflow
+      ? Math.max(-1, Math.min(2, raw))
+      : Math.max(0, Math.min(1, raw));
 
     this.dataset.progress = progress.toFixed(3);
     if (this._debugInfo && !this._debugInfo.hidden) {
@@ -258,12 +263,9 @@ export class TosiProductSection extends Component {
       const rangeStr = el.getAttribute("data-scroll-range") || "0,1";
       const [start, end] = rangeStr.split(",").map(Number);
       const range = end - start;
-      const localProgress =
-        range <= 0
-          ? progress >= end
-            ? 1
-            : 0
-          : Math.max(0, Math.min(1, (progress - start) / range));
+      const localProgress = range <= 0
+        ? progress >= end ? 1 : 0
+        : Math.max(0, Math.min(1, (progress - start) / range));
 
       (el as HTMLElement).style.setProperty(
         "--local-progress",

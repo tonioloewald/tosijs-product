@@ -190,9 +190,18 @@ class TosiProductSection extends Component {
       const containerRect = this._scrollTarget.getBoundingClientRect();
       offset -= horizontal ? containerRect.left : containerRect.top;
     }
-    const raw = -offset / scrollAmount;
-    const overflow = this.hasAttribute("overflow");
-    const progress = overflow ? Math.max(-1, Math.min(2, raw)) : Math.max(0, Math.min(1, raw));
+    const coreProgress = Math.max(0, Math.min(1, -offset / scrollAmount));
+    const overflow = this.overflow;
+    let progress = coreProgress;
+    if (overflow) {
+      const containerSize = horizontal ? this._scrollTarget instanceof HTMLElement ? this._scrollTarget.getBoundingClientRect().width : window.innerWidth : this._scrollTarget instanceof HTMLElement ? this._scrollTarget.getBoundingClientRect().height : window.innerHeight;
+      if (offset > 0) {
+        progress = -(offset / containerSize);
+      } else if (-offset > scrollAmount) {
+        progress = 1 + (-offset - scrollAmount) / containerSize;
+      }
+      progress = Math.max(-1, Math.min(2, progress));
+    }
     this.dataset.progress = progress.toFixed(3);
     if (this._debugInfo && !this._debugInfo.hidden) {
       this._debugInfo.textContent = `Section: ${progress.toFixed(3)}`;

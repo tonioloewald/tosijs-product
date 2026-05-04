@@ -15,7 +15,7 @@ bun install              # Install dependencies
 bun run start            # Dev server with watch mode (port 8788)
 bun run build            # Build library (ESM + IIFE) and demo
 bun run format           # ESLint + Prettier
-bun run test             # Bun test runner (no tests currently)
+bun run test             # Bun test runner (currently covers interpolation helpers)
 ```
 
 The build is a custom script (`dev.ts`) using `Bun.build` — it produces `dist/module.js` (ESM), `dist/index.js` (IIFE), and `demo/index.js`.
@@ -37,6 +37,7 @@ All components extend `tosijs`'s `Component` class (Custom Elements with shadow 
 | `TosiScrollCamera` | `<tosi-scroll-camera>` | `tosiScrollCamera` | Waypoint-driven camera controller for B3d scenes (alpha/beta/radius/position/fov) |
 | `TosiScrollTime` | `<tosi-scroll-time>` | `tosiScrollTime` | Maps scroll progress to day/night cycle on B3d skybox (`from`/`to` hours) |
 | `TosiScrollAnimation` | `<tosi-scroll-animation>` | `tosiScrollAnimation` | Scrubs a named BabylonJS AnimationGroup to scroll-driven frame |
+| `TosiCode` | `<tosi-code>` | `tosiCode` | Lazy-loads PrismJS from CDN to syntax-highlight its text content (`language` attr, default `html`) |
 
 ### Scroll progress flow
 
@@ -55,8 +56,10 @@ All components extend `tosijs`'s `Component` class (Custom Elements with shadow 
 ### Key attributes
 
 - **`scroll`** (on `tosi-product-section`): viewport-relative percentage (not pixels). `100` = 1× container dimension of scroll distance. Default: `100`.
+- **`viewport`** (on `tosi-product-section`): percentage of the container's perpendicular dimension the sticky frame occupies (height for vertical, width for horizontal). `100` (default) fills the viewport. Lower values (e.g., `70`) shrink the pinned area so the section background — or the next section, near the end of the runway — peeks through the unused band. Section outer = `viewport% + scroll%` of container, so pinning duration is unaffected.
 - **`direction`** (on `tosi-product-section`): `"vertical"` (default) or `"horizontal"`.
 - **`debug`** (on `tosi-product-section`): shows an overlay with current progress value.
+- **`overflow`** (on `tosi-product-section`): when set, progress extends beyond `[0,1]` to `[-1,2]` — `<0` while the section approaches the viewport, `>1` after it has scrolled past. Lets animations enter/exit beyond the pinned range. Default: `false`.
 - **`easing`** (on `tosi-interpolator`): `"ease-in-out"` applies easeInOutQuad between waypoints. Default: linear.
 - **`progress`** (on `tosi-waypoint`): 0→1 value defining the keyframe position.
 
@@ -66,7 +69,7 @@ All components extend `tosijs`'s `Component` class (Custom Elements with shadow 
 - **Progress is always 0→1**: all animation values are normalized.
 - **Mosaic filenames encode grid info**: `name_COLSxROWS_TOTAL.webp` — `TosiFilmstrip` auto-parses this.
 - **IIFE build** (`dist/index.js`) is self-contained (bundles tosijs + tosijs-ui) and exposes `globalThis.tosijs`, `globalThis.tosijsUi`, and `globalThis.tosijsProduct`. Entry point: `src/index-iife.ts`.
-- **Peer dependencies**: `tosijs` (^1.4.0) and `tosijs-ui` (^1.3.0) are required. Dev uses local `file:` links to sibling directories `../tosijs` and `../tosijs-ui`.
+- **Peer dependencies**: `tosijs` (^1.5.7) and `tosijs-ui` (^1.3.0) are required. Dev uses local `file:` links to sibling directories `../tosijs` and `../tosijs-ui`.
 - **Horizontal scroll layout**: parent `tosi-product` needs `display: inline-flex; width: max-content`; sections need `flex-shrink: 0`; sticky uses `left: 0`.
 
 ### CLI tool
@@ -84,6 +87,8 @@ bunx tosi-mosaic <video-file> [-f frames] [-w width] [-q quality] [-r fps]
 - `src/tosi-interpolator.ts` — `TosiInterpolator`, `TosiWaypoint`, `interpolateStrings`
 - `src/waypoints.ts` — `interpolateWaypoints` helper (numeric interpolation with easeInOutQuad)
 - `src/tosi-b3d-scroll.ts` — `TosiScrollCamera`, `TosiScrollTime`, `TosiScrollAnimation` (B3d scroll controllers; use `<tosi-waypoint>` children for camera keyframes)
+- `src/tosi-code.ts` — `TosiCode` (Prism-highlighted code block; loads PrismJS lazily from jsDelivr CDN)
+- `src/interpolation.test.ts` — tests for `interpolateStrings` and `interpolateWaypoints`
 - `src/index.ts` — re-exports all public API
 - `src/index-iife.ts` — IIFE entry point; assigns `tosijs`, `tosijsUi`, `tosijsProduct` to `globalThis`
 - `dev.ts` — build script + dev server (ESM build marks tosijs/tosijs-ui as external; IIFE bundles everything)

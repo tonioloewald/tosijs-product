@@ -3,6 +3,7 @@ export declare class TosiProductSection extends Component {
     scrollCallback: ((progress: number, el: HTMLElement) => void) | null;
     static initAttributes: {
         scroll: number;
+        viewport: number;
         debug: boolean;
         direction: string;
         overflow: boolean;
@@ -48,6 +49,7 @@ export declare class TosiProductSection extends Component {
     disconnectedCallback(): void;
     render(): void;
     private _getScrollPct;
+    private _getViewportPct;
     private _getScrollAmountPx;
     updateProgress(): void;
 }

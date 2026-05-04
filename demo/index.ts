@@ -44,13 +44,36 @@ style.textContent = `
     padding: 0 20px; margin: 0;
     filter: drop-shadow(0 2px 12px rgba(0,0,0,0.8)) drop-shadow(0 0 40px rgba(0,0,0,0.6));
   }
-  .hero { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; z-index: 10; }
+  .hero { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding-bottom: 18vh; pointer-events: none; z-index: 10; }
   .hero h1 {
     font-size: clamp(2rem, 8vw, 6rem); font-weight: 800; text-align: center; margin: 0;
     background: linear-gradient(to bottom, #fff, #aaa);
     -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
   }
   .hero p { font-size: clamp(1rem, 2.5vw, 1.5rem); text-align: center; color: #999; margin: 0.5em 0 0; max-width: 600px; padding: 0 20px; }
+  .scroll-hint {
+    position: absolute; left: 50%; bottom: 6vh; transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center; gap: 14px;
+    color: rgba(255,255,255,0.55);
+    font-size: 0.7rem; font-weight: 500;
+    letter-spacing: 0.25em; text-transform: uppercase;
+    pointer-events: none; z-index: 11;
+  }
+  .scroll-hint::after {
+    content: ''; display: block;
+    width: 10px; height: 10px;
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    transform: rotate(45deg);
+    animation: scroll-hint-bounce 1.8s ease-in-out infinite;
+  }
+  @keyframes scroll-hint-bounce {
+    0%, 100% { transform: rotate(45deg) translate(0, 0); }
+    50% { transform: rotate(45deg) translate(4px, 4px); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .scroll-hint::after { animation: none; }
+  }
   .feature-text {
     position: absolute; inset: 0;
     display: flex; align-items: center; justify-content: center;
@@ -63,6 +86,26 @@ style.textContent = `
   .nested-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
   .nested-scroll::-webkit-scrollbar-track { background: transparent; }
   .nested-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
+  .intro-block {
+    background: #050510;
+    padding: clamp(4rem, 14vh, 10rem) 1.5rem;
+    display: flex; justify-content: center;
+  }
+  .intro-block tosi-md {
+    display: block; max-width: 640px;
+    font-size: clamp(1rem, 2vw, 1.2rem); line-height: 1.7; color: #bbb;
+  }
+  .intro-block tosi-md h2 {
+    font-size: clamp(1.5rem, 4vw, 2.5rem); font-weight: 700; margin: 0 0 0.8em;
+    background: linear-gradient(to bottom, #fff, #aaa);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .intro-block tosi-md strong { color: #fff; }
+  .intro-block tosi-md code {
+    background: rgba(255,255,255,0.08); padding: 0.1em 0.4em;
+    border-radius: 4px; font-size: 0.9em;
+    font-family: Consolas, Monaco, 'Courier New', monospace;
+  }
 `;
 document.head.appendChild(style);
 
@@ -134,7 +177,7 @@ const oulu = { lat: 65.0121, lng: 25.4651 };
 const app = tosiProduct(
   // ===== HERO =====
   tosiProductSection(
-    { scroll: 150 },
+    { scroll: 150, viewport: 70 },
     div({
       class: "gradient-bg",
       style: {
@@ -156,6 +199,26 @@ const app = tosiProduct(
         h1("tosijs-product"),
         p("Build scrolling pages that tell your product's story. With HTML.")
       )
+    ),
+    tosiInterpolator(
+      { "data-scroll-animate": true },
+      tosiWaypoint({ progress: 0.0, style: { opacity: 1 } }),
+      tosiWaypoint({ progress: 0.1, style: { opacity: 0 } }),
+      div({ class: "scroll-hint" }, "Scroll")
+    )
+  ),
+
+  // ===== INTRO =====
+  div(
+    { class: "intro-block" },
+    markdownViewer(
+      `## What is tosijs-product?
+
+A small library for building **scroll-driven product pages** — the cinematic, "Apple-style" pages where scrolling becomes the timeline.
+
+Drop in a \`<tosi-product-section>\`, layer in waypoints, video scrubbing, 3D scenes, or maps. Everything is **declarative HTML** — no scroll listeners to wire up.
+
+Read on for what each piece does.`
     )
   ),
 

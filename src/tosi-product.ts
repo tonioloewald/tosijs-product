@@ -39,6 +39,7 @@ export class TosiProductSection extends Component {
 
   static initAttributes = {
     scroll: 100,
+    viewport: 100,
     debug: false,
     direction: "vertical",
     overflow: false,
@@ -162,6 +163,7 @@ export class TosiProductSection extends Component {
   render() {
     super.render();
     const scrollPct = this._getScrollPct();
+    const viewportPct = this._getViewportPct();
     const horizontal = this.getAttribute("direction") === "horizontal";
     const sticky = this.shadowRoot?.querySelector(
       ".tosi-sticky"
@@ -169,31 +171,34 @@ export class TosiProductSection extends Component {
 
     const container =
       this._scrollTarget instanceof HTMLElement ? this._scrollTarget : null;
-    const viewW = container ? container.clientWidth + "px" : "100vw";
-    const viewH = container ? container.clientHeight + "px" : "100vh";
-    const scrollDim = container
-      ? `${
-          (scrollPct / 100) *
-          (horizontal ? container.clientWidth : container.clientHeight)
-        }px`
+    const containerSize = container
+      ? horizontal
+        ? container.clientWidth
+        : container.clientHeight
+      : null;
+    const stickyDim = containerSize !== null
+      ? `${(viewportPct / 100) * containerSize}px`
+      : `${viewportPct}${horizontal ? "vw" : "vh"}`;
+    const scrollDim = containerSize !== null
+      ? `${(scrollPct / 100) * containerSize}px`
       : `${scrollPct}${horizontal ? "vw" : "vh"}`;
 
     if (horizontal) {
-      this.style.width = `calc(${viewW} + ${scrollDim})`;
+      this.style.width = `calc(${stickyDim} + ${scrollDim})`;
       this.style.height = "100%";
       if (sticky) {
         sticky.style.left = "0";
         sticky.style.top = "0";
-        sticky.style.width = viewW;
+        sticky.style.width = stickyDim;
         sticky.style.height = "100%";
       }
     } else {
-      this.style.height = `calc(${viewH} + ${scrollDim})`;
+      this.style.height = `calc(${stickyDim} + ${scrollDim})`;
       this.style.width = "100%";
       if (sticky) {
         sticky.style.top = "0";
         sticky.style.left = "0";
-        sticky.style.height = viewH;
+        sticky.style.height = stickyDim;
         sticky.style.width = "100%";
       }
     }
@@ -205,6 +210,11 @@ export class TosiProductSection extends Component {
 
   private _getScrollPct(): number {
     const raw = Number(this.getAttribute("scroll"));
+    return Number.isFinite(raw) && raw > 0 ? raw : 100;
+  }
+
+  private _getViewportPct(): number {
+    const raw = Number(this.getAttribute("viewport"));
     return Number.isFinite(raw) && raw > 0 ? raw : 100;
   }
 

@@ -15,6 +15,26 @@ function getScrollParent(el: HTMLElement): EventTarget {
   return window;
 }
 
+function findEnclosingSection(el: HTMLElement): HTMLElement | null {
+  let node: HTMLElement | null = el.parentElement;
+  while (node) {
+    if (node.tagName.toLowerCase() === "tosi-product-section-v2") {
+      return node;
+    }
+    node = node.parentElement;
+  }
+  return null;
+}
+
+function nearestEnclosingProduct(el: HTMLElement | null): HTMLElement | null {
+  let node = el;
+  while (node) {
+    if (node.tagName.toLowerCase() === "tosi-product-v2") return node;
+    node = node.parentElement;
+  }
+  return null;
+}
+
 interface Item {
   element: HTMLElement;
   isSection: boolean;
@@ -96,6 +116,7 @@ export class TosiProductV2 extends Component {
 
   private _scrollTarget: EventTarget | null = null;
   private _stack: HTMLElement | null = null;
+  private _window: HTMLElement | null = null;
   private _debugPanel: HTMLElement | null = null;
   private _resizeObserver: ResizeObserver | null = null;
   private _mutationObserver: MutationObserver | null = null;
@@ -103,18 +124,42 @@ export class TosiProductV2 extends Component {
   private _totalRunway = 0;
   private _scrollHandler = () => this._scheduleUpdate();
   private _rafPending = false;
+  private _isNested = false;
+  private _injectedProgress = 0;
 
   connectedCallback() {
     super.connectedCallback();
     this._stack = this.shadowRoot?.querySelector(".stack") as HTMLElement;
+    this._window = this.shadowRoot?.querySelector(".window") as HTMLElement;
     this._debugPanel = this.shadowRoot?.querySelector(
       ".debug-panel"
     ) as HTMLElement;
-    this._scrollTarget = getScrollParent(this);
-    this._scrollTarget.addEventListener("scroll", this._scrollHandler, {
-      passive: true,
-    });
-    window.addEventListener("resize", this._scrollHandler, { passive: true });
+
+    // Detect nesting: if we live inside an enclosing tosi-product-section-v2,
+    // we run in "follower" mode — the parent section forwards its pin progress
+    // to us via setScrollProgress, and we don't touch document scroll ourselves.
+    this._isNested = !!findEnclosingSection(this);
+
+    if (this._isNested) {
+      // Tag self so the enclosing section's setScrollProgress dispatch finds us.
+      this.setAttribute("data-scroll-animate", "tosi-product-v2");
+      // Override sticky-window styling: in follower mode the parent section is
+      // already pinned, so the inner window just needs to clip and fill us.
+      if (this._window) {
+        this._window.style.position = "relative";
+        this._window.style.width = "100%";
+        this._window.style.height = "100%";
+      }
+      this.style.width = "100%";
+      this.style.height = "100%";
+      this.style.display = "block";
+    } else {
+      this._scrollTarget = getScrollParent(this);
+      this._scrollTarget.addEventListener("scroll", this._scrollHandler, {
+        passive: true,
+      });
+      window.addEventListener("resize", this._scrollHandler, { passive: true });
+    }
 
     this._mutationObserver = new MutationObserver(() => this._relayout());
     this._mutationObserver.observe(this, {
@@ -127,6 +172,8 @@ export class TosiProductV2 extends Component {
     for (const child of Array.from(this.children)) {
       if (child instanceof HTMLElement) this._resizeObserver.observe(child);
     }
+    // Watch our own host too — nested layouts depend on our parent-supplied size.
+    this._resizeObserver.observe(this);
 
     requestAnimationFrame(() => {
       this._relayout();
@@ -136,10 +183,20 @@ export class TosiProductV2 extends Component {
 
   disconnectedCallback() {
     super.disconnectedCallback();
-    this._scrollTarget?.removeEventListener("scroll", this._scrollHandler);
-    window.removeEventListener("resize", this._scrollHandler);
+    if (!this._isNested) {
+      this._scrollTarget?.removeEventListener("scroll", this._scrollHandler);
+      window.removeEventListener("resize", this._scrollHandler);
+    }
     this._mutationObserver?.disconnect();
     this._resizeObserver?.disconnect();
+  }
+
+  // Called by an enclosing tosi-product-section-v2 when we're nested.
+  // The parent's pin progress drives our internal scroll position.
+  setScrollProgress(progress: number) {
+    if (!this._isNested) return;
+    this._injectedProgress = Math.max(0, Math.min(1, progress));
+    this._update();
   }
 
   private _isHorizontal(): boolean {
@@ -148,6 +205,10 @@ export class TosiProductV2 extends Component {
 
   private _viewSize(): number {
     const horizontal = this._isHorizontal();
+    if (this._isNested) {
+      // Our visible area is whatever our parent gave us.
+      return horizontal ? this.clientWidth : this.clientHeight;
+    }
     if (this._scrollTarget instanceof HTMLElement) {
       return horizontal
         ? this._scrollTarget.clientWidth
@@ -224,11 +285,14 @@ export class TosiProductV2 extends Component {
     this._items = items;
     this._totalRunway = cumRunway;
 
-    // Host height = runway + viewport so the sticky window can pin for the
-    // entire runway. The end-state translate clamp ensures the last viewport
-    // shows the tail of the stack rather than blank space.
-    const hostDim = horizontal ? "width" : "height";
-    this.style[hostDim as any] = `${cumRunway + view}px`;
+    if (!this._isNested) {
+      // Standalone: host height = runway + viewport so the sticky window can
+      // pin for the entire runway. The end-state translate clamp ensures the
+      // last viewport shows the tail of the stack rather than blank space.
+      const hostDim = horizontal ? "width" : "height";
+      this.style[hostDim as any] = `${cumRunway + view}px`;
+    }
+    // Nested: host size is dictated by the parent — don't override.
 
     this._update();
   }
@@ -246,9 +310,9 @@ export class TosiProductV2 extends Component {
     if (!this._stack || this._items.length === 0) return;
     const horizontal = this._isHorizontal();
     const view = this._viewSize();
-    const scrollPos = this._scrollPos();
-    const hostStart = this._hostStart();
-    const local = scrollPos - hostStart;
+    const local = this._isNested
+      ? this._injectedProgress * this._totalRunway
+      : this._scrollPos() - this._hostStart();
 
     const last = this._items[this._items.length - 1];
     const stackSize = last.offset + last.naturalSize;
@@ -347,10 +411,18 @@ export class TosiProductSectionV2 extends Component {
       if (this.scrollCallback) this.scrollCallback(progress, this);
       return;
     }
+    // We belong to the nearest enclosing tosi-product-v2. Animators that
+    // belong to a *different* (deeper) tosi-product-v2 are owned by that
+    // nested engine and should not be driven from here.
+    const myProduct = this.closest("tosi-product-v2");
     const animators = this.querySelectorAll(
       "[data-scroll-animate], [data-scroll-range]"
     );
     for (const el of Array.from(animators)) {
+      const ownerProduct = nearestEnclosingProduct(
+        el === this ? null : (el.parentElement as HTMLElement | null)
+      );
+      if (ownerProduct !== myProduct) continue;
       const rangeStr = el.getAttribute("data-scroll-range") || "0,1";
       const [start, end] = rangeStr.split(",").map(Number);
       const range = end - start;

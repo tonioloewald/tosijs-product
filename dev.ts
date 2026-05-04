@@ -52,6 +52,14 @@ async function build() {
     format: "esm",
     naming: "v2.js",
   });
+
+  await Bun.build({
+    entrypoints: ["./demo/v2-embed.ts"],
+    outdir: PUBLIC,
+    target: "browser",
+    format: "esm",
+    naming: "v2-embed.js",
+  });
   console.timeEnd("build");
 }
 

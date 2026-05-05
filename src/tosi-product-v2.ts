@@ -2,6 +2,48 @@ import { Component, elements } from "tosijs";
 
 const { div, slot } = elements;
 
+export type ThemeMap = Record<string, string>;
+export type ThemeRegistry = Record<string, ThemeMap>;
+
+function isColor(s: string): boolean {
+  const t = s.trim();
+  return (
+    t.startsWith("#") ||
+    t.startsWith("rgb") ||
+    t.startsWith("hsl") ||
+    t.startsWith("color(") ||
+    ["red", "blue", "green", "white", "black", "transparent", "currentColor"].includes(t)
+  );
+}
+
+function interpolateThemeValue(from: string, to: string, t: number): string {
+  if (from === to || t <= 0) return from;
+  if (t >= 1) return to;
+  if (isColor(from) && isColor(to)) {
+    return `color-mix(in srgb, ${from} ${(1 - t) * 100}%, ${to})`;
+  }
+  // Fallback: numeric interpolation if both contain matching numbers,
+  // otherwise step at midpoint.
+  const numRegex = /-?\d+(?:\.\d+)?/g;
+  const aNums = Array.from(from.matchAll(numRegex));
+  const bNums = Array.from(to.matchAll(numRegex));
+  if (aNums.length > 0 && aNums.length === bNums.length) {
+    let result = "";
+    let lastIndex = 0;
+    for (let i = 0; i < aNums.length; i++) {
+      const am = aNums[i];
+      const bm = bNums[i];
+      result += from.substring(lastIndex, am.index);
+      const v = parseFloat(am[0]) + (parseFloat(bm[0]) - parseFloat(am[0])) * t;
+      result += v.toFixed(4).replace(/0+$/, "").replace(/\.$/, "");
+      lastIndex = am.index! + am[0].length;
+    }
+    result += from.substring(lastIndex);
+    return result;
+  }
+  return t < 0.5 ? from : to;
+}
+
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
 function getScrollParent(el: HTMLElement): EventTarget {
@@ -114,6 +156,15 @@ export class TosiProductV2 extends Component {
     div({ class: "debug-panel", part: "debug", hidden: true }),
   ];
 
+  // Map of theme name → CSS custom property dictionary.
+  // Sections reference themes by name via `theme=` or `theme-from=`/`theme-to=`.
+  themes: ThemeRegistry = {};
+  // Optional theme name to apply when no section is active or section has none.
+  defaultTheme: string = "";
+  // Where to apply the resolved theme variables. Default: documentElement
+  // so external siblings (e.g. a sticky header outside this engine) inherit.
+  themeTarget: HTMLElement = document.documentElement;
+
   private _scrollTarget: EventTarget | null = null;
   private _stack: HTMLElement | null = null;
   private _window: HTMLElement | null = null;
@@ -126,6 +177,7 @@ export class TosiProductV2 extends Component {
   private _rafPending = false;
   private _isNested = false;
   private _injectedProgress = 0;
+  private _appliedThemeKeys = new Set<string>();
 
   connectedCallback() {
     super.connectedCallback();
@@ -153,6 +205,10 @@ export class TosiProductV2 extends Component {
       this.style.width = "100%";
       this.style.height = "100%";
       this.style.display = "block";
+      // Avoid fighting the outer engine for :root vars: scope theme to self.
+      if (this.themeTarget === document.documentElement) {
+        this.themeTarget = this;
+      }
     } else {
       this._scrollTarget = getScrollParent(this);
       this._scrollTarget.addEventListener("scroll", this._scrollHandler, {
@@ -369,6 +425,8 @@ export class TosiProductV2 extends Component {
       this._notify(item.element, progress);
     }
 
+    this._applyTheme(activeIdx, activeProgress);
+
     if (this._debugPanel) {
       const showDebug = this.getAttribute("debug") === "true";
       this._debugPanel.hidden = !showDebug;
@@ -386,6 +444,59 @@ export class TosiProductV2 extends Component {
     if (typeof (section as any).setScrollProgress === "function") {
       (section as any).setScrollProgress(progress);
     }
+  }
+
+  private _applyTheme(activeIdx: number, activeProgress: number) {
+    const themeNames = Object.keys(this.themes);
+    if (themeNames.length === 0) return;
+
+    let fromName = this.defaultTheme;
+    let toName = this.defaultTheme;
+    let t = 0;
+
+    if (activeIdx >= 0) {
+      const el = this._items[activeIdx].element;
+      const themeAttr = el.getAttribute("theme");
+      const fromAttr = el.getAttribute("theme-from");
+      const toAttr = el.getAttribute("theme-to");
+      if (fromAttr && toAttr) {
+        fromName = fromAttr;
+        toName = toAttr;
+        t = activeProgress;
+      } else if (themeAttr) {
+        fromName = themeAttr;
+        toName = themeAttr;
+      } else if (fromAttr || toAttr) {
+        const single = (fromAttr || toAttr) as string;
+        fromName = single;
+        toName = single;
+      }
+    }
+
+    const fromTheme = this.themes[fromName];
+    const toTheme = this.themes[toName];
+    if (!fromTheme && !toTheme) return;
+    const target = this.themeTarget;
+
+    // Iterate union of keys so a target-only key isn't dropped.
+    const allKeys = new Set([
+      ...Object.keys(fromTheme || {}),
+      ...Object.keys(toTheme || {}),
+    ]);
+    const seen = new Set<string>();
+    for (const key of allKeys) {
+      const fromVal = fromTheme?.[key] ?? toTheme?.[key];
+      const toVal = toTheme?.[key] ?? fromTheme?.[key];
+      if (fromVal === undefined || toVal === undefined) continue;
+      const value = interpolateThemeValue(fromVal, toVal, t);
+      target.style.setProperty(key, value);
+      seen.add(key);
+    }
+    // Clean up keys we previously set but no longer need (theme schema shrank).
+    for (const key of this._appliedThemeKeys) {
+      if (!seen.has(key)) target.style.removeProperty(key);
+    }
+    this._appliedThemeKeys = seen;
   }
 }
 
@@ -451,9 +562,57 @@ export class TosiProductSectionV2 extends Component {
   }
 }
 
+// Sticky header that slides into view once scroll passes a threshold.
+// Inherits CSS variables (theme) from documentElement, so a tosi-product-v2
+// driving :root will style this header in unison with its sections.
+export class TosiProductHeaderV2 extends Component {
+  static initAttributes = {
+    threshold: 50, // px scrolled before header becomes visible
+  };
+
+  static styleSpec = {
+    ":host": {
+      position: "fixed",
+      top: "0",
+      left: "0",
+      right: "0",
+      zIndex: "100",
+      transform: "translateY(-100%)",
+      transition: "transform 0.3s ease",
+      pointerEvents: "auto",
+    },
+    ":host([data-visible=true])": {
+      transform: "translateY(0)",
+    },
+  };
+
+  content = () => slot();
+
+  private _scrollHandler = () => this._update();
+
+  connectedCallback() {
+    super.connectedCallback();
+    window.addEventListener("scroll", this._scrollHandler, { passive: true });
+    this._update();
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    window.removeEventListener("scroll", this._scrollHandler);
+  }
+
+  private _update() {
+    const threshold = Number(this.getAttribute("threshold")) || 50;
+    this.dataset.visible = window.scrollY > threshold ? "true" : "false";
+  }
+}
+
 export const tosiProductV2 = TosiProductV2.elementCreator({
   tag: "tosi-product-v2",
 });
 export const tosiProductSectionV2 = TosiProductSectionV2.elementCreator({
   tag: "tosi-product-section-v2",
+});
+export const tosiProductHeaderV2 = TosiProductHeaderV2.elementCreator({
+  tag: "tosi-product-header-v2",
 });

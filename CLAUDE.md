@@ -82,18 +82,32 @@ bunx tosi-mosaic <video-file> [-f frames] [-w width] [-q quality] [-r fps]
 
 ## Source layout
 
-- `src/tosi-product.ts` — `TosiProduct`, `TosiProductSection`, `TosiScrollMapper` + global scroll handler
+- `src/tosi-product.ts` — `TosiProduct`, `TosiProductSection`, `TosiScrollMapper` + global scroll handler (shipping v1)
+- `src/tosi-product-v2.ts` — `TosiProductV2`, `TosiProductSectionV2` (in-progress prototype; see below)
 - `src/tosi-filmstrip.ts` — `TosiFilmstrip` (canvas mosaic renderer)
 - `src/tosi-interpolator.ts` — `TosiInterpolator`, `TosiWaypoint`, `interpolateStrings`
 - `src/waypoints.ts` — `interpolateWaypoints` helper (numeric interpolation with easeInOutQuad)
 - `src/tosi-b3d-scroll.ts` — `TosiScrollCamera`, `TosiScrollTime`, `TosiScrollAnimation` (B3d scroll controllers; use `<tosi-waypoint>` children for camera keyframes)
 - `src/tosi-code.ts` — `TosiCode` (Prism-highlighted code block; loads PrismJS lazily from jsDelivr CDN)
 - `src/interpolation.test.ts` — tests for `interpolateStrings` and `interpolateWaypoints`
-- `src/index.ts` — re-exports all public API
+- `src/index.ts` — re-exports all public API (v1 only — v2 is intentionally not exported yet)
 - `src/index-iife.ts` — IIFE entry point; assigns `tosijs`, `tosijsUi`, `tosijsProduct` to `globalThis`
-- `dev.ts` — build script + dev server (ESM build marks tosijs/tosijs-ui as external; IIFE bundles everything)
-- `demo/index.html` + `demo/index.ts` — ESM demo app
+- `dev.ts` — build script + dev server. ESM build marks tosijs/tosijs-ui as external; IIFE bundles everything. Also produces `demo/index.js`, `demo/v2.js`, `demo/v2-embed.js`, `demo/v2-theme.js`.
+- `demo/index.html` + `demo/index.ts` — ESM demo app (v1)
+- `demo/v2.html` + `demo/v2.ts` — v2 prototype demo
+- `demo/v2-embed.html` + `demo/v2-embed.ts` — nested v2 (follower-mode) demo
+- `demo/v2-theme.html` + `demo/v2-theme.ts` — v2 theme + page-header/sticky-header demo
 - `demo/example.html` — pure HTML demo using only the IIFE build
+
+### v2 prototype architecture
+
+`tosi-product-v2.ts` is a parallel prototype on the `tosi-product-v2` branch. It is **not yet exported from `src/index.ts`** and is reachable only through the v2 demos. Don't add it to public exports without explicit instruction.
+
+Differences from v1:
+- **`<tosi-product-v2>` owns scroll layout itself** rather than each section being independently sticky. The host listens to its scroll parent, computes a single runway from all children's `scroll` attributes, and translates a sticky `.window` element via `transform`. Sections pin for their `scroll` duration, then exit at 1:1.
+- **Nested follower mode**: a `<tosi-product-v2>` placed inside a `<tosi-product-section-v2>` detects the enclosing section, tags itself `data-scroll-animate="tosi-product-v2"`, and accepts driving progress via `setScrollProgress(progress)` instead of attaching to document scroll. This lets a parent v2 engine drive an embedded v2 engine.
+- Layout is recomputed via `MutationObserver` (childList + `scroll` attr) and `ResizeObserver` (children + self).
+- **Theme system**: assign `app.themes = { dark: { '--bg': '#000', ... }, light: { ... } }` and optionally `app.defaultTheme = 'dark'`. Sections declare `theme="dark"` (constant) or `theme-from="dark" theme-to="light"` (interpolated during pin progress via `color-mix(in srgb, ...)`). The resolved CSS variables are written to `document.documentElement` by default so external siblings (page header / sticky overlay / footer) inherit them via the cascade. Configurable target via `app.themeTarget`.
 
 ## tosijs framework essentials
 

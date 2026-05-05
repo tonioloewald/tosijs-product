@@ -2584,236 +2584,165 @@ var tosiProductSectionV2 = TosiProductSectionV2.elementCreator({
   tag: "tosi-product-section-v2"
 });
 
-// src/tosi-interpolator.ts
-var interpolateStrings = (a2, b2, t2) => {
-  const numRegex = /-?\d+(?:\.\d+)?/g;
-  const aNums = Array.from(a2.matchAll(numRegex));
-  const bNums = Array.from(b2.matchAll(numRegex));
-  if (aNums.length > 0 && aNums.length === bNums.length) {
-    let result = "";
-    let lastIndex = 0;
-    for (let i2 = 0;i2 < aNums.length; i2++) {
-      const aMatch = aNums[i2];
-      const bMatch = bNums[i2];
-      result += a2.substring(lastIndex, aMatch.index);
-      const n1 = parseFloat(aMatch[0]);
-      const n2 = parseFloat(bMatch[0]);
-      const interpolated = n1 + (n2 - n1) * t2;
-      let numStr = interpolated.toFixed(4);
-      if (numStr.includes(".")) {
-        numStr = numStr.replace(/0+$/, "").replace(/\.$/, "");
-      }
-      result += numStr;
-      lastIndex = aMatch.index + aMatch[0].length;
-    }
-    result += a2.substring(lastIndex);
-    return result;
+// demo/v2-theme.ts
+var { div: div2, header, footer, nav, h1, h2, h3, p: p2, span, a: a2 } = I;
+var themes = {
+  midnight: {
+    "--bg": "#08081a",
+    "--fg": "#f0f0f5",
+    "--muted": "#a0a0b8",
+    "--accent": "#9be7ff",
+    "--surface": "rgba(255,255,255,0.06)",
+    "--border": "rgba(255,255,255,0.12)"
+  },
+  forest: {
+    "--bg": "#0a1f14",
+    "--fg": "#e8f5ee",
+    "--muted": "#9bbaa6",
+    "--accent": "#7fdba0",
+    "--surface": "rgba(255,255,255,0.06)",
+    "--border": "rgba(255,255,255,0.12)"
+  },
+  paper: {
+    "--bg": "#f5f1e8",
+    "--fg": "#1a1815",
+    "--muted": "#6b6862",
+    "--accent": "#7c3aed",
+    "--surface": "rgba(0,0,0,0.04)",
+    "--border": "rgba(0,0,0,0.08)"
+  },
+  rose: {
+    "--bg": "#2a0820",
+    "--fg": "#ffeef5",
+    "--muted": "#d8a8c0",
+    "--accent": "#ff80b5",
+    "--surface": "rgba(255,255,255,0.06)",
+    "--border": "rgba(255,255,255,0.12)"
   }
-  const isColor2 = (s2) => s2.startsWith("#") || s2.startsWith("rgb") || s2.startsWith("hsl") || ["red", "blue", "white", "black", "transparent"].includes(s2);
-  if (isColor2(a2) && isColor2(b2)) {
-    return `color-mix(in srgb, ${a2} ${Math.round((1 - t2) * 100)}%, ${b2})`;
-  }
-  return t2 < 0.5 ? a2 : b2;
 };
-
-class TosiInterpolator extends u {
-  static styleSpec = {
-    ":host": {
-      display: "contents"
-    }
-  };
-  setScrollProgress(progress) {
-    const waypointsNodes = Array.from(this.querySelectorAll("tosi-waypoint"));
-    if (waypointsNodes.length === 0)
-      return;
-    const waypoints = waypointsNodes.map((w) => {
-      const styles = {};
-      const htmlEl = w;
-      for (let i2 = 0;i2 < htmlEl.style.length; i2++) {
-        const prop = htmlEl.style[i2];
-        styles[prop] = htmlEl.style.getPropertyValue(prop);
-      }
-      return {
-        progress: Number(w.getAttribute("progress") || 0),
-        styles
-      };
-    }).sort((a2, b2) => a2.progress - b2.progress);
-    let wp1 = waypoints[0];
-    let wp2 = waypoints[waypoints.length - 1];
-    let t2 = 0;
-    if (progress <= wp1.progress) {
-      wp2 = wp1;
-      t2 = 0;
-    } else if (progress >= wp2.progress) {
-      wp1 = wp2;
-      t2 = 1;
-    } else {
-      for (let i2 = 0;i2 < waypoints.length - 1; i2++) {
-        if (progress >= waypoints[i2].progress && progress <= waypoints[i2 + 1].progress) {
-          wp1 = waypoints[i2];
-          wp2 = waypoints[i2 + 1];
-          const rawT = (progress - wp1.progress) / (wp2.progress - wp1.progress);
-          const easing = this.getAttribute("easing");
-          if (easing === "ease-in-out") {
-            t2 = rawT < 0.5 ? 2 * rawT * rawT : -1 + (4 - 2 * rawT) * rawT;
-          } else {
-            t2 = rawT;
-          }
-          break;
-        }
-      }
-    }
-    const currentStyles = {};
-    for (const prop in wp1.styles) {
-      const val1 = wp1.styles[prop];
-      const val2 = wp2.styles[prop] || val1;
-      currentStyles[prop] = interpolateStrings(val1, val2, t2);
-    }
-    const targets = Array.from(this.children).filter((c2) => c2.tagName !== "TOSI-WAYPOINT");
-    targets.forEach((target) => {
-      const el = target;
-      for (const prop in currentStyles) {
-        el.style.setProperty(prop, currentStyles[prop]);
-      }
-    });
-  }
-}
-
-class TosiWaypoint extends u {
-  static initAttributes = {
-    progress: 0
-  };
-  static styleSpec = {
-    ":host": {
-      display: "none"
-    }
-  };
-  content = null;
-}
-var tosiInterpolator = TosiInterpolator.elementCreator({
-  tag: "tosi-interpolator"
-});
-var tosiWaypoint = TosiWaypoint.elementCreator({
-  tag: "tosi-waypoint"
-});
-
-// demo/v2.ts
-var { div: div2, h1, h2, p: p2 } = I;
 var style = document.createElement("style");
 style.textContent = `
   *, *::before, *::after { box-sizing: border-box; }
   body {
-    margin: 0; padding: 0; background: #000; color: #fff;
+    margin: 0; padding: 0;
+    background: var(--bg, #000);
+    color: var(--fg, #fff);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    transition: background-color 0.25s linear;
   }
-  .hero {
-    height: 70vh;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    background: radial-gradient(ellipse at center, #1a1a2e 0%, #000 120%);
+
+  /* === Page header (sibling above engine) === */
+  .page-header {
+    background: var(--bg);
+    color: var(--fg);
+    border-bottom: 1px solid var(--border);
+    padding: 1rem 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    transition: background-color 0.25s linear, color 0.25s linear, border-color 0.25s linear;
+  }
+  .page-header .brand { font-weight: 700; font-size: 1.1rem; }
+  .page-header nav { display: flex; gap: 1.25rem; }
+  .page-header nav a {
+    color: var(--muted); text-decoration: none; font-size: 0.9rem;
+    transition: color 0.2s ease;
+  }
+  .page-header nav a:hover { color: var(--accent); }
+
+  /* === Sticky header (fixed, slides in after scroll) === */
+  .sticky-header {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: color-mix(in srgb, var(--bg) 85%, transparent);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: var(--fg);
+    border-bottom: 1px solid var(--border);
+    padding: 0.7rem 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    transform: translateY(-100%);
+    transition:
+      transform 0.3s cubic-bezier(.5,0,.2,1),
+      background-color 0.3s linear,
+      color 0.3s linear,
+      border-color 0.3s linear;
+  }
+  .sticky-header.visible { transform: translateY(0); }
+  .sticky-header .brand { font-weight: 700; font-size: 1rem; }
+  .sticky-header .progress {
+    font-family: monospace; font-size: 0.8rem; color: var(--muted);
+  }
+
+  /* === Page footer (sibling below engine) === */
+  .page-footer {
+    background: var(--bg);
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+    padding: 2.5rem 2rem;
     text-align: center;
+    transition: background-color 0.25s linear, color 0.25s linear, border-color 0.25s linear;
   }
-  .hero h1 {
-    font-size: clamp(2rem, 7vw, 5rem); margin: 0; font-weight: 800;
-    background: linear-gradient(to bottom, #fff, #aaa);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  }
-  .hero p { color: #999; margin-top: 0.5em; font-size: 1.2rem; }
-  .intro {
-    background: #050510;
-    padding: clamp(3rem, 10vh, 8rem) 1.5rem;
-    display: flex; justify-content: center;
-  }
-  .intro-inner {
-    max-width: 640px; line-height: 1.7; color: #bbb;
-    font-size: clamp(1rem, 1.6vw, 1.15rem);
-  }
-  .intro-inner h2 {
-    font-size: clamp(1.4rem, 3.5vw, 2.2rem); margin: 0 0 0.6em;
-    color: #fff;
-  }
-  .panel {
+  .page-footer p { margin: 0; }
+
+  /* === Section content === */
+  .scene {
     height: 100vh;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    text-align: center; padding: 2rem;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 2rem; text-align: center;
+    background: var(--bg); color: var(--fg);
+    transition: background-color 0.25s linear, color 0.25s linear;
   }
-  .panel h2 {
-    font-size: clamp(1.6rem, 5vw, 3rem); margin: 0 0 0.4em;
+  .scene h2 {
+    font-size: clamp(2rem, 6vw, 4rem); margin: 0 0 0.4em; font-weight: 800;
   }
-  .panel p { color: #aaa; max-width: 540px; margin: 0; }
-  .feature-list {
-    display: flex; flex-direction: column; align-items: flex-start;
-    gap: 0.5em; max-width: 560px; padding: 0 1.5rem;
+  .scene p {
+    font-size: clamp(1rem, 1.6vw, 1.2rem); color: var(--muted);
+    max-width: 560px; margin: 0;
   }
-  .feature-list h2, .feature-list p { text-align: left; }
-  .feature-row {
-    font-size: 1.1rem; color: #fff;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 8px;
-    padding: 0.6em 1em;
-    margin-top: 0.25em;
-    font-family: monospace;
+  .scene .pill {
+    display: inline-block; margin-top: 1.5em;
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--accent); font-family: monospace; font-size: 0.85rem;
+    padding: 0.5em 1.2em; border-radius: 999px;
   }
-  .blue { background: linear-gradient(180deg, #051030 0%, #000820 100%); }
-  .green { background: linear-gradient(180deg, #052010 0%, #001008 100%); }
-  .purple { background: linear-gradient(180deg, #1a0530 0%, #08001a 100%); }
-  .progress-overlay {
-    position: absolute; inset: 0;
-    display: flex; align-items: center; justify-content: center;
-    pointer-events: none;
+
+  .intro {
+    background: var(--bg); color: var(--fg);
+    padding: clamp(3rem, 8vh, 6rem) 1.5rem;
+    display: flex; justify-content: center;
+    transition: background-color 0.25s linear, color 0.25s linear;
   }
-  .pill {
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.15);
-    backdrop-filter: blur(8px);
-    border-radius: 999px;
-    padding: 0.6em 1.4em; font-size: 0.85rem;
-    color: #fff; font-family: monospace;
-  }
+  .intro-inner { max-width: 640px; line-height: 1.7; }
+  .intro-inner h3 { font-size: 1.5rem; margin: 0 0 0.6em; }
+  .intro-inner p { color: var(--muted); margin: 0; }
 `;
 document.head.appendChild(style);
-var app = tosiProductV2({ debug: true }, tosiProductSectionV2({ scroll: 200 }, div2({ class: "hero" }, tosiInterpolator({ "data-scroll-animate": true, easing: "ease-in-out" }, tosiWaypoint({
-  progress: 0,
-  style: { transform: "scale(1) translateY(0px)" }
-}), tosiWaypoint({
-  progress: 1,
-  style: { transform: "scale(1.4) translateY(20px)" }
-}), h1("tosijs-product")), p2("Build cinematic product pages with HTML."))), div2({ class: "intro" }, div2({ class: "intro-inner" }, h2("What is this?"), p2("A small library for scroll-driven product pages. Each section claims a slice of scroll runway; as you scroll, the stack translates so each scene gets its moment, then yields to the next."))), tosiProductSectionV2({ scroll: 400 }, div2({ class: "panel blue" }, h2("Lingering Scene"), p2("Pinned for 400vh of scroll, then exits. The panel sits motionless while interpolators run; once progress reaches 1 the section scrolls out at 1:1 and the next section takes over."), tosiInterpolator({ "data-scroll-animate": true, easing: "ease-in-out" }, tosiWaypoint({
-  progress: 0,
-  style: {
-    opacity: 0,
-    transform: "translate(-40vw, -25vh) scale(0.4) rotate(-180deg)"
-  }
-}), tosiWaypoint({
-  progress: 0.5,
-  style: {
-    opacity: 1,
-    transform: "translate(0, 25vh) scale(2.2) rotate(0deg)"
-  }
-}), tosiWaypoint({
-  progress: 1,
-  style: {
-    opacity: 0,
-    transform: "translate(40vw, -25vh) scale(0.4) rotate(180deg)"
-  }
-}), div2({ class: "progress-overlay" }, div2({ class: "pill" }, "✨ interpolated ✨"))))), tosiProductSectionV2({ scroll: 100 }, div2({ class: "panel green" }, h2("Natural Scroll"), p2("With scroll=100, this section scrolls at 1:1 — no lingering, no fast-forward."))), tosiProductSectionV2({ scroll: 300 }, div2({ class: "panel purple" }, div2({ class: "feature-list" }, h2("Staged Reveal"), p2("Multiple interpolators in one section, each constrained to a sub-range with data-scroll-range."), ...["Sticky window", "Stack translation", "Per-section progress", "Sub-range staging"].map((label, i2) => {
-  const start = 0.2 + i2 * 0.15;
-  const end = start + 0.15;
-  return tosiInterpolator({
-    "data-scroll-animate": true,
-    "data-scroll-range": `${start},${end}`,
-    easing: "ease-in-out"
-  }, tosiWaypoint({
-    progress: 0,
-    style: { opacity: 0, transform: "translateX(-40px)" }
-  }), tosiWaypoint({
-    progress: 0.5,
-    style: { opacity: 1, transform: "translateX(0px)" }
-  }), tosiWaypoint({
-    progress: 1,
-    style: { opacity: 1, transform: "translateX(0px)" }
-  }), div2({ class: "feature-row" }, "✓ " + label));
-})))), div2({ class: "intro" }, div2({ class: "intro-inner" }, h2("End of stack"), p2("After the runway is exhausted, the sticky frame releases and you scroll naturally past the trailing content."))));
+var pageHeader = header({ class: "page-header" }, div2({ class: "brand" }, "tosijs-product"), nav(a2({ href: "#" }, "Docs"), a2({ href: "#" }, "Examples"), a2({ href: "#" }, "GitHub")));
+var stickyProgress = span({ class: "progress" }, "0%");
+var stickyHeader = header({ class: "sticky-header", id: "sticky" }, div2({ class: "brand" }, "tosijs-product"), stickyProgress);
+var app = tosiProductV2(tosiProductSectionV2({ scroll: 100, theme: "midnight" }, div2({ class: "scene" }, h2("Midnight"), p2("First section pinned with a constant midnight theme. Scroll to enter the next scene."), span({ class: "pill" }, "theme=midnight"))), div2({ class: "intro" }, div2({ class: "intro-inner" }, h3("Why themes?"), p2("Themes are dictionaries of CSS custom properties. tosi-product-v2 reads the active section's theme attributes and writes the resolved values to document.documentElement, so everything cascading from there — including the sticky header above — re-themes in unison."))), tosiProductSectionV2({ scroll: 100, theme: "forest" }, div2({ class: "scene" }, h2("Forest"), p2("Different theme, same layout. Notice the page header and sticky header both follow."), span({ class: "pill" }, "theme=forest"))), tosiProductSectionV2({
+  scroll: 250,
+  "theme-from": "forest",
+  "theme-to": "paper"
+}, div2({ class: "scene" }, h2("Dawn"), p2("This section's pin progress interpolates the theme from forest into paper. By the time pinning ends, you're in light mode — and so is the page above and below."), span({ class: "pill" }, 'theme-from="forest" theme-to="paper"'))), tosiProductSectionV2({ scroll: 100, theme: "paper" }, div2({ class: "scene" }, h2("Paper"), p2("Light theme settled. Sticky header is themed in light too."), span({ class: "pill" }, "theme=paper"))), tosiProductSectionV2({
+  scroll: 200,
+  "theme-from": "paper",
+  "theme-to": "rose"
+}, div2({ class: "scene" }, h2("Dusk"), p2("And back the other way — paper interpolating to rose."), span({ class: "pill" }, 'theme-from="paper" theme-to="rose"'))), tosiProductSectionV2({ scroll: 100, theme: "rose" }, div2({ class: "scene" }, h2("Rose"), p2("Last section. The footer below inherits this theme too."), span({ class: "pill" }, "theme=rose"))));
+app.themes = themes;
+app.defaultTheme = "midnight";
+var pageFooter = footer({ class: "page-footer" }, p2("Page footer — themed by whatever section ended the engine."));
+document.body.appendChild(pageHeader);
+document.body.appendChild(stickyHeader);
 document.body.appendChild(app);
+document.body.appendChild(pageFooter);
+var lastScroll = 0;
+var STICKY_THRESHOLD = 80;
+function onPageScroll() {
+  const y = window.scrollY;
+  stickyHeader.classList.toggle("visible", y > STICKY_THRESHOLD);
+  const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+  const pct = docHeight > 0 ? Math.round(y / docHeight * 100) : 0;
+  stickyProgress.textContent = `${pct}%`;
+  lastScroll = y;
+}
+window.addEventListener("scroll", () => requestAnimationFrame(onPageScroll), { passive: true });
+onPageScroll();

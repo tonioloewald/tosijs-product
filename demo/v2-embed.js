@@ -2132,6 +2132,37 @@ var gf = wL.elementCreator();
 
 // src/tosi-product-v2.ts
 var { div, slot } = I;
+function isColor(s2) {
+  const t2 = s2.trim();
+  return t2.startsWith("#") || t2.startsWith("rgb") || t2.startsWith("hsl") || t2.startsWith("color(") || ["red", "blue", "green", "white", "black", "transparent", "currentColor"].includes(t2);
+}
+function interpolateThemeValue(from, to, t2) {
+  if (from === to || t2 <= 0)
+    return from;
+  if (t2 >= 1)
+    return to;
+  if (isColor(from) && isColor(to)) {
+    return `color-mix(in srgb, ${from} ${(1 - t2) * 100}%, ${to})`;
+  }
+  const numRegex = /-?\d+(?:\.\d+)?/g;
+  const aNums = Array.from(from.matchAll(numRegex));
+  const bNums = Array.from(to.matchAll(numRegex));
+  if (aNums.length > 0 && aNums.length === bNums.length) {
+    let result = "";
+    let lastIndex = 0;
+    for (let i2 = 0;i2 < aNums.length; i2++) {
+      const am = aNums[i2];
+      const bm = bNums[i2];
+      result += from.substring(lastIndex, am.index);
+      const v2 = parseFloat(am[0]) + (parseFloat(bm[0]) - parseFloat(am[0])) * t2;
+      result += v2.toFixed(4).replace(/0+$/, "").replace(/\.$/, "");
+      lastIndex = am.index + am[0].length;
+    }
+    result += from.substring(lastIndex);
+    return result;
+  }
+  return t2 < 0.5 ? from : to;
+}
 var reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 function getScrollParent(el) {
   let node = el.parentElement;
@@ -2226,6 +2257,9 @@ class TosiProductV2 extends u {
     div({ class: "window", part: "window" }, div({ class: "stack", part: "stack" }, slot())),
     div({ class: "debug-panel", part: "debug", hidden: true })
   ];
+  themes = {};
+  defaultTheme = "";
+  themeTarget = document.documentElement;
   _scrollTarget = null;
   _stack = null;
   _window = null;
@@ -2238,6 +2272,7 @@ class TosiProductV2 extends u {
   _rafPending = false;
   _isNested = false;
   _injectedProgress = 0;
+  _appliedThemeKeys = new Set;
   connectedCallback() {
     super.connectedCallback();
     this._stack = this.shadowRoot?.querySelector(".stack");
@@ -2437,6 +2472,7 @@ class TosiProductV2 extends u {
         progress = activeProgress;
       this._notify(item.element, progress);
     }
+    this._applyTheme(activeIdx, activeProgress);
     if (this._debugPanel) {
       const showDebug = this.getAttribute("debug") === "true";
       this._debugPanel.hidden = !showDebug;
@@ -2452,6 +2488,51 @@ class TosiProductV2 extends u {
     if (typeof section.setScrollProgress === "function") {
       section.setScrollProgress(progress);
     }
+  }
+  _applyTheme(activeIdx, activeProgress) {
+    const themeNames = Object.keys(this.themes);
+    if (themeNames.length === 0)
+      return;
+    let fromName = this.defaultTheme;
+    let toName = this.defaultTheme;
+    let t2 = 0;
+    if (activeIdx >= 0) {
+      const el = this._items[activeIdx].element;
+      const themeAttr = el.getAttribute("theme");
+      const fromAttr = el.getAttribute("theme-from");
+      const toAttr = el.getAttribute("theme-to");
+      if (fromAttr && toAttr) {
+        fromName = fromAttr;
+        toName = toAttr;
+        t2 = activeProgress;
+      } else if (themeAttr) {
+        fromName = themeAttr;
+        toName = themeAttr;
+      } else if (fromAttr || toAttr) {
+        const single = fromAttr || toAttr;
+        fromName = single;
+        toName = single;
+      }
+    }
+    const fromTheme = this.themes[fromName];
+    const toTheme = this.themes[toName] || fromTheme;
+    if (!fromTheme && !toTheme)
+      return;
+    const base = fromTheme || toTheme;
+    const target = this.themeTarget;
+    const seen = new Set;
+    for (const key in base) {
+      const fromVal = (fromTheme || toTheme)[key];
+      const toVal = (toTheme || fromTheme)[key] ?? fromVal;
+      const value = interpolateThemeValue(fromVal, toVal, t2);
+      target.style.setProperty(key, value);
+      seen.add(key);
+    }
+    for (const key of this._appliedThemeKeys) {
+      if (!seen.has(key))
+        target.style.removeProperty(key);
+    }
+    this._appliedThemeKeys = seen;
   }
 }
 

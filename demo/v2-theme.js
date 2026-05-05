@@ -2206,8 +2206,8 @@ class TosiProductV2 extends u {
       display: "block",
       position: "relative",
       width: "100%",
-      background: "#000",
-      color: "#fff"
+      background: "var(--bg, #000)",
+      color: "var(--fg, #fff)"
     },
     ".window": {
       position: "sticky",
@@ -2289,6 +2289,9 @@ class TosiProductV2 extends u {
       this.style.width = "100%";
       this.style.height = "100%";
       this.style.display = "block";
+      if (this.themeTarget === document.documentElement) {
+        this.themeTarget = this;
+      }
     } else {
       this._scrollTarget = getScrollParent(this);
       this._scrollTarget.addEventListener("scroll", this._scrollHandler, {
@@ -2496,34 +2499,42 @@ class TosiProductV2 extends u {
     let fromName = this.defaultTheme;
     let toName = this.defaultTheme;
     let t2 = 0;
-    if (activeIdx >= 0) {
-      const el = this._items[activeIdx].element;
+    let themeIdx = activeIdx;
+    while (themeIdx >= 0) {
+      const it = this._items[themeIdx];
+      const el = it.element;
       const themeAttr = el.getAttribute("theme");
       const fromAttr = el.getAttribute("theme-from");
       const toAttr = el.getAttribute("theme-to");
-      if (fromAttr && toAttr) {
-        fromName = fromAttr;
-        toName = toAttr;
-        t2 = activeProgress;
-      } else if (themeAttr) {
-        fromName = themeAttr;
-        toName = themeAttr;
-      } else if (fromAttr || toAttr) {
-        const single = fromAttr || toAttr;
-        fromName = single;
-        toName = single;
+      if (themeAttr || fromAttr || toAttr) {
+        if (fromAttr && toAttr) {
+          fromName = fromAttr;
+          toName = toAttr;
+          t2 = themeIdx === activeIdx ? activeProgress : 1;
+        } else {
+          const single = themeAttr || fromAttr || toAttr;
+          fromName = single;
+          toName = single;
+        }
+        break;
       }
+      themeIdx--;
     }
     const fromTheme = this.themes[fromName];
-    const toTheme = this.themes[toName] || fromTheme;
+    const toTheme = this.themes[toName];
     if (!fromTheme && !toTheme)
       return;
-    const base = fromTheme || toTheme;
     const target = this.themeTarget;
+    const allKeys = new Set([
+      ...Object.keys(fromTheme || {}),
+      ...Object.keys(toTheme || {})
+    ]);
     const seen = new Set;
-    for (const key in base) {
-      const fromVal = (fromTheme || toTheme)[key];
-      const toVal = (toTheme || fromTheme)[key] ?? fromVal;
+    for (const key of allKeys) {
+      const fromVal = fromTheme?.[key] ?? toTheme?.[key];
+      const toVal = toTheme?.[key] ?? fromTheme?.[key];
+      if (fromVal === undefined || toVal === undefined)
+        continue;
       const value = interpolateThemeValue(fromVal, toVal, t2);
       target.style.setProperty(key, value);
       seen.add(key);
@@ -2571,10 +2582,49 @@ class TosiProductSectionV2 extends u {
         el.setScrollProgress(localProgress);
       } else if (el.getAttribute("data-scroll-animate") === "currentTime" && el.duration) {
         el.currentTime = localProgress * el.duration;
+      } else if (el.getAttribute("data-scroll-animate") === "lottie" && el.animation && typeof el.animation.goToAndStop === "function") {
+        const total = el.animation.totalFrames || 0;
+        el.animation.goToAndStop(localProgress * total, true);
       }
     }
     if (this.scrollCallback)
       this.scrollCallback(progress, this);
+  }
+}
+
+class TosiProductHeaderV2 extends u {
+  static initAttributes = {
+    threshold: 50
+  };
+  static styleSpec = {
+    ":host": {
+      position: "fixed",
+      top: "0",
+      left: "0",
+      right: "0",
+      zIndex: "100",
+      transform: "translateY(-100%)",
+      transition: "transform 0.3s ease",
+      pointerEvents: "auto"
+    },
+    ":host([data-visible=true])": {
+      transform: "translateY(0)"
+    }
+  };
+  content = () => slot();
+  _scrollHandler = () => this._update();
+  connectedCallback() {
+    super.connectedCallback();
+    window.addEventListener("scroll", this._scrollHandler, { passive: true });
+    this._update();
+  }
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    window.removeEventListener("scroll", this._scrollHandler);
+  }
+  _update() {
+    const threshold = Number(this.getAttribute("threshold")) || 50;
+    this.dataset.visible = window.scrollY > threshold ? "true" : "false";
   }
 }
 var tosiProductV2 = TosiProductV2.elementCreator({
@@ -2582,6 +2632,9 @@ var tosiProductV2 = TosiProductV2.elementCreator({
 });
 var tosiProductSectionV2 = TosiProductSectionV2.elementCreator({
   tag: "tosi-product-section-v2"
+});
+var tosiProductHeaderV2 = TosiProductHeaderV2.elementCreator({
+  tag: "tosi-product-header-v2"
 });
 
 // demo/v2-theme.ts
@@ -2648,9 +2701,8 @@ style.textContent = `
   }
   .page-header nav a:hover { color: var(--accent); }
 
-  /* === Sticky header (fixed, slides in after scroll) === */
-  .sticky-header {
-    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  /* === Sticky header content (the chrome lives inside tosi-product-header-v2) === */
+  .sticky-bar {
     background: color-mix(in srgb, var(--bg) 85%, transparent);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
@@ -2658,16 +2710,13 @@ style.textContent = `
     border-bottom: 1px solid var(--border);
     padding: 0.7rem 2rem;
     display: flex; align-items: center; justify-content: space-between;
-    transform: translateY(-100%);
     transition:
-      transform 0.3s cubic-bezier(.5,0,.2,1),
       background-color 0.3s linear,
       color 0.3s linear,
       border-color 0.3s linear;
   }
-  .sticky-header.visible { transform: translateY(0); }
-  .sticky-header .brand { font-weight: 700; font-size: 1rem; }
-  .sticky-header .progress {
+  .sticky-bar .brand { font-weight: 700; font-size: 1rem; }
+  .sticky-bar .progress {
     font-family: monospace; font-size: 0.8rem; color: var(--muted);
   }
 
@@ -2717,7 +2766,7 @@ style.textContent = `
 document.head.appendChild(style);
 var pageHeader = header({ class: "page-header" }, div2({ class: "brand" }, "tosijs-product"), nav(a2({ href: "#" }, "Docs"), a2({ href: "#" }, "Examples"), a2({ href: "#" }, "GitHub")));
 var stickyProgress = span({ class: "progress" }, "0%");
-var stickyHeader = header({ class: "sticky-header", id: "sticky" }, div2({ class: "brand" }, "tosijs-product"), stickyProgress);
+var stickyHeader = tosiProductHeaderV2({ threshold: 80 }, div2({ class: "sticky-bar" }, div2({ class: "brand" }, "tosijs-product"), stickyProgress));
 var app = tosiProductV2(tosiProductSectionV2({ scroll: 100, theme: "midnight" }, div2({ class: "scene" }, h2("Midnight"), p2("First section pinned with a constant midnight theme. Scroll to enter the next scene."), span({ class: "pill" }, "theme=midnight"))), div2({ class: "intro" }, div2({ class: "intro-inner" }, h3("Why themes?"), p2("Themes are dictionaries of CSS custom properties. tosi-product-v2 reads the active section's theme attributes and writes the resolved values to document.documentElement, so everything cascading from there — including the sticky header above — re-themes in unison."))), tosiProductSectionV2({ scroll: 100, theme: "forest" }, div2({ class: "scene" }, h2("Forest"), p2("Different theme, same layout. Notice the page header and sticky header both follow."), span({ class: "pill" }, "theme=forest"))), tosiProductSectionV2({
   scroll: 250,
   "theme-from": "forest",
@@ -2734,15 +2783,13 @@ document.body.appendChild(pageHeader);
 document.body.appendChild(stickyHeader);
 document.body.appendChild(app);
 document.body.appendChild(pageFooter);
-var lastScroll = 0;
-var STICKY_THRESHOLD = 80;
 function onPageScroll() {
   const y = window.scrollY;
-  stickyHeader.classList.toggle("visible", y > STICKY_THRESHOLD);
   const docHeight = document.documentElement.scrollHeight - window.innerHeight;
   const pct = docHeight > 0 ? Math.round(y / docHeight * 100) : 0;
   stickyProgress.textContent = `${pct}%`;
-  lastScroll = y;
 }
-window.addEventListener("scroll", () => requestAnimationFrame(onPageScroll), { passive: true });
+window.addEventListener("scroll", () => requestAnimationFrame(onPageScroll), {
+  passive: true
+});
 onPageScroll();

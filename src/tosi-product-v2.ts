@@ -100,8 +100,8 @@ export class TosiProductV2 extends Component {
       display: "block",
       position: "relative",
       width: "100%",
-      background: "#000",
-      color: "#fff",
+      background: "var(--bg, #000)",
+      color: "var(--fg, #fff)",
     },
     ".window": {
       position: "sticky",
@@ -454,23 +454,32 @@ export class TosiProductV2 extends Component {
     let toName = this.defaultTheme;
     let t = 0;
 
-    if (activeIdx >= 0) {
-      const el = this._items[activeIdx].element;
+    // Find the nearest theme source. If the active item is a section, use it.
+    // Otherwise carry forward the most recent preceding section's theme so
+    // markdown blocks and other non-section interludes don't snap to default.
+    let themeIdx = activeIdx;
+    while (themeIdx >= 0) {
+      const it = this._items[themeIdx];
+      const el = it.element;
       const themeAttr = el.getAttribute("theme");
       const fromAttr = el.getAttribute("theme-from");
       const toAttr = el.getAttribute("theme-to");
-      if (fromAttr && toAttr) {
-        fromName = fromAttr;
-        toName = toAttr;
-        t = activeProgress;
-      } else if (themeAttr) {
-        fromName = themeAttr;
-        toName = themeAttr;
-      } else if (fromAttr || toAttr) {
-        const single = (fromAttr || toAttr) as string;
-        fromName = single;
-        toName = single;
+      if (themeAttr || fromAttr || toAttr) {
+        if (fromAttr && toAttr) {
+          fromName = fromAttr;
+          toName = toAttr;
+          // Only interpolate while we're still in this item's pin phase.
+          // If we've moved past it (themeIdx < activeIdx) or it's exiting,
+          // hold at the to-value.
+          t = themeIdx === activeIdx ? activeProgress : 1;
+        } else {
+          const single = (themeAttr || fromAttr || toAttr) as string;
+          fromName = single;
+          toName = single;
+        }
+        break;
       }
+      themeIdx--;
     }
 
     const fromTheme = this.themes[fromName];
@@ -556,6 +565,13 @@ export class TosiProductSectionV2 extends Component {
       ) {
         (el as HTMLVideoElement).currentTime =
           localProgress * (el as HTMLVideoElement).duration;
+      } else if (
+        el.getAttribute("data-scroll-animate") === "lottie" &&
+        (el as any).animation &&
+        typeof (el as any).animation.goToAndStop === "function"
+      ) {
+        const total = (el as any).animation.totalFrames || 0;
+        (el as any).animation.goToAndStop(localProgress * total, true);
       }
     }
     if (this.scrollCallback) this.scrollCallback(progress, this);

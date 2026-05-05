@@ -2166,6 +2166,702 @@ class wL extends u {
 }
 var gf = wL.elementCreator();
 
+// src/tosi-product-v2.ts
+var { div, slot } = I;
+function isColor(s2) {
+  const t2 = s2.trim();
+  return t2.startsWith("#") || t2.startsWith("rgb") || t2.startsWith("hsl") || t2.startsWith("color(") || ["red", "blue", "green", "white", "black", "transparent", "currentColor"].includes(t2);
+}
+function interpolateThemeValue(from, to, t2) {
+  if (from === to || t2 <= 0)
+    return from;
+  if (t2 >= 1)
+    return to;
+  if (isColor(from) && isColor(to)) {
+    return `color-mix(in srgb, ${from} ${(1 - t2) * 100}%, ${to})`;
+  }
+  const numRegex = /-?\d+(?:\.\d+)?/g;
+  const aNums = Array.from(from.matchAll(numRegex));
+  const bNums = Array.from(to.matchAll(numRegex));
+  if (aNums.length > 0 && aNums.length === bNums.length) {
+    let result = "";
+    let lastIndex = 0;
+    for (let i2 = 0;i2 < aNums.length; i2++) {
+      const am = aNums[i2];
+      const bm = bNums[i2];
+      result += from.substring(lastIndex, am.index);
+      const v2 = parseFloat(am[0]) + (parseFloat(bm[0]) - parseFloat(am[0])) * t2;
+      result += v2.toFixed(4).replace(/0+$/, "").replace(/\.$/, "");
+      lastIndex = am.index + am[0].length;
+    }
+    result += from.substring(lastIndex);
+    return result;
+  }
+  return t2 < 0.5 ? from : to;
+}
+var reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+function getScrollParent(el) {
+  let node = el.parentElement;
+  while (node) {
+    if (node === document.body || node === document.documentElement)
+      break;
+    const { overflow, overflowX, overflowY } = getComputedStyle(node);
+    if (/(auto|scroll)/.test(overflow + overflowX + overflowY))
+      return node;
+    node = node.parentElement;
+  }
+  return window;
+}
+function findEnclosingSection(el) {
+  let node = el.parentElement;
+  while (node) {
+    if (node.tagName.toLowerCase() === "tosi-product-section-v2") {
+      return node;
+    }
+    node = node.parentElement;
+  }
+  return null;
+}
+function nearestEnclosingProduct(el) {
+  let node = el;
+  while (node) {
+    if (node.tagName.toLowerCase() === "tosi-product-v2")
+      return node;
+    node = node.parentElement;
+  }
+  return null;
+}
+
+class TosiProductV2 extends u {
+  static initAttributes = {
+    direction: "vertical",
+    debug: false
+  };
+  static styleSpec = {
+    ":host": {
+      display: "block",
+      position: "relative",
+      width: "100%",
+      background: "var(--bg, #000)",
+      color: "var(--fg, #fff)"
+    },
+    ".window": {
+      position: "sticky",
+      top: "0",
+      left: "0",
+      width: "100%",
+      height: "100vh",
+      overflow: "hidden"
+    },
+    ":host([direction=horizontal])": {
+      display: "inline-block",
+      width: "max-content"
+    },
+    ":host([direction=horizontal]) .window": {
+      width: "100vw",
+      height: "100%"
+    },
+    ".stack": {
+      position: "absolute",
+      top: "0",
+      left: "0",
+      width: "100%",
+      willChange: "transform"
+    },
+    ":host([direction=horizontal]) .stack": {
+      display: "flex",
+      flexDirection: "row",
+      width: "max-content",
+      height: "100%"
+    },
+    ".debug-panel": {
+      position: "fixed",
+      top: "10px",
+      right: "10px",
+      background: "rgba(0,0,0,0.85)",
+      color: "#0f0",
+      padding: "6px 10px",
+      fontFamily: "monospace",
+      fontSize: "11px",
+      borderRadius: "4px",
+      zIndex: 1000,
+      pointerEvents: "none",
+      whiteSpace: "pre"
+    }
+  };
+  content = () => [
+    div({ class: "window", part: "window" }, div({ class: "stack", part: "stack" }, slot())),
+    div({ class: "debug-panel", part: "debug", hidden: true })
+  ];
+  themes = {};
+  defaultTheme = "";
+  themeTarget = document.documentElement;
+  _scrollTarget = null;
+  _stack = null;
+  _window = null;
+  _debugPanel = null;
+  _resizeObserver = null;
+  _mutationObserver = null;
+  _items = [];
+  _totalRunway = 0;
+  _scrollHandler = () => this._scheduleUpdate();
+  _rafPending = false;
+  _isNested = false;
+  _injectedProgress = 0;
+  _appliedThemeKeys = new Set;
+  connectedCallback() {
+    super.connectedCallback();
+    this._stack = this.shadowRoot?.querySelector(".stack");
+    this._window = this.shadowRoot?.querySelector(".window");
+    this._debugPanel = this.shadowRoot?.querySelector(".debug-panel");
+    this._isNested = !!findEnclosingSection(this);
+    if (this._isNested) {
+      this.setAttribute("data-scroll-animate", "tosi-product-v2");
+      if (this._window) {
+        this._window.style.position = "relative";
+        this._window.style.width = "100%";
+        this._window.style.height = "100%";
+      }
+      this.style.width = "100%";
+      this.style.height = "100%";
+      this.style.display = "block";
+      if (this.themeTarget === document.documentElement) {
+        this.themeTarget = this;
+      }
+    } else {
+      this._scrollTarget = getScrollParent(this);
+      this._scrollTarget.addEventListener("scroll", this._scrollHandler, {
+        passive: true
+      });
+      window.addEventListener("resize", this._scrollHandler, { passive: true });
+    }
+    this._mutationObserver = new MutationObserver(() => this._relayout());
+    this._mutationObserver.observe(this, {
+      childList: true,
+      attributes: true,
+      attributeFilter: ["scroll"]
+    });
+    this._resizeObserver = new ResizeObserver(() => this._relayout());
+    for (const child of Array.from(this.children)) {
+      if (child instanceof HTMLElement)
+        this._resizeObserver.observe(child);
+    }
+    this._resizeObserver.observe(this);
+    requestAnimationFrame(() => {
+      this._relayout();
+      this._update();
+    });
+  }
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    if (!this._isNested) {
+      this._scrollTarget?.removeEventListener("scroll", this._scrollHandler);
+      window.removeEventListener("resize", this._scrollHandler);
+    }
+    this._mutationObserver?.disconnect();
+    this._resizeObserver?.disconnect();
+  }
+  setScrollProgress(progress) {
+    if (!this._isNested)
+      return;
+    this._injectedProgress = Math.max(0, Math.min(1, progress));
+    this._update();
+  }
+  _isHorizontal() {
+    return this.getAttribute("direction") === "horizontal";
+  }
+  _viewSize() {
+    const horizontal = this._isHorizontal();
+    if (this._isNested) {
+      return horizontal ? this.clientWidth : this.clientHeight;
+    }
+    if (this._scrollTarget instanceof HTMLElement) {
+      return horizontal ? this._scrollTarget.clientWidth : this._scrollTarget.clientHeight;
+    }
+    return horizontal ? window.innerWidth : window.innerHeight;
+  }
+  _scrollPos() {
+    const horizontal = this._isHorizontal();
+    if (this._scrollTarget instanceof HTMLElement) {
+      return horizontal ? this._scrollTarget.scrollLeft : this._scrollTarget.scrollTop;
+    }
+    return horizontal ? window.scrollX : window.scrollY;
+  }
+  _hostStart() {
+    const horizontal = this._isHorizontal();
+    const rect = this.getBoundingClientRect();
+    let edge = horizontal ? rect.left : rect.top;
+    if (this._scrollTarget instanceof HTMLElement) {
+      const containerRect = this._scrollTarget.getBoundingClientRect();
+      edge -= horizontal ? containerRect.left : containerRect.top;
+    }
+    return this._scrollPos() + edge;
+  }
+  _relayout() {
+    if (!this._stack)
+      return;
+    const horizontal = this._isHorizontal();
+    const view = this._viewSize();
+    const items = [];
+    let cumOffset = 0;
+    let cumRunway = 0;
+    for (const child of Array.from(this.children)) {
+      if (!(child instanceof HTMLElement))
+        continue;
+      const isSection = child.tagName.toLowerCase() === "tosi-product-section-v2";
+      const naturalSize = horizontal ? child.offsetWidth : child.offsetHeight;
+      let pinDuration = 0;
+      if (isSection) {
+        const scrollAttr = child.getAttribute("scroll");
+        if (scrollAttr !== null) {
+          const pct = Number(scrollAttr);
+          if (Number.isFinite(pct) && pct >= 0) {
+            pinDuration = pct / 100 * view;
+          }
+        } else {
+          pinDuration = view;
+        }
+      }
+      const exitDuration = naturalSize;
+      const rangeStart = cumRunway;
+      const pinEnd = rangeStart + pinDuration;
+      const rangeEnd = pinEnd + exitDuration;
+      items.push({
+        element: child,
+        isSection,
+        naturalSize,
+        pinDuration,
+        exitDuration,
+        offset: cumOffset,
+        rangeStart,
+        pinEnd,
+        rangeEnd
+      });
+      cumOffset += naturalSize;
+      cumRunway += pinDuration + exitDuration;
+    }
+    this._items = items;
+    this._totalRunway = cumRunway;
+    if (!this._isNested) {
+      const hostDim = horizontal ? "width" : "height";
+      this.style[hostDim] = `${cumRunway + view}px`;
+    }
+    this._update();
+  }
+  _scheduleUpdate() {
+    if (this._rafPending)
+      return;
+    this._rafPending = true;
+    requestAnimationFrame(() => {
+      this._rafPending = false;
+      this._update();
+    });
+  }
+  _update() {
+    if (!this._stack || this._items.length === 0)
+      return;
+    const horizontal = this._isHorizontal();
+    const view = this._viewSize();
+    const local = this._isNested ? this._injectedProgress * this._totalRunway : this._scrollPos() - this._hostStart();
+    const last = this._items[this._items.length - 1];
+    const stackSize = last.offset + last.naturalSize;
+    const minTranslate = -Math.max(0, stackSize - view);
+    let translate = 0;
+    let activeIdx = -1;
+    let activeProgress = 0;
+    if (local <= 0) {
+      translate = 0;
+      activeIdx = 0;
+      activeProgress = 0;
+    } else if (local >= this._totalRunway) {
+      translate = minTranslate;
+      activeIdx = this._items.length - 1;
+      activeProgress = 1;
+    } else {
+      for (let i2 = 0;i2 < this._items.length; i2++) {
+        const item = this._items[i2];
+        if (local < item.rangeStart || local >= item.rangeEnd)
+          continue;
+        if (local < item.pinEnd) {
+          translate = -item.offset;
+          activeProgress = item.pinDuration > 0 ? (local - item.rangeStart) / item.pinDuration : 1;
+        } else {
+          const exitProgress = (local - item.pinEnd) / item.exitDuration;
+          translate = -item.offset - exitProgress * item.naturalSize;
+          activeProgress = 1;
+        }
+        activeIdx = i2;
+        break;
+      }
+    }
+    if (translate < minTranslate)
+      translate = minTranslate;
+    const axis = horizontal ? "X" : "Y";
+    this._stack.style.transform = `translate${axis}(${translate}px)`;
+    for (let i2 = 0;i2 < this._items.length; i2++) {
+      const item = this._items[i2];
+      if (!item.isSection)
+        continue;
+      let progress;
+      if (i2 < activeIdx)
+        progress = 1;
+      else if (i2 > activeIdx)
+        progress = 0;
+      else
+        progress = activeProgress;
+      this._notify(item.element, progress);
+    }
+    this._applyTheme(activeIdx, activeProgress);
+    if (this._debugPanel) {
+      const showDebug = this.getAttribute("debug") === "true";
+      this._debugPanel.hidden = !showDebug;
+      if (showDebug) {
+        this._debugPanel.textContent = `local: ${local.toFixed(0)}px / ${this._totalRunway.toFixed(0)}
+` + `translate${axis}: ${translate.toFixed(0)}px
+` + `active: #${activeIdx} @ ${activeProgress.toFixed(3)}`;
+      }
+    }
+  }
+  _notify(section, progress) {
+    section.dataset.progress = progress.toFixed(3);
+    if (typeof section.setScrollProgress === "function") {
+      section.setScrollProgress(progress);
+    }
+  }
+  _applyTheme(activeIdx, activeProgress) {
+    const themeNames = Object.keys(this.themes);
+    if (themeNames.length === 0)
+      return;
+    let fromName = this.defaultTheme;
+    let toName = this.defaultTheme;
+    let t2 = 0;
+    let themeIdx = activeIdx;
+    while (themeIdx >= 0) {
+      const it = this._items[themeIdx];
+      const el = it.element;
+      const themeAttr = el.getAttribute("theme");
+      const fromAttr = el.getAttribute("theme-from");
+      const toAttr = el.getAttribute("theme-to");
+      if (themeAttr || fromAttr || toAttr) {
+        if (fromAttr && toAttr) {
+          fromName = fromAttr;
+          toName = toAttr;
+          t2 = themeIdx === activeIdx ? activeProgress : 1;
+        } else {
+          const single = themeAttr || fromAttr || toAttr;
+          fromName = single;
+          toName = single;
+        }
+        break;
+      }
+      themeIdx--;
+    }
+    const fromTheme = this.themes[fromName];
+    const toTheme = this.themes[toName];
+    if (!fromTheme && !toTheme)
+      return;
+    const target = this.themeTarget;
+    const allKeys = new Set([
+      ...Object.keys(fromTheme || {}),
+      ...Object.keys(toTheme || {})
+    ]);
+    const seen = new Set;
+    for (const key of allKeys) {
+      const fromVal = fromTheme?.[key] ?? toTheme?.[key];
+      const toVal = toTheme?.[key] ?? fromTheme?.[key];
+      if (fromVal === undefined || toVal === undefined)
+        continue;
+      const value = interpolateThemeValue(fromVal, toVal, t2);
+      target.style.setProperty(key, value);
+      seen.add(key);
+    }
+    for (const key of this._appliedThemeKeys) {
+      if (!seen.has(key))
+        target.style.removeProperty(key);
+    }
+    this._appliedThemeKeys = seen;
+  }
+}
+
+class TosiProductSectionV2 extends u {
+  static initAttributes = {
+    scroll: 100
+  };
+  static styleSpec = {
+    ":host": {
+      display: "block",
+      position: "relative",
+      width: "100%"
+    }
+  };
+  content = () => slot();
+  scrollCallback = null;
+  setScrollProgress(progress) {
+    if (reducedMotion.matches) {
+      if (this.scrollCallback)
+        this.scrollCallback(progress, this);
+      return;
+    }
+    const myProduct = this.closest("tosi-product-v2");
+    const animators = this.querySelectorAll("[data-scroll-animate], [data-scroll-range]");
+    for (const el of Array.from(animators)) {
+      const ownerProduct = nearestEnclosingProduct(el === this ? null : el.parentElement);
+      if (ownerProduct !== myProduct)
+        continue;
+      const rangeStr = el.getAttribute("data-scroll-range") || "0,1";
+      const [start, end] = rangeStr.split(",").map(Number);
+      const range = end - start;
+      const localProgress = range <= 0 ? progress >= end ? 1 : 0 : Math.max(0, Math.min(1, (progress - start) / range));
+      el.style.setProperty("--local-progress", localProgress.toString());
+      el.dataset.localProgress = localProgress.toFixed(3);
+      if (typeof el.setScrollProgress === "function") {
+        el.setScrollProgress(localProgress);
+      } else if (el.getAttribute("data-scroll-animate") === "currentTime" && el.duration) {
+        el.currentTime = localProgress * el.duration;
+      } else if (el.getAttribute("data-scroll-animate") === "lottie" && el.animation && typeof el.animation.goToAndStop === "function") {
+        const total = el.animation.totalFrames || 0;
+        el.animation.goToAndStop(localProgress * total, true);
+      }
+    }
+    if (this.scrollCallback)
+      this.scrollCallback(progress, this);
+  }
+}
+
+class TosiProductHeaderV2 extends u {
+  static initAttributes = {
+    threshold: 50
+  };
+  static styleSpec = {
+    ":host": {
+      position: "fixed",
+      top: "0",
+      left: "0",
+      right: "0",
+      zIndex: "100",
+      transform: "translateY(-100%)",
+      transition: "transform 0.3s ease",
+      pointerEvents: "auto"
+    },
+    ":host([data-visible=true])": {
+      transform: "translateY(0)"
+    }
+  };
+  content = () => slot();
+  _scrollHandler = () => this._update();
+  connectedCallback() {
+    super.connectedCallback();
+    window.addEventListener("scroll", this._scrollHandler, { passive: true });
+    this._update();
+  }
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    window.removeEventListener("scroll", this._scrollHandler);
+  }
+  _update() {
+    const threshold = Number(this.getAttribute("threshold")) || 50;
+    this.dataset.visible = window.scrollY > threshold ? "true" : "false";
+  }
+}
+var tosiProductV2 = TosiProductV2.elementCreator({
+  tag: "tosi-product-v2"
+});
+var tosiProductSectionV2 = TosiProductSectionV2.elementCreator({
+  tag: "tosi-product-section-v2"
+});
+var tosiProductHeaderV2 = TosiProductHeaderV2.elementCreator({
+  tag: "tosi-product-header-v2"
+});
+
+// src/tosi-interpolator.ts
+var interpolateStrings = (a2, b2, t2) => {
+  const numRegex = /-?\d+(?:\.\d+)?/g;
+  const aNums = Array.from(a2.matchAll(numRegex));
+  const bNums = Array.from(b2.matchAll(numRegex));
+  if (aNums.length > 0 && aNums.length === bNums.length) {
+    let result = "";
+    let lastIndex = 0;
+    for (let i2 = 0;i2 < aNums.length; i2++) {
+      const aMatch = aNums[i2];
+      const bMatch = bNums[i2];
+      result += a2.substring(lastIndex, aMatch.index);
+      const n1 = parseFloat(aMatch[0]);
+      const n2 = parseFloat(bMatch[0]);
+      const interpolated = n1 + (n2 - n1) * t2;
+      let numStr = interpolated.toFixed(4);
+      if (numStr.includes(".")) {
+        numStr = numStr.replace(/0+$/, "").replace(/\.$/, "");
+      }
+      result += numStr;
+      lastIndex = aMatch.index + aMatch[0].length;
+    }
+    result += a2.substring(lastIndex);
+    return result;
+  }
+  const isColor2 = (s2) => s2.startsWith("#") || s2.startsWith("rgb") || s2.startsWith("hsl") || ["red", "blue", "white", "black", "transparent"].includes(s2);
+  if (isColor2(a2) && isColor2(b2)) {
+    return `color-mix(in srgb, ${a2} ${Math.round((1 - t2) * 100)}%, ${b2})`;
+  }
+  return t2 < 0.5 ? a2 : b2;
+};
+
+class TosiInterpolator extends u {
+  static styleSpec = {
+    ":host": {
+      display: "contents"
+    }
+  };
+  setScrollProgress(progress) {
+    const waypointsNodes = Array.from(this.querySelectorAll("tosi-waypoint"));
+    if (waypointsNodes.length === 0)
+      return;
+    const waypoints = waypointsNodes.map((w) => {
+      const styles = {};
+      const htmlEl = w;
+      for (let i2 = 0;i2 < htmlEl.style.length; i2++) {
+        const prop = htmlEl.style[i2];
+        styles[prop] = htmlEl.style.getPropertyValue(prop);
+      }
+      return {
+        progress: Number(w.getAttribute("progress") || 0),
+        styles
+      };
+    }).sort((a2, b2) => a2.progress - b2.progress);
+    let wp1 = waypoints[0];
+    let wp2 = waypoints[waypoints.length - 1];
+    let t2 = 0;
+    if (progress <= wp1.progress) {
+      wp2 = wp1;
+      t2 = 0;
+    } else if (progress >= wp2.progress) {
+      wp1 = wp2;
+      t2 = 1;
+    } else {
+      for (let i2 = 0;i2 < waypoints.length - 1; i2++) {
+        if (progress >= waypoints[i2].progress && progress <= waypoints[i2 + 1].progress) {
+          wp1 = waypoints[i2];
+          wp2 = waypoints[i2 + 1];
+          const rawT = (progress - wp1.progress) / (wp2.progress - wp1.progress);
+          const easing = this.getAttribute("easing");
+          if (easing === "ease-in-out") {
+            t2 = rawT < 0.5 ? 2 * rawT * rawT : -1 + (4 - 2 * rawT) * rawT;
+          } else {
+            t2 = rawT;
+          }
+          break;
+        }
+      }
+    }
+    const currentStyles = {};
+    for (const prop in wp1.styles) {
+      const val1 = wp1.styles[prop];
+      const val2 = wp2.styles[prop] || val1;
+      currentStyles[prop] = interpolateStrings(val1, val2, t2);
+    }
+    const targets = Array.from(this.children).filter((c2) => c2.tagName !== "TOSI-WAYPOINT");
+    targets.forEach((target) => {
+      const el = target;
+      for (const prop in currentStyles) {
+        el.style.setProperty(prop, currentStyles[prop]);
+      }
+    });
+  }
+}
+
+class TosiWaypoint extends u {
+  static initAttributes = {
+    progress: 0
+  };
+  static styleSpec = {
+    ":host": {
+      display: "none"
+    }
+  };
+  content = null;
+}
+var tosiInterpolator = TosiInterpolator.elementCreator({
+  tag: "tosi-interpolator"
+});
+var tosiWaypoint = TosiWaypoint.elementCreator({
+  tag: "tosi-waypoint"
+});
+
+// src/tosi-code.ts
+var prismLoaded = null;
+function loadPrism() {
+  if (prismLoaded)
+    return prismLoaded;
+  prismLoaded = new Promise((resolve) => {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = "https://cdn.jsdelivr.net/npm/prismjs@1/themes/prism-tomorrow.min.css";
+    document.head.appendChild(link);
+    const script = document.createElement("script");
+    script.src = "https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-core.min.js";
+    script.onload = () => {
+      const markup = document.createElement("script");
+      markup.src = "https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-markup.min.js";
+      markup.onload = () => resolve();
+      document.head.appendChild(markup);
+    };
+    document.head.appendChild(script);
+  });
+  return prismLoaded;
+}
+
+class TosiCode extends u {
+  static initAttributes = {
+    language: "html"
+  };
+  static lightStyleSpec = {
+    ":host": {
+      display: "block"
+    },
+    ":host pre": {
+      background: "rgba(255,255,255,0.05)",
+      border: "1px solid rgba(255,255,255,0.1)",
+      borderRadius: "12px",
+      padding: "1.5em",
+      fontSize: "clamp(0.75rem, 1.5vw, 1rem)",
+      lineHeight: 1.6,
+      maxWidth: "90vw",
+      overflowX: "auto",
+      backdropFilter: "blur(20px)",
+      margin: "1em 0 0",
+      textAlign: "left"
+    },
+    ":host code": {
+      fontFamily: "Consolas, Monaco, 'Courier New', monospace",
+      whiteSpace: "pre"
+    }
+  };
+  content = null;
+  connectedCallback() {
+    super.connectedCallback();
+    this._highlight();
+  }
+  async _highlight() {
+    const raw = this.textContent || "";
+    if (!raw.trim())
+      return;
+    await loadPrism();
+    const lang = this.language || "html";
+    const grammar = globalThis.Prism?.languages?.[lang];
+    const codeEl = document.createElement("code");
+    codeEl.className = `language-${lang}`;
+    if (grammar) {
+      codeEl.innerHTML = globalThis.Prism.highlight(raw.trim(), grammar, lang);
+    } else {
+      codeEl.textContent = raw.trim();
+    }
+    const preEl = document.createElement("pre");
+    preEl.appendChild(codeEl);
+    this.textContent = "";
+    this.appendChild(preEl);
+  }
+}
+var tosiCode = TosiCode.elementCreator({ tag: "tosi-code" });
+
 // node_modules/marked/lib/marked.esm.js
 function L() {
   return { async: false, breaks: false, extensions: null, gfm: true, hooks: null, pedantic: false, renderer: null, silent: false, tokenizer: null, walkTokens: null };
@@ -6918,1204 +7614,335 @@ var Is = t0($4);
 var us = Il($4);
 var ul = { "--xin-icon-size": fM.tosiIconSize, "--xin-icon-fill": fM.tosiIconFill, "--xin-icon-stroke": fM.tosiIconStroke, "--xin-tabs-bar-color": fM.tosiTabsBarColor, "--xin-tabs-bar-height": fM.tosiTabsBarHeight, "--xin-tabs-selected-color": fM.tosiTabsSelectedColor, "--spacing": fM.tosiSpacing, "--gap": fM.tosiSpacingSm, "--touch-size": fM.tosiTouchSize, "--background": fM.tosiBg, "--text-color": fM.tosiText, "--brand-color": fM.tosiAccent, "--brand-text-color": fM.tosiAccentText };
 
-// src/tosi-product.ts
-var { div, span, slot } = I;
-var scrollTargets = new Map;
-var scrollHandlers = new Map;
-function getScrollParent(el) {
-  let node = el.parentElement;
-  while (node) {
-    if (node === document.body || node === document.documentElement) {
-      break;
-    }
-    const { overflow, overflowX, overflowY } = getComputedStyle(node);
-    if (/(auto|scroll)/.test(overflow + overflowX + overflowY)) {
-      return node;
-    }
-    node = node.parentElement;
-  }
-  return window;
-}
-function onScroll(target) {
-  requestAnimationFrame(() => {
-    const sections = scrollTargets.get(target);
-    if (sections) {
-      for (const section of sections) {
-        section.updateProgress();
-      }
-    }
-  });
-}
-var reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-
-class TosiProductSection extends u {
-  scrollCallback = null;
-  static initAttributes = {
-    scroll: 100,
-    viewport: 100,
-    debug: false,
-    direction: "vertical",
-    overflow: false
-  };
-  _debugInfo = null;
-  _scrollTarget = null;
-  _animators = null;
-  _observer = null;
-  static styleSpec = {
-    ":host": {
-      display: "block",
-      position: "relative",
-      backgroundColor: "#000",
-      color: "#fff"
-    },
-    ":host([direction=horizontal])": {
-      display: "inline-block"
-    },
-    ".tosi-sticky": {
-      position: "sticky",
-      overflow: "hidden",
-      zIndex: 1,
-      backgroundColor: "inherit"
-    },
-    ".tosi-debug": {
-      position: "absolute",
-      top: "10px",
-      left: "10px",
-      background: "rgba(0,0,0,0.8)",
-      color: "#0f0",
-      padding: "5px 10px",
-      fontFamily: "monospace",
-      fontSize: "12px",
-      zIndex: 100,
-      borderRadius: "4px",
-      pointerEvents: "none"
-    }
-  };
-  content = () => [
-    div({ class: "tosi-sticky" }, slot(), span({ class: "tosi-debug", part: "debug-info", hidden: true }))
-  ];
-  _getAnimators() {
-    if (this._animators === null) {
-      this._animators = Array.from(this.querySelectorAll("[data-scroll-animate], [data-scroll-range]"));
-    }
-    return this._animators;
-  }
-  _invalidateAnimators() {
-    this._animators = null;
-  }
-  connectedCallback() {
-    this._scrollTarget = getScrollParent(this);
-    super.connectedCallback();
-    this._debugInfo = this.shadowRoot?.querySelector(".tosi-debug");
-    let sections = scrollTargets.get(this._scrollTarget);
-    if (!sections) {
-      sections = new Set;
-      scrollTargets.set(this._scrollTarget, sections);
-      const target = this._scrollTarget;
-      const handler = () => onScroll(target);
-      scrollHandlers.set(target, handler);
-      target.addEventListener("scroll", handler, { passive: true });
-    }
-    sections.add(this);
-    this._observer = new MutationObserver(() => this._invalidateAnimators());
-    this._observer.observe(this, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: ["data-scroll-animate", "data-scroll-range"]
-    });
-    requestAnimationFrame(() => {
-      this.render();
-      this.updateProgress();
-    });
-  }
-  disconnectedCallback() {
-    super.disconnectedCallback();
-    if (this._observer) {
-      this._observer.disconnect();
-      this._observer = null;
-    }
-    this._animators = null;
-    if (this._scrollTarget) {
-      const sections = scrollTargets.get(this._scrollTarget);
-      if (sections) {
-        sections.delete(this);
-        if (sections.size === 0) {
-          scrollTargets.delete(this._scrollTarget);
-          const handler = scrollHandlers.get(this._scrollTarget);
-          if (handler) {
-            this._scrollTarget.removeEventListener("scroll", handler);
-            scrollHandlers.delete(this._scrollTarget);
-          }
-        }
-      }
-    }
-  }
-  render() {
-    super.render();
-    const scrollPct = this._getScrollPct();
-    const viewportPct = this._getViewportPct();
-    const horizontal = this.getAttribute("direction") === "horizontal";
-    const sticky = this.shadowRoot?.querySelector(".tosi-sticky");
-    const container = this._scrollTarget instanceof HTMLElement ? this._scrollTarget : null;
-    const containerSize = container ? horizontal ? container.clientWidth : container.clientHeight : null;
-    const stickyDim = containerSize !== null ? `${viewportPct / 100 * containerSize}px` : `${viewportPct}${horizontal ? "vw" : "vh"}`;
-    const scrollDim = containerSize !== null ? `${scrollPct / 100 * containerSize}px` : `${scrollPct}${horizontal ? "vw" : "vh"}`;
-    if (horizontal) {
-      this.style.width = `calc(${stickyDim} + ${scrollDim})`;
-      this.style.height = "100%";
-      if (sticky) {
-        sticky.style.left = "0";
-        sticky.style.top = "0";
-        sticky.style.width = stickyDim;
-        sticky.style.height = "100%";
-      }
-    } else {
-      this.style.height = `calc(${stickyDim} + ${scrollDim})`;
-      this.style.width = "100%";
-      if (sticky) {
-        sticky.style.top = "0";
-        sticky.style.left = "0";
-        sticky.style.height = stickyDim;
-        sticky.style.width = "100%";
-      }
-    }
-    if (this._debugInfo) {
-      this._debugInfo.hidden = this.getAttribute("debug") !== "true";
-    }
-  }
-  _getScrollPct() {
-    const raw = Number(this.getAttribute("scroll"));
-    return Number.isFinite(raw) && raw > 0 ? raw : 100;
-  }
-  _getViewportPct() {
-    const raw = Number(this.getAttribute("viewport"));
-    return Number.isFinite(raw) && raw > 0 ? raw : 100;
-  }
-  _getScrollAmountPx() {
-    const scrollPct = this._getScrollPct();
-    const horizontal = this.getAttribute("direction") === "horizontal";
-    const container = this._scrollTarget instanceof HTMLElement ? this._scrollTarget : null;
-    if (container) {
-      return scrollPct / 100 * (horizontal ? container.clientWidth : container.clientHeight);
-    }
-    return scrollPct / 100 * (horizontal ? window.innerWidth : window.innerHeight);
-  }
-  updateProgress() {
-    if (!this.isConnected)
-      return;
-    const scrollAmount = this._getScrollAmountPx();
-    if (scrollAmount <= 0)
-      return;
-    const rect = this.getBoundingClientRect();
-    const horizontal = this.getAttribute("direction") === "horizontal";
-    let offset = horizontal ? rect.left : rect.top;
-    if (this._scrollTarget instanceof HTMLElement) {
-      const containerRect = this._scrollTarget.getBoundingClientRect();
-      offset -= horizontal ? containerRect.left : containerRect.top;
-    }
-    const coreProgress = Math.max(0, Math.min(1, -offset / scrollAmount));
-    const overflow = this.overflow;
-    let progress = coreProgress;
-    if (overflow) {
-      const containerSize = horizontal ? this._scrollTarget instanceof HTMLElement ? this._scrollTarget.getBoundingClientRect().width : window.innerWidth : this._scrollTarget instanceof HTMLElement ? this._scrollTarget.getBoundingClientRect().height : window.innerHeight;
-      if (offset > 0) {
-        progress = -(offset / containerSize);
-      } else if (-offset > scrollAmount) {
-        progress = 1 + (-offset - scrollAmount) / containerSize;
-      }
-      progress = Math.max(-1, Math.min(2, progress));
-    }
-    this.dataset.progress = progress.toFixed(3);
-    if (this._debugInfo && !this._debugInfo.hidden) {
-      this._debugInfo.textContent = `Section: ${progress.toFixed(3)}`;
-    }
-    if (reducedMotion.matches) {
-      if (this.scrollCallback) {
-        this.scrollCallback(progress, this);
-      }
-      return;
-    }
-    const animators = this._getAnimators();
-    for (const el of animators) {
-      const rangeStr = el.getAttribute("data-scroll-range") || "0,1";
-      const [start, end] = rangeStr.split(",").map(Number);
-      const range = end - start;
-      const localProgress = range <= 0 ? progress >= end ? 1 : 0 : Math.max(0, Math.min(1, (progress - start) / range));
-      el.style.setProperty("--local-progress", localProgress.toString());
-      el.dataset.localProgress = localProgress.toFixed(3);
-      if (typeof el.setScrollProgress === "function") {
-        el.setScrollProgress(localProgress);
-      } else if (el.getAttribute("data-scroll-animate") === "currentTime" && el.duration) {
-        el.currentTime = localProgress * el.duration;
-      } else if (el.getAttribute("data-scroll-animate") === "lottie" && el.animation && (el instanceof P1 || el.tagName.includes("LOTTIE"))) {
-        el.animation.goToAndStop(localProgress * el.animation.totalFrames, true);
-      } else if (el.scene && (el instanceof v0 || el.tagName.includes("3D"))) {
-        if (el.scene.activeCamera && el.scene.activeCamera.alpha !== undefined) {
-          el.scene.activeCamera.alpha = localProgress * Math.PI * 2;
-        }
-      }
-    }
-    if (this.scrollCallback) {
-      this.scrollCallback(progress, this);
-    }
-  }
-}
-
-class TosiProduct extends u {
-  static styleSpec = {
-    ":host": {
-      display: "block",
-      position: "relative",
-      width: "100%",
-      background: "#000",
-      color: "#fff"
-    }
-  };
-  content = () => slot();
-}
-
-class TosiScrollMapper extends u {
-  scrollCallback = null;
-  static styleSpec = {
-    ":host": {
-      display: "block",
-      width: "100%",
-      height: "100%"
-    }
-  };
-  content = () => slot();
-  connectedCallback() {
-    super.connectedCallback();
-    if (!this.hasAttribute("data-scroll-animate")) {
-      this.setAttribute("data-scroll-animate", "mapper");
-    }
-  }
-  setScrollProgress(progress) {
-    if (this.scrollCallback) {
-      this.scrollCallback(progress);
-    }
-  }
-}
-var tosiProduct = TosiProduct.elementCreator({ tag: "tosi-product" });
-var tosiProductSection = TosiProductSection.elementCreator({
-  tag: "tosi-product-section"
-});
-var tosiScrollMapper = TosiScrollMapper.elementCreator({
-  tag: "tosi-scroll-mapper"
-});
-// src/tosi-filmstrip.ts
-var { canvas } = I;
-
-class TosiFilmstrip extends u {
-  static initAttributes = {
-    src: "",
-    cols: 0,
-    rows: 0,
-    total: 0
-  };
-  _img = null;
-  _ctx = null;
-  _lastProgress = 0;
-  _canvas = null;
-  _loadedSrc = "";
-  _loadId = 0;
-  static styleSpec = {
-    ":host": {
-      display: "block",
-      position: "relative",
-      width: "100%",
-      height: "100%"
-    },
-    canvas: {
-      width: "100%",
-      height: "100%",
-      objectFit: "contain",
-      display: "block"
-    }
-  };
-  content = () => {
-    this._canvas = canvas({ part: "canvas" });
-    return this._canvas;
-  };
-  _parseGrid() {
-    const src = this.getAttribute("src") || "";
-    let cols = Number(this.getAttribute("cols")) || 0;
-    let rows = Number(this.getAttribute("rows")) || 0;
-    let total = Number(this.getAttribute("total")) || 0;
-    if (!cols || !rows || !total) {
-      const match = src.match(/(\d+)x(\d+)_(\d+)\.(webp|jpg|png|data)/i);
-      if (match) {
-        if (!cols)
-          cols = parseInt(match[1]);
-        if (!rows)
-          rows = parseInt(match[2]);
-        if (!total)
-          total = parseInt(match[3]);
-      }
-    }
-    if (!total || !cols || !rows)
-      return null;
-    return { cols, rows, total };
-  }
-  load() {
-    const src = this.getAttribute("src") || "";
-    if (!src)
-      return;
-    const grid = this._parseGrid();
-    if (!grid)
-      return;
-    const loadId = ++this._loadId;
-    this._loadedSrc = src;
-    const img = new Image;
-    img.onload = () => {
-      if (loadId !== this._loadId)
-        return;
-      this._img = img;
-      this.setScrollProgress(this._lastProgress);
-    };
-    img.onerror = () => {
-      if (loadId !== this._loadId)
-        return;
-      console.warn(`[tosi-filmstrip] Failed to load: ${src}`);
-      this._img = null;
-    };
-    img.src = src;
-  }
-  setScrollProgress(progress) {
-    this._lastProgress = progress;
-    if (!this._img)
-      return;
-    const grid = this._parseGrid();
-    if (!grid)
-      return;
-    const { cols, rows, total } = grid;
-    const cvs = this._canvas || this.parts && this.parts.canvas;
-    if (!cvs)
-      return;
-    if (!this._ctx)
-      this._ctx = cvs.getContext("2d");
-    if (!this._ctx)
-      return;
-    const frameIndex = Math.max(0, Math.min(total - 1, Math.floor(progress * total)));
-    const col = frameIndex % cols;
-    const row = Math.floor(frameIndex / cols);
-    const fw = this._img.width / cols;
-    const fh = this._img.height / rows;
-    if (cvs.width !== fw || cvs.height !== fh) {
-      cvs.width = fw;
-      cvs.height = fh;
-    }
-    this._ctx.clearRect(0, 0, fw, fh);
-    this._ctx.drawImage(this._img, col * fw, row * fh, fw, fh, 0, 0, fw, fh);
-  }
-  connectedCallback() {
-    super.connectedCallback();
-    this.load();
-  }
-  disconnectedCallback() {
-    super.disconnectedCallback();
-    this._loadId++;
-    this._img = null;
-  }
-  render() {
-    super.render();
-    const currentSrc = this.getAttribute("src") || "";
-    if (!this._img || this._loadedSrc !== currentSrc) {
-      this.load();
-    } else {
-      this.setScrollProgress(this._lastProgress);
-    }
-  }
-}
-var tosiFilmstrip = TosiFilmstrip.elementCreator({
-  tag: "tosi-filmstrip"
-});
-// src/tosi-interpolator.ts
-var interpolateStrings = (a5, b3, t5) => {
-  const numRegex = /-?\d+(?:\.\d+)?/g;
-  const aNums = Array.from(a5.matchAll(numRegex));
-  const bNums = Array.from(b3.matchAll(numRegex));
-  if (aNums.length > 0 && aNums.length === bNums.length) {
-    let result = "";
-    let lastIndex = 0;
-    for (let i3 = 0;i3 < aNums.length; i3++) {
-      const aMatch = aNums[i3];
-      const bMatch = bNums[i3];
-      result += a5.substring(lastIndex, aMatch.index);
-      const n12 = parseFloat(aMatch[0]);
-      const n22 = parseFloat(bMatch[0]);
-      const interpolated = n12 + (n22 - n12) * t5;
-      let numStr = interpolated.toFixed(4);
-      if (numStr.includes(".")) {
-        numStr = numStr.replace(/0+$/, "").replace(/\.$/, "");
-      }
-      result += numStr;
-      lastIndex = aMatch.index + aMatch[0].length;
-    }
-    result += a5.substring(lastIndex);
-    return result;
-  }
-  const isColor = (s2) => s2.startsWith("#") || s2.startsWith("rgb") || s2.startsWith("hsl") || ["red", "blue", "white", "black", "transparent"].includes(s2);
-  if (isColor(a5) && isColor(b3)) {
-    return `color-mix(in srgb, ${a5} ${Math.round((1 - t5) * 100)}%, ${b3})`;
-  }
-  return t5 < 0.5 ? a5 : b3;
-};
-
-class TosiInterpolator extends u {
-  static styleSpec = {
-    ":host": {
-      display: "contents"
-    }
-  };
-  setScrollProgress(progress) {
-    const waypointsNodes = Array.from(this.querySelectorAll("tosi-waypoint"));
-    if (waypointsNodes.length === 0)
-      return;
-    const waypoints = waypointsNodes.map((w3) => {
-      const styles = {};
-      const htmlEl = w3;
-      for (let i3 = 0;i3 < htmlEl.style.length; i3++) {
-        const prop = htmlEl.style[i3];
-        styles[prop] = htmlEl.style.getPropertyValue(prop);
-      }
-      return {
-        progress: Number(w3.getAttribute("progress") || 0),
-        styles
-      };
-    }).sort((a5, b3) => a5.progress - b3.progress);
-    let wp1 = waypoints[0];
-    let wp2 = waypoints[waypoints.length - 1];
-    let t5 = 0;
-    if (progress <= wp1.progress) {
-      wp2 = wp1;
-      t5 = 0;
-    } else if (progress >= wp2.progress) {
-      wp1 = wp2;
-      t5 = 1;
-    } else {
-      for (let i3 = 0;i3 < waypoints.length - 1; i3++) {
-        if (progress >= waypoints[i3].progress && progress <= waypoints[i3 + 1].progress) {
-          wp1 = waypoints[i3];
-          wp2 = waypoints[i3 + 1];
-          const rawT = (progress - wp1.progress) / (wp2.progress - wp1.progress);
-          const easing = this.getAttribute("easing");
-          if (easing === "ease-in-out") {
-            t5 = rawT < 0.5 ? 2 * rawT * rawT : -1 + (4 - 2 * rawT) * rawT;
-          } else {
-            t5 = rawT;
-          }
-          break;
-        }
-      }
-    }
-    const currentStyles = {};
-    for (const prop in wp1.styles) {
-      const val1 = wp1.styles[prop];
-      const val2 = wp2.styles[prop] || val1;
-      currentStyles[prop] = interpolateStrings(val1, val2, t5);
-    }
-    const targets = Array.from(this.children).filter((c3) => c3.tagName !== "TOSI-WAYPOINT");
-    targets.forEach((target) => {
-      const el = target;
-      for (const prop in currentStyles) {
-        el.style.setProperty(prop, currentStyles[prop]);
-      }
-    });
-  }
-}
-
-class TosiWaypoint extends u {
-  static initAttributes = {
-    progress: 0
-  };
-  static styleSpec = {
-    ":host": {
-      display: "none"
-    }
-  };
-  content = null;
-}
-var tosiInterpolator = TosiInterpolator.elementCreator({
-  tag: "tosi-interpolator"
-});
-var tosiWaypoint = TosiWaypoint.elementCreator({
-  tag: "tosi-waypoint"
-});
-// src/tosi-b3d-scroll.ts
-var { slot: slot2 } = I;
-function findScene(el) {
-  let node = el.parentElement;
-  while (node) {
-    if ("scene" in node)
-      return node;
-    for (const child of Array.from(node.children)) {
-      if (child !== el && "scene" in child)
-        return child;
-    }
-    node = node.parentElement;
-  }
-  return null;
-}
-function easeInOutQuad(t5) {
-  return t5 < 0.5 ? 2 * t5 * t5 : -1 + (4 - 2 * t5) * t5;
-}
-function interpolateWaypoints(progress, waypoints, easing) {
-  if (waypoints.length === 0)
-    return {};
-  if (waypoints.length === 1)
-    return waypoints[0];
-  if (progress <= waypoints[0].progress)
-    return waypoints[0];
-  if (progress >= waypoints[waypoints.length - 1].progress) {
-    return waypoints[waypoints.length - 1];
-  }
-  for (let i3 = 0;i3 < waypoints.length - 1; i3++) {
-    const wp1 = waypoints[i3];
-    const wp2 = waypoints[i3 + 1];
-    if (progress >= wp1.progress && progress <= wp2.progress) {
-      const rawT = (progress - wp1.progress) / (wp2.progress - wp1.progress);
-      const t5 = easing ? easeInOutQuad(rawT) : rawT;
-      const result = {};
-      for (const key in wp1) {
-        if (key === "progress")
-          continue;
-        const v1 = wp1[key] ?? 0;
-        const v23 = wp2[key] ?? v1;
-        result[key] = v1 + (v23 - v1) * t5;
-      }
-      return result;
-    }
-  }
-  return waypoints[0];
-}
-function readWaypoints(host) {
-  return Array.from(host.querySelectorAll("tosi-waypoint")).map((wp) => {
-    const result = {
-      progress: Number(wp.getAttribute("progress") || 0)
-    };
-    for (const attr of Array.from(wp.attributes)) {
-      if (attr.name === "progress")
-        continue;
-      const val = Number(attr.value);
-      if (Number.isFinite(val)) {
-        const key = attr.name.replace(/-([a-z])/g, (_3, c3) => c3.toUpperCase());
-        result[key] = val;
-      }
-    }
-    return result;
-  }).sort((a5, b3) => a5.progress - b3.progress);
-}
-
-class TosiScrollCamera extends u {
-  static initAttributes = {
-    easing: ""
-  };
-  static styleSpec = {
-    ":host": { display: "none" }
-  };
-  content = () => slot2();
-  setScrollProgress(progress) {
-    const owner = findScene(this);
-    if (!owner?.scene?.activeCamera)
-      return;
-    const camera = owner.scene.activeCamera;
-    const waypoints = readWaypoints(this);
-    if (waypoints.length === 0)
-      return;
-    const easing = this.getAttribute("easing") === "ease-in-out";
-    const v3 = interpolateWaypoints(progress, waypoints, easing);
-    if ("alpha" in v3 && camera.alpha !== undefined)
-      camera.alpha = v3.alpha;
-    if ("beta" in v3 && camera.beta !== undefined)
-      camera.beta = v3.beta;
-    if ("radius" in v3 && camera.radius !== undefined)
-      camera.radius = v3.radius;
-    if (camera.target && typeof camera.target.copyFromFloats === "function") {
-      if ("targetX" in v3 || "targetY" in v3 || "targetZ" in v3) {
-        camera.target.copyFromFloats(v3.targetX ?? camera.target.x, v3.targetY ?? camera.target.y, v3.targetZ ?? camera.target.z);
-      }
-    }
-    if (camera.position) {
-      if ("x" in v3)
-        camera.position.x = v3.x;
-      if ("y" in v3)
-        camera.position.y = v3.y;
-      if ("z" in v3)
-        camera.position.z = v3.z;
-    }
-    if ("fov" in v3 && camera.fov !== undefined)
-      camera.fov = v3.fov;
-  }
-}
-
-class TosiScrollTime extends u {
-  static initAttributes = {
-    from: 0,
-    to: 24
-  };
-  static styleSpec = {
-    ":host": { display: "none" }
-  };
-  content = null;
-  setScrollProgress(progress) {
-    const owner = findScene(this);
-    if (!owner)
-      return;
-    const from = Number(this.getAttribute("from")) || 0;
-    const to = Number(this.getAttribute("to")) || 24;
-    const time = from + (to - from) * progress;
-    const skybox = owner.querySelector("tosi-b3d-skybox");
-    if (skybox) {
-      skybox.timeOfDay = time;
-    }
-  }
-}
-
-class TosiScrollAnimation extends u {
-  static initAttributes = {
-    name: ""
-  };
-  static styleSpec = {
-    ":host": { display: "none" }
-  };
-  content = null;
-  _animGroup = null;
-  _started = false;
-  setScrollProgress(progress) {
-    const owner = findScene(this);
-    if (!owner?.scene)
-      return;
-    const name = this.getAttribute("name") || "";
-    if (!name)
-      return;
-    if (!this._animGroup || this._animGroup.name !== name) {
-      this._animGroup = owner.scene.animationGroups?.find((g) => g.name === name);
-      this._started = false;
-    }
-    if (!this._animGroup)
-      return;
-    if (!this._started) {
-      this._animGroup.start(false, 0);
-      this._started = true;
-    }
-    const from = this._animGroup.from ?? 0;
-    const to = this._animGroup.to ?? 1;
-    const frame = from + (to - from) * progress;
-    this._animGroup.goToFrame(frame);
-  }
-  disconnectedCallback() {
-    super.disconnectedCallback();
-    if (this._animGroup && this._started) {
-      this._animGroup.stop();
-    }
-    this._animGroup = null;
-    this._started = false;
-  }
-}
-var tosiScrollCamera = TosiScrollCamera.elementCreator({
-  tag: "tosi-scroll-camera"
-});
-var tosiScrollTime = TosiScrollTime.elementCreator({
-  tag: "tosi-scroll-time"
-});
-var tosiScrollAnimation = TosiScrollAnimation.elementCreator({
-  tag: "tosi-scroll-animation"
-});
-// src/tosi-code.ts
-var prismLoaded = null;
-function loadPrism() {
-  if (prismLoaded)
-    return prismLoaded;
-  prismLoaded = new Promise((resolve) => {
-    const link = document.createElement("link");
-    link.rel = "stylesheet";
-    link.href = "https://cdn.jsdelivr.net/npm/prismjs@1/themes/prism-tomorrow.min.css";
-    document.head.appendChild(link);
-    const script = document.createElement("script");
-    script.src = "https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-core.min.js";
-    script.onload = () => {
-      const markup = document.createElement("script");
-      markup.src = "https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-markup.min.js";
-      markup.onload = () => resolve();
-      document.head.appendChild(markup);
-    };
-    document.head.appendChild(script);
-  });
-  return prismLoaded;
-}
-
-class TosiCode extends u {
-  static initAttributes = {
-    language: "html"
-  };
-  static lightStyleSpec = {
-    ":host": {
-      display: "block"
-    },
-    ":host pre": {
-      background: "rgba(255,255,255,0.05)",
-      border: "1px solid rgba(255,255,255,0.1)",
-      borderRadius: "12px",
-      padding: "1.5em",
-      fontSize: "clamp(0.75rem, 1.5vw, 1rem)",
-      lineHeight: 1.6,
-      maxWidth: "90vw",
-      overflowX: "auto",
-      backdropFilter: "blur(20px)",
-      margin: "1em 0 0",
-      textAlign: "left"
-    },
-    ":host code": {
-      fontFamily: "Consolas, Monaco, 'Courier New', monospace",
-      whiteSpace: "pre"
-    }
-  };
-  content = null;
-  connectedCallback() {
-    super.connectedCallback();
-    this._highlight();
-  }
-  async _highlight() {
-    const raw = this.textContent || "";
-    if (!raw.trim())
-      return;
-    await loadPrism();
-    const lang = this.language || "html";
-    const grammar = globalThis.Prism?.languages?.[lang];
-    const codeEl = document.createElement("code");
-    codeEl.className = `language-${lang}`;
-    if (grammar) {
-      codeEl.innerHTML = globalThis.Prism.highlight(raw.trim(), grammar, lang);
-    } else {
-      codeEl.textContent = raw.trim();
-    }
-    const preEl = document.createElement("pre");
-    preEl.appendChild(codeEl);
-    this.textContent = "";
-    this.appendChild(preEl);
-  }
-}
-var tosiCode = TosiCode.elementCreator({ tag: "tosi-code" });
 // demo/index.ts
+var { div: div2, header, footer, nav, h1: h12, h2: h22, p: p3, span, a: a5 } = I;
+var themes = {
+  midnight: {
+    "--bg": "#08081a",
+    "--fg": "#f0f0f5",
+    "--muted": "#a0a0b8",
+    "--accent": "#9be7ff",
+    "--surface": "rgba(255,255,255,0.06)",
+    "--border": "rgba(255,255,255,0.12)",
+    "--code-bg": "rgba(255,255,255,0.04)"
+  },
+  forest: {
+    "--bg": "#0a1f14",
+    "--fg": "#e8f5ee",
+    "--muted": "#9bbaa6",
+    "--accent": "#7fdba0",
+    "--surface": "rgba(255,255,255,0.06)",
+    "--border": "rgba(255,255,255,0.12)",
+    "--code-bg": "rgba(255,255,255,0.04)"
+  },
+  paper: {
+    "--bg": "#f5f1e8",
+    "--fg": "#1a1815",
+    "--muted": "#6b6862",
+    "--accent": "#7c3aed",
+    "--surface": "rgba(0,0,0,0.04)",
+    "--border": "rgba(0,0,0,0.08)",
+    "--code-bg": "rgba(0,0,0,0.05)"
+  },
+  rose: {
+    "--bg": "#2a0820",
+    "--fg": "#ffeef5",
+    "--muted": "#d8a8c0",
+    "--accent": "#ff80b5",
+    "--surface": "rgba(255,255,255,0.06)",
+    "--border": "rgba(255,255,255,0.12)",
+    "--code-bg": "rgba(255,255,255,0.04)"
+  }
+};
 var style = document.createElement("style");
 style.textContent = `
   *, *::before, *::after { box-sizing: border-box; }
   body {
-    margin: 0; padding: 0; background: #000; color: #fff; overflow-x: hidden;
+    margin: 0; padding: 0;
+    background: var(--bg, #000);
+    color: var(--fg, #fff);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    transition: background-color 0.25s linear;
   }
-  tosi-product-section { display: block !important; width: 100% !important; position: relative !important; }
-  tosi-lottie, tosi-3d, tosi-map, video, tosi-filmstrip {
-    position: absolute !important;
-    top: 0 !important; left: 0 !important;
-    width: 100vw !important; height: 100vh !important;
-    object-fit: cover !important; display: block !important;
+
+  /* === Page chrome === */
+  .page-header, .page-footer, .sticky-bar {
+    background: var(--bg);
+    color: var(--fg);
+    transition:
+      background-color 0.25s linear,
+      color 0.25s linear,
+      border-color 0.25s linear;
   }
-  .overlay {
-    position: absolute !important; top: 0; left: 0;
-    width: 100vw; height: 100vh;
-    display: flex; align-items: center; justify-content: center;
-    pointer-events: none; z-index: 10;
+  .page-header {
+    border-bottom: 1px solid var(--border);
+    padding: 1rem 2rem;
+    display: flex; align-items: center; justify-content: space-between;
   }
-  .hero-text {
-    font-size: clamp(2rem, 8vw, 5rem); font-weight: 800; text-align: center;
-    background: linear-gradient(to bottom, #fff, #999);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-    padding: 0 20px; margin: 0;
-    filter: drop-shadow(0 2px 12px rgba(0,0,0,0.8)) drop-shadow(0 0 40px rgba(0,0,0,0.6));
+  .page-header .brand { font-weight: 700; font-size: 1.1rem; }
+  .page-header nav { display: flex; gap: 1.25rem; }
+  .page-header nav a {
+    color: var(--muted); text-decoration: none; font-size: 0.9rem;
+    transition: color 0.2s ease;
   }
-  .hero { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding-bottom: 18vh; pointer-events: none; z-index: 10; }
-  .hero h1 {
-    font-size: clamp(2rem, 8vw, 6rem); font-weight: 800; text-align: center; margin: 0;
-    background: linear-gradient(to bottom, #fff, #aaa);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  .page-header nav a:hover { color: var(--accent); }
+
+  .sticky-bar {
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0.7rem 2rem;
+    display: flex; align-items: center; justify-content: space-between;
   }
-  .hero p { font-size: clamp(1rem, 2.5vw, 1.5rem); text-align: center; color: #999; margin: 0.5em 0 0; max-width: 600px; padding: 0 20px; }
-  .scroll-hint {
-    position: absolute; left: 50%; bottom: 6vh; transform: translateX(-50%);
-    display: flex; flex-direction: column; align-items: center; gap: 14px;
-    color: rgba(255,255,255,0.55);
-    font-size: 0.7rem; font-weight: 500;
-    letter-spacing: 0.25em; text-transform: uppercase;
-    pointer-events: none; z-index: 11;
+  .sticky-bar .brand { font-weight: 700; font-size: 1rem; }
+  .sticky-bar .progress {
+    font-family: monospace; font-size: 0.8rem; color: var(--muted);
   }
-  .scroll-hint::after {
-    content: ''; display: block;
-    width: 10px; height: 10px;
-    border-right: 1.5px solid currentColor;
-    border-bottom: 1.5px solid currentColor;
-    transform: rotate(45deg);
-    animation: scroll-hint-bounce 1.8s ease-in-out infinite;
+
+  .page-footer {
+    border-top: 1px solid var(--border);
+    padding: 3rem 2rem;
+    text-align: center; color: var(--muted);
   }
-  @keyframes scroll-hint-bounce {
-    0%, 100% { transform: rotate(45deg) translate(0, 0); }
-    50% { transform: rotate(45deg) translate(4px, 4px); }
+  .page-footer p { margin: 0; }
+  .page-footer a { color: var(--accent); text-decoration: none; }
+
+  /* === Scenes === */
+  .scene {
+    height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 2rem; text-align: center; position: relative;
+    background: var(--bg); color: var(--fg);
+    transition: background-color 0.25s linear, color 0.25s linear;
   }
-  @media (prefers-reduced-motion: reduce) {
-    .scroll-hint::after { animation: none; }
+  .scene h1 {
+    font-size: clamp(2.5rem, 9vw, 6rem); margin: 0 0 0.2em; font-weight: 800;
+    letter-spacing: -0.02em;
   }
-  .feature-text {
-    position: absolute; inset: 0;
-    display: flex; align-items: center; justify-content: center;
-    pointer-events: none; z-index: 10;
+  .scene h2 {
+    font-size: clamp(2rem, 6vw, 4rem); margin: 0 0 0.4em; font-weight: 800;
   }
-  .feature-text h2 { font-size: clamp(1.5rem, 5vw, 3.5rem); font-weight: 700; text-align: center; margin: 0; padding: 0 20px; }
-  .feature-text p { font-size: clamp(0.875rem, 2vw, 1.25rem); text-align: center; color: #aaa; margin: 0.5em 0 0; max-width: 500px; padding: 0 20px; }
-  .gradient-bg { position: absolute; inset: 0; z-index: 0; }
-  .nested-scroll { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.2) transparent; }
-  .nested-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
-  .nested-scroll::-webkit-scrollbar-track { background: transparent; }
-  .nested-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
-  .intro-block {
-    background: #050510;
-    padding: clamp(4rem, 14vh, 10rem) 1.5rem;
+  .scene p {
+    font-size: clamp(1rem, 1.6vw, 1.25rem); color: var(--muted);
+    max-width: 580px; margin: 0;
+  }
+  .scene .pill {
+    display: inline-block; margin-top: 1.5em;
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--accent); font-family: monospace; font-size: 0.85rem;
+    padding: 0.5em 1.2em; border-radius: 999px;
+  }
+
+  /* === Markdown intro blocks === */
+  .intro {
+    background: var(--bg); color: var(--fg);
+    padding: clamp(3rem, 10vh, 7rem) 1.5rem;
     display: flex; justify-content: center;
+    transition: background-color 0.25s linear, color 0.25s linear;
   }
-  .intro-block tosi-md {
+  .intro tosi-md {
     display: block; max-width: 640px;
-    font-size: clamp(1rem, 2vw, 1.2rem); line-height: 1.7; color: #bbb;
+    line-height: 1.7; font-size: clamp(1rem, 1.55vw, 1.15rem);
   }
-  .intro-block tosi-md h2 {
-    font-size: clamp(1.5rem, 4vw, 2.5rem); font-weight: 700; margin: 0 0 0.8em;
-    background: linear-gradient(to bottom, #fff, #aaa);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  .intro tosi-md h2 {
+    font-size: clamp(1.6rem, 3.5vw, 2.4rem); margin: 0 0 0.6em; font-weight: 800;
   }
-  .intro-block tosi-md strong { color: #fff; }
-  .intro-block tosi-md code {
-    background: rgba(255,255,255,0.08); padding: 0.1em 0.4em;
+  .intro tosi-md p { color: var(--muted); margin: 0 0 1em; }
+  .intro tosi-md p:last-child { margin: 0; }
+  .intro tosi-md strong { color: var(--fg); }
+  .intro tosi-md code {
+    background: var(--code-bg); padding: 0.12em 0.4em;
     border-radius: 4px; font-size: 0.9em;
-    font-family: Consolas, Monaco, 'Courier New', monospace;
+    font-family: Consolas, Monaco, "Courier New", monospace;
+  }
+
+  /* === Staged reveal feature list === */
+  .feature-list {
+    display: flex; flex-direction: column; align-items: flex-start;
+    gap: 0.5em; max-width: 580px; padding: 0 1.5rem;
+  }
+  .feature-list h2, .feature-list p { text-align: left; }
+  .feature-row {
+    font-size: 1.05rem;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 0.7em 1.1em; margin-top: 0.3em;
+    font-family: monospace; color: var(--fg);
+  }
+
+  /* === Embedded vertical scroll region === */
+  .embed-host {
+    background: var(--bg); padding: clamp(2rem, 5vh, 4rem) 1.5rem;
+    transition: background-color 0.25s linear;
+  }
+  .embed-host h2 {
+    text-align: center; max-width: 720px; margin: 0 auto 0.4em;
+    font-size: clamp(1.5rem, 4vw, 2.2rem);
+  }
+  .embed-host > p {
+    text-align: center; max-width: 560px; margin: 0 auto 2em;
+    color: var(--muted);
+  }
+  .embed-frame {
+    height: 60vh; max-width: 880px; margin: 0 auto;
+    border: 1px solid var(--border); border-radius: 14px;
+    overflow: hidden; background: var(--surface);
+  }
+  .embed-frame.scroll-y { overflow-y: auto; overflow-x: hidden; }
+  .embed-frame.scroll-y::-webkit-scrollbar { width: 8px; }
+  .embed-frame.scroll-y::-webkit-scrollbar-thumb {
+    background: var(--border); border-radius: 4px;
+  }
+  .inner-scene {
+    height: 100%; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 2rem; text-align: center;
+    color: var(--fg);
+  }
+  .inner-scene h3 {
+    font-size: clamp(1.4rem, 3.5vw, 2rem); margin: 0 0 0.3em;
+    background: linear-gradient(180deg, var(--fg), var(--muted));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .inner-scene p {
+    color: var(--fg); max-width: 460px; margin: 0;
+    opacity: 0.85; font-size: 1rem;
+  }
+  .h-card {
+    width: 100%; height: 100%; flex-shrink: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 2rem; text-align: center; color: #fff;
+    white-space: normal;
+  }
+  .h-card h3 { font-size: 1.8rem; margin: 0 0 0.3em; }
+  .h-card p { max-width: 320px; opacity: 0.9; }
+
+  /* === Hero scroll-down arrow uses the theme accent === */
+  .hero-pill {
+    position: absolute; left: 50%; bottom: 6vh; transform: translateX(-50%);
+    color: var(--muted); font-size: 0.7rem;
+    letter-spacing: 0.25em; text-transform: uppercase;
   }
 `;
 document.head.appendChild(style);
-var { div: div2, h1: h12, h2: h22, p: p3, pre, code, span: span2, video } = I;
-var ease = (t5) => t5 < 0.5 ? 2 * t5 * t5 : -1 + (4 - 2 * t5) * t5;
-var overlay = (range, text, options = {}) => tosiInterpolator({ "data-scroll-animate": "interpolator", "data-scroll-range": range }, tosiWaypoint({
+var pageHeader = header({ class: "page-header" }, div2({ class: "brand" }, "tosijs-product"), nav(a5({ href: "https://github.com/tonioloewald/tosijs-product" }, "GitHub"), a5({ href: "https://tosijs.net" }, "tosijs"), a5({ href: "#" }, "Examples")));
+var stickyProgressLabel = span({ class: "progress" }, "0%");
+var stickyHeader = tosiProductHeaderV2({ threshold: 80 }, div2({ class: "sticky-bar" }, div2({ class: "brand" }, "tosijs-product"), stickyProgressLabel));
+var pageFooter = footer({ class: "page-footer" }, p3("Built with ", a5({ href: "https://tosijs.net" }, "tosijs"), ". Source on ", a5({ href: "https://github.com/tonioloewald/tosijs-product" }, "GitHub"), "."));
+var md = (markdown) => div2({ class: "intro" }, I9(markdown));
+var stagedRow = (label, start, end) => tosiInterpolator({
+  "data-scroll-animate": true,
+  "data-scroll-range": `${start},${end}`,
+  easing: "ease-in-out"
+}, tosiWaypoint({
   progress: 0,
-  style: { opacity: 0, transform: "translateY(20px)" }
+  style: { opacity: 0, transform: "translateX(-40px)" }
 }), tosiWaypoint({
   progress: 0.5,
-  style: { opacity: 1, transform: "translateY(0px)" }
+  style: { opacity: 1, transform: "translateX(0px)" }
 }), tosiWaypoint({
   progress: 1,
-  style: { opacity: 0, transform: "translateY(-20px)" }
-}), div2({ class: "overlay", ...options }, h12({ class: "hero-text" }, text)));
-var featureIntro = (title, description, codeText, bg = "#0a0a0a") => tosiProductSection({ scroll: 250, style: { background: bg } }, tosiInterpolator({ "data-scroll-animate": true, easing: "ease-in-out" }, tosiWaypoint({
+  style: { opacity: 1, transform: "translateX(0px)" }
+}), div2({ class: "feature-row" }, "✓ " + label));
+var app = tosiProductV2(tosiProductSectionV2({ scroll: 100, theme: "midnight" }, div2({ class: "scene" }, tosiInterpolator({ "data-scroll-animate": true, easing: "ease-in-out" }, tosiWaypoint({
   progress: 0,
-  style: { opacity: 0, transform: "translateY(60px)" }
-}), tosiWaypoint({
-  progress: 0.3,
-  style: { opacity: 1, transform: "translateY(0px)" }
-}), tosiWaypoint({
-  progress: 0.7,
-  style: { opacity: 1, transform: "translateY(0px)" }
+  style: { transform: "scale(1) translateY(0px)" }
 }), tosiWaypoint({
   progress: 1,
-  style: { opacity: 0, transform: "translateY(-60px)" }
-}), div2({ class: "feature-text", style: { flexDirection: "column" } }, h22(title), p3(description), ...codeText ? [tosiCode({ language: "html" }, codeText)] : [])));
-var hmb = { lat: 37.4636, lng: -122.4286 };
-var oulu = { lat: 65.0121, lng: 25.4651 };
-var app = tosiProduct(tosiProductSection({ scroll: 150, viewport: 70 }, div2({
-  class: "gradient-bg",
-  style: {
-    background: "radial-gradient(ellipse at center, #1a1a2e 0%, #000 120%)"
-  }
-}), tosiInterpolator({ "data-scroll-animate": true }, tosiWaypoint({
-  progress: 0,
-  style: { opacity: 1, transform: "translateY(0px) scale(1)" }
-}), tosiWaypoint({
-  progress: 0.8,
-  style: { opacity: 0, transform: "translateY(-100px) scale(0.9)" }
-}), div2({ class: "hero" }, h12("tosijs-product"), p3("Build scrolling pages that tell your product's story. With HTML."))), tosiInterpolator({ "data-scroll-animate": true }, tosiWaypoint({ progress: 0, style: { opacity: 1 } }), tosiWaypoint({ progress: 0.1, style: { opacity: 0 } }), div2({ class: "scroll-hint" }, "Scroll"))), div2({ class: "intro-block" }, I9(`## What is tosijs-product?
+  style: { transform: "scale(1.4) translateY(20px)" }
+}), h12("tosijs-product")), p3("Build cinematic product pages with HTML."), div2({ class: "hero-pill" }, "scroll"))), md(`## What is tosijs-product?
 
 A small library for building **scroll-driven product pages** — the cinematic, "Apple-style" pages where scrolling becomes the timeline.
 
-Drop in a \`<tosi-product-section>\`, layer in waypoints, video scrubbing, 3D scenes, or maps. Everything is **declarative HTML** — no scroll listeners to wire up.
+You compose a stack of \`<tosi-product-section-v2>\` elements inside a \`<tosi-product-v2>\`. Each section claims a slice of scroll runway: it pins at the viewport top, animations run during pin, then it scrolls out at 1:1 as the next section takes over.
 
-Read on for what each piece does.`)), featureIntro("<tosi-interpolator>", "Scrolling is progress. Orchestrate layers with declarative waypoints — opacity, transforms, any CSS property.", `<tosi-interpolator data-scroll-animate>
-  <tosi-waypoint progress="0.0" style="opacity: 0"></tosi-waypoint>
-  <tosi-waypoint progress="0.5" style="opacity: 1"></tosi-waypoint>
-  <tosi-waypoint progress="1.0" style="opacity: 0"></tosi-waypoint>
-  <div>Your content here</div>
-</tosi-interpolator>`, "#050510"), tosiProductSection({ scroll: 300, style: { background: "#0a0a0a" } }, tosiInterpolator({ "data-scroll-range": "0,0.5", easing: "ease-in-out" }, tosiWaypoint({
+This whole page is one engine. Read on to see what each piece does.`), tosiProductSectionV2({ scroll: 200, theme: "midnight" }, div2({ class: "scene" }, tosiInterpolator({ "data-scroll-animate": true, easing: "ease-in-out" }, tosiWaypoint({
   progress: 0,
-  style: { opacity: 0, transform: "translateX(-80px)" }
+  style: { opacity: 0, transform: "translateY(60px) scale(0.95)" }
 }), tosiWaypoint({
   progress: 0.4,
-  style: { opacity: 1, transform: "translateX(0px)" }
+  style: { opacity: 1, transform: "translateY(0px) scale(1)" }
 }), tosiWaypoint({
   progress: 1,
-  style: { opacity: 0, transform: "translateX(-80px)" }
-}), div2({
-  class: "feature-text",
-  style: {
-    flexDirection: "column",
-    alignItems: "flex-start",
-    paddingLeft: "10vw"
-  }
-}, h22("Scroll Ranges"), p3("Constrain animations to any portion of a section's scroll."))), tosiInterpolator({ "data-scroll-range": "0.5,1", easing: "ease-in-out" }, tosiWaypoint({
+  style: { opacity: 1, transform: "translateY(0px) scale(1)" }
+}), h22("Interpolator")), p3("A waypoint timeline for any CSS property. Set keyframes by progress and let the engine drive the rest."), span({ class: "pill" }, "<tosi-interpolator>"))), md(`## Declarative interpolation
+
+\`<tosi-interpolator>\` interpolates inline styles between \`<tosi-waypoint>\` keyframes as the section's progress moves from 0 to 1. Numbers in transforms, opacity, colors — anything CSS understands.
+
+\`\`\`html
+<tosi-interpolator data-scroll-animate>
+  <tosi-waypoint progress="0" style="opacity: 0"></tosi-waypoint>
+  <tosi-waypoint progress="1" style="opacity: 1"></tosi-waypoint>
+  <div>I fade in.</div>
+</tosi-interpolator>
+\`\`\``), tosiProductSectionV2({ scroll: 300, theme: "midnight" }, div2({ class: "scene" }, div2({ class: "feature-list" }, h22("Staged reveal"), p3("Multiple interpolators in one section, each scoped to a slice of progress with data-scroll-range:"), stagedRow("Sticky window pins the engine", 0.05, 0.2), stagedRow("Stack translates as you scroll", 0.2, 0.35), stagedRow("Sections pin then exit", 0.35, 0.5), stagedRow("Sub-range staging schedules the rest", 0.5, 0.65)))), tosiProductSectionV2({
+  scroll: 250,
+  "theme-from": "midnight",
+  "theme-to": "paper"
+}, div2({ class: "scene" }, tosiInterpolator({ "data-scroll-animate": true, easing: "ease-in-out" }, tosiWaypoint({
   progress: 0,
-  style: { opacity: 0, transform: "translateX(80px)" }
+  style: { transform: "translateY(40px)", opacity: 0 }
 }), tosiWaypoint({
-  progress: 0.5,
-  style: { opacity: 1, transform: "translateX(0px)" }
+  progress: 0.4,
+  style: { transform: "translateY(0px)", opacity: 1 }
 }), tosiWaypoint({
   progress: 1,
-  style: { opacity: 0, transform: "translateX(80px)" }
-}), div2({
-  class: "feature-text",
-  style: {
-    flexDirection: "column",
-    alignItems: "flex-end",
-    paddingRight: "10vw"
-  }
-}, h22("Layer by Layer"), p3("Choreograph multiple elements, each with its own timing.")))), featureIntro("Video Scrubbing", `Scrub any video frame-by-frame via scroll position. Just add data-scroll-animate="currentTime" — you'll want a fast server or CDN.`, `<video src="clip.mp4" data-scroll-animate="currentTime" muted playsinline></video>`), tosiProductSection({ scroll: 300, style: { backgroundColor: "#000" } }, video({
-  src: "demo/assets/agent-owl.mp4",
-  "data-scroll-animate": "currentTime",
-  muted: true,
-  playsinline: true,
-  preload: "auto"
-}), overlay("0.1, 0.5", "Scrub any video. Frame by frame.")), featureIntro("Filmstrip Mosaic", "Convert video into a single mosaic image. No video decode, instant seeking, works everywhere. Use the tosi-mosaic CLI to generate.", `<tosi-filmstrip
-  src="clip_10x10_100.jpg"
-  cols="10" rows="10" total="100"
-  data-scroll-animate
-></tosi-filmstrip>`), tosiProductSection({ scroll: 300, style: { backgroundColor: "#000" } }, tosiFilmstrip({
-  src: "demo/assets/agent-owl_10x10_100.jpg",
-  cols: 10,
-  rows: 10,
-  total: 100,
-  "data-scroll-animate": "true"
-}), overlay("0.1, 0.9", "100 frames. One image. Zero stutter.")), featureIntro("Mapbox Integration", "Travel the world with scroll-linked map navigation. Zoom out, pan across continents, zoom back in.", `<tosi-scroll-mapper>
-  <tosi-map token="pk.ey..."
-    coords="37.46,-122.43,12"
-    map-style="mapbox://styles/mapbox/dark-v11">
-  </tosi-map>
-</tosi-scroll-mapper>`), tosiProductSection({ scroll: 500, style: { backgroundColor: "#fff" } }, tosiScrollMapper({
-  scrollCallback(progress) {
-    const map = this.querySelector("tosi-map");
-    if (!map)
-      return;
-    let moveP = 0;
-    if (progress > 0.1 && progress < 0.9) {
-      moveP = ease((progress - 0.1) / 0.8);
-    } else if (progress >= 0.9) {
-      moveP = 1;
-    }
-    const zp = Math.abs(progress - 0.5) * 2;
-    const zoom = 2 + zp * zp * 10;
-    const lat = hmb.lat + (oulu.lat - hmb.lat) * moveP;
-    const lng = hmb.lng + (oulu.lng - hmb.lng) * moveP;
-    map.coords = `${lat.toFixed(6)},${lng.toFixed(6)},${zoom.toFixed(4)}`;
-  }
-}, O8({
-  token: "pk.eyJ1IjoicG9kcGVyc29uIiwiYSI6ImNqc2JlbWU0bjA1ZmY0YW5ycHZod3VhbWcifQ.arvqfpOqMgFYkKgQ35UScA",
-  coords: `${hmb.lat},${hmb.lng},12`,
-  mapStyle: "mapbox://styles/mapbox/dark-v11",
-  style: { width: "100%", height: "100%", pointerEvents: "none" }
-})), overlay("0, 0.2", "Half Moon Bay"), overlay("0.8, 1.0", "Oulu")), featureIntro("3D Scenes", "Animate BabylonJS scenes with scroll-driven camera waypoints. Load any GLB/glTF model.", `<tosi-scroll-camera data-scroll-animate easing="ease-in-out">
-  <tosi-waypoint progress="0" alpha="-1.57" radius="110"></tosi-waypoint>
-  <tosi-waypoint progress="1" alpha="1.57" radius="76"></tosi-waypoint>
-</tosi-scroll-camera>`), tosiProductSection({ scroll: 400, style: { backgroundColor: "#111" } }, overlay("0, 0.5", "MacBook Neo."), overlay("0.5, 1.0", "Every angle. Pure elegance."), a3({
-  "data-scroll-animate": "babylon",
-  async sceneCreated(element, BABYLON) {
-    const { scene } = element;
-    const camera = new BABYLON.ArcRotateCamera("camera", -Math.PI / 2, Math.PI / 3, 80, new BABYLON.Vector3(0, 10, 0), scene);
-    scene.activeCamera = camera;
-    camera.minZ = 0.1;
-    camera.fov = camera.fov * 0.6;
-    scene.clearColor = new BABYLON.Color4(0, 0, 0, 0);
-    new BABYLON.HemisphericLight("hemi", new BABYLON.Vector3(0, 1, 0), scene).intensity = 0.6;
-    const dir = new BABYLON.DirectionalLight("dir", new BABYLON.Vector3(-1, -2, 1), scene);
-    dir.intensity = 0.8;
-    element.loadScene("demo/assets/", "macbook_neo.glb");
-  }
-}), tosiScrollCamera({ "data-scroll-animate": true, easing: "ease-in-out" }, tosiWaypoint({ progress: 0, alpha: -1.57, beta: 1.2, radius: 110 }), tosiWaypoint({ progress: 0.5, alpha: 0, beta: 1, radius: 70 }), tosiWaypoint({ progress: 1, alpha: 1.57, beta: 1.55, radius: 76 }))), featureIntro("Lottie Animations", "Scrub Lottie/Bodymovin animations with scroll progress. Frame-perfect control over vector animations.", `<tosi-lottie
-  src="animation.json"
-  data-scroll-animate="lottie"
-></tosi-lottie>`), tosiProductSection({
+  style: { transform: "translateY(0px)", opacity: 1 }
+}), h22("Theme transition")), p3("This section interpolates the theme from midnight to paper as you scroll through it. Page header, sticky bar, and footer all follow."), span({ class: "pill" }, 'theme-from="midnight" theme-to="paper"'))), tosiProductSectionV2({ scroll: 100, theme: "paper" }, div2({ class: "scene" }, h22("Paper"), p3("Light theme settled. The chrome above and below switched too."), span({ class: "pill" }, "theme=paper"))), md(`## Theming via CSS variables
+
+Themes are dictionaries of CSS custom properties. The engine writes the active section's resolved values to \`document.documentElement\`, so anything cascading from \`:root\` — including the page header, the sticky overlay, and the footer — re-themes in unison.
+
+For interpolated sections, color values blend through \`color-mix(in srgb, ...)\`; numeric strings interpolate per-number; everything else steps at the midpoint.
+
+\`\`\`html
+<tosi-product-section-v2
+  theme-from="midnight"
+  theme-to="paper">
+  ...
+</tosi-product-section-v2>
+\`\`\``), tosiProductSectionV2({
   scroll: 200,
-  style: { backgroundColor: "#000" }
-}, M3({
-  src: "demo/assets/tosi-platform.json",
-  "data-scroll-animate": "lottie",
-  config: { renderer: "svg", autoplay: false, loop: false }
-}), overlay("0, 0.5", "Scroll-driven vector art."), overlay("0.5, 1.0", "Any Lottie animation. Zero code.")), tosiProductSection({
-  scroll: 200,
-  style: {
-    background: "radial-gradient(ellipse at center, #1a1a2e 0%, #000 70%)"
-  }
-}, tosiInterpolator({ "data-scroll-animate": true, easing: "ease-in-out" }, tosiWaypoint({
+  "theme-from": "paper",
+  "theme-to": "rose"
+}, div2({ class: "scene" }, h22("Dusk"), p3("And back the other way. The transition is just a section with two themes."), span({ class: "pill" }, 'theme-from="paper" theme-to="rose"'))), div2({ class: "embed-host" }, h22("Nested scroll engines"), p3("A tosi-product-v2 inside any scrollable container detects its scroll parent automatically. It works the same in a 60vh card as on the whole page."), div2({ class: "embed-frame scroll-y" }, tosiProductV2(...["Hero", "Intro", "Reveal", "Theme", "Done"].map((label, i3, arr) => tosiProductSectionV2({
+  scroll: 80,
+  theme: ["midnight", "forest", "paper", "rose", "midnight"][i3]
+}, div2({ class: "inner-scene" }, tosiInterpolator({ "data-scroll-animate": true, easing: "ease-in-out" }, tosiWaypoint({
   progress: 0,
-  style: { opacity: 0, transform: "translateY(40px)" }
+  style: { opacity: i3 === 0 ? 1 : 0, transform: "translateY(20px)" }
 }), tosiWaypoint({
-  progress: 0.3,
-  style: { opacity: 1, transform: "translateY(0px)" }
-}), tosiWaypoint({
-  progress: 0.7,
-  style: { opacity: 1, transform: "translateY(0px)" }
+  progress: 0.4,
+  style: { opacity: 1, transform: "translateY(0)" }
 }), tosiWaypoint({
   progress: 1,
-  style: { opacity: 0, transform: "translateY(-40px)" }
-}), div2({ class: "feature-text", style: { flexDirection: "column" } }, h22("One Script Tag"), p3("The IIFE build includes tosijs, tosijs-ui, and tosijs-product. Load it from a CDN and start building."), tosiCode({ language: "html" }, `<script src="https://cdn.jsdelivr.net/npm/tosijs-product/dist/index.js"></script>`)))), div2({ style: { padding: "4em 1em", background: "#111", textAlign: "center" } }, h22({
-  style: { fontSize: "clamp(1.5rem, 4vw, 2.5rem)", margin: "0 0 0.5em" }
-}, "Nested Scroll Containers"), p3({
-  style: { color: "#999", margin: "0 auto 2em", maxWidth: "500px" },
-  innerHTML: "A <code>tosi-product</code> inside an <code>overflow-y: auto</code> div detects its scroll parent automatically."
-}), div2({
-  class: "nested-scroll",
-  style: {
-    height: "60vh",
-    overflowY: "auto",
-    border: "1px solid rgba(255,255,255,0.15)",
-    borderRadius: "12px",
-    maxWidth: "800px",
-    margin: "0 auto",
-    background: "#000"
-  }
-}, tosiProduct(...[
-  [
-    "tosi-product",
-    "Top-level container. Wraps your scroll story.",
-    "#0a0a1a",
-    "#7ec8e3"
-  ],
-  [
-    "tosi-product-section",
-    "Converts scroll offset to 0→1 progress. Sticky viewport pinning.",
-    "#1a0a1a",
-    "#c792ea"
-  ],
-  [
-    "tosi-interpolator",
-    "Declarative CSS interpolation between waypoints.",
-    "#0a1a0a",
-    "#88e0a0"
-  ],
-  [
-    "tosi-filmstrip",
-    "Canvas-based frame animator from a single mosaic image.",
-    "#1a1a0a",
-    "#e0d888"
-  ],
-  [
-    "tosi-scroll-mapper",
-    "Generic scroll progress wrapper with a callback.",
-    "#0a0a1a",
-    "#e08888"
-  ],
-  [
-    "tosi-scroll-camera",
-    "Waypoint-driven camera controller for BabylonJS.",
-    "#1a0a0a",
-    "#c0a0e0"
-  ]
-].map(([name, desc, bg, color], i3, arr) => tosiProductSection({ scroll: 200, style: { background: bg } }, tosiInterpolator({ "data-scroll-animate": true }, tosiWaypoint({
-  progress: 0,
-  style: {
-    opacity: i3 === 0 ? 1 : 0,
-    transform: i3 === 0 ? "translateY(0px)" : "translateY(40px)"
-  }
-}), tosiWaypoint({
-  progress: 0.3,
-  style: { opacity: 1, transform: "translateY(0px)" }
-}), tosiWaypoint({
-  progress: 0.7,
-  style: { opacity: 1, transform: "translateY(0px)" }
-}), tosiWaypoint({
-  progress: 1,
-  style: {
-    opacity: i3 === arr.length - 1 ? 1 : 0,
-    transform: i3 === arr.length - 1 ? "translateY(0px)" : "translateY(-40px)"
-  }
-}), div2({ class: "feature-text", style: { flexDirection: "column" } }, h22({ style: { color } }, `<${name}>`), p3(desc)))))))), div2({
-  style: { padding: "4em 1em", background: "#0a0a0a", textAlign: "center" }
-}, h22({
-  style: { fontSize: "clamp(1.5rem, 4vw, 2.5rem)", margin: "0 0 0.5em" }
-}, "Horizontal Scrolling"), p3({
-  style: { color: "#999", margin: "0 auto 2em", maxWidth: "500px" },
-  innerHTML: 'Set <code>direction="horizontal"</code> for side-scrolling sections.'
-}), div2({
-  class: "nested-scroll",
-  style: {
-    width: "100%",
-    maxWidth: "800px",
-    height: "60vh",
-    overflowX: "auto",
-    overflowY: "hidden",
-    border: "1px solid rgba(255,255,255,0.15)",
-    borderRadius: "12px",
-    margin: "0 auto",
-    background: "#000",
-    whiteSpace: "nowrap"
-  }
-}, tosiProduct({
-  style: {
-    display: "inline-flex",
-    width: "max-content",
-    height: "100%"
-  }
-}, ...[
-  [
-    "tosijs",
-    "A front-end library for leveraging web components and CSS3 with proxy-based state management and O(1) virtual lists.",
-    "#0a1a0a",
-    "#88e0a0"
-  ],
-  [
-    "tosijs-ui",
-    "Web components that complement the DOM instead of fighting it.",
-    "#1a1a0a",
-    "#e0d888"
-  ],
-  [
-    "tosijs-3d",
-    "A declarative 3D library built on BabylonJS.",
-    "#1a0a1a",
-    "#c792ea"
-  ],
-  [
-    "tjs-lang",
-    "Fulfills the promise of JavaScript, Lisp, and Dylan. Transpiles TypeScript, turns types into runtime contracts, provides safe eval.",
-    "#0a0a1a",
-    "#7ec8e3"
-  ]
-].map(([name, desc, bg, color], i3, arr) => tosiProductSection({
-  direction: "horizontal",
-  scroll: i3 === arr.length - 1 ? 0 : 200,
-  style: { background: bg, height: "100%", flexShrink: 0 }
-}, tosiInterpolator({ "data-scroll-animate": true }, tosiWaypoint({
-  progress: 0,
-  style: {
-    opacity: i3 === 0 ? 1 : 0,
-    transform: i3 === 0 ? "translateX(0px)" : "translateX(60px)"
-  }
-}), tosiWaypoint({
-  progress: 0.3,
-  style: { opacity: 1, transform: "translateX(0px)" }
-}), tosiWaypoint({
-  progress: 0.7,
-  style: { opacity: 1, transform: "translateX(0px)" }
-}), tosiWaypoint({
-  progress: 1,
-  style: {
-    opacity: i3 === arr.length - 1 ? 1 : 0,
-    transform: i3 === arr.length - 1 ? "translateX(0px)" : "translateX(-60px)"
-  }
-}), div2({
-  class: "feature-text",
-  style: { flexDirection: "column", whiteSpace: "normal" }
-}, h22({ style: { color } }, name), p3(desc)))))))), div2({
-  style: {
-    textAlign: "center",
-    padding: "4em 1em",
-    background: "#000",
-    color: "#555",
-    fontSize: "0.9rem"
-  }
-}, p3("Built with ", I.a({
-  href: "https://tosijs.net",
-  style: { color: "#7ec8e3", textDecoration: "none" }
-}, "tosijs"))));
-document.body.append(app);
+  style: { opacity: i3 === arr.length - 1 ? 1 : 0.85, transform: "translateY(0)" }
+}), I.h3(label)), p3(`Inner section ${i3 + 1} of ${arr.length}. Note: this engine has its own theme set per section, but it doesn't write to :root — it would override the outer engine.`))))))), tosiProductSectionV2({ scroll: 250, theme: "rose" }, div2({ class: "embed-host", style: { padding: "2rem 1rem", background: "transparent" } }, h22("Horizontal nested engine"), p3("This section pins. Inside the pin, a horizontal tosi-product-v2 in follower mode — its panels slide as the outer's pin progress advances."), div2({ class: "embed-frame", style: { height: "55vh" } }, tosiProductV2({ direction: "horizontal" }, ...[
+  { name: "tosijs", desc: "Web components + proxy state.", bg: "#1a3a4a" },
+  { name: "tosijs-ui", desc: "UI components that respect the DOM.", bg: "#3a3a1a" },
+  { name: "tosijs-3d", desc: "BabylonJS, declaratively.", bg: "#3a1a3a" },
+  { name: "tosijs-product", desc: "You are here.", bg: "#1a1a3a" }
+].map((card) => tosiProductSectionV2({ scroll: 100 }, div2({ class: "h-card", style: { background: card.bg } }, I.h3(card.name), p3(card.desc)))))))), md(`## Get started
+
+\`\`\`html
+<script src="https://cdn.jsdelivr.net/npm/tosijs-product/dist/index.js"></script>
+\`\`\`
+
+Drop the IIFE into any page — \`tosijs\`, \`tosijs-ui\`, and \`tosijs-product\` are all bundled. Or install from npm:
+
+\`\`\`bash
+bun add tosijs-product tosijs tosijs-ui
+\`\`\`
+
+Then compose your scenes in HTML.`));
+app.themes = themes;
+app.defaultTheme = "midnight";
+document.body.appendChild(pageHeader);
+document.body.appendChild(stickyHeader);
+document.body.appendChild(app);
+document.body.appendChild(pageFooter);
+window.addEventListener("scroll", () => {
+  requestAnimationFrame(() => {
+    const docH = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = docH > 0 ? Math.round(window.scrollY / docH * 100) : 0;
+    stickyProgressLabel.textContent = `${pct}%`;
+  });
+}, { passive: true });

@@ -1,6 +1,7 @@
 import {
   tosiProductV2,
   tosiProductSectionV2,
+  tosiProductHeaderV2,
   TosiProductV2,
 } from "../src/tosi-product-v2";
 import { elements } from "tosijs";
@@ -74,9 +75,8 @@ style.textContent = `
   }
   .page-header nav a:hover { color: var(--accent); }
 
-  /* === Sticky header (fixed, slides in after scroll) === */
-  .sticky-header {
-    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  /* === Sticky header content (the chrome lives inside tosi-product-header-v2) === */
+  .sticky-bar {
     background: color-mix(in srgb, var(--bg) 85%, transparent);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
@@ -84,16 +84,13 @@ style.textContent = `
     border-bottom: 1px solid var(--border);
     padding: 0.7rem 2rem;
     display: flex; align-items: center; justify-content: space-between;
-    transform: translateY(-100%);
     transition:
-      transform 0.3s cubic-bezier(.5,0,.2,1),
       background-color 0.3s linear,
       color 0.3s linear,
       border-color 0.3s linear;
   }
-  .sticky-header.visible { transform: translateY(0); }
-  .sticky-header .brand { font-weight: 700; font-size: 1rem; }
-  .sticky-header .progress {
+  .sticky-bar .brand { font-weight: 700; font-size: 1rem; }
+  .sticky-bar .progress {
     font-family: monospace; font-size: 0.8rem; color: var(--muted);
   }
 
@@ -154,11 +151,16 @@ const pageHeader = header(
 );
 
 // === Sticky header (overlay) ==================================================
+// tosi-product-header-v2 handles show/hide animation; the slotted .sticky-bar
+// provides the chrome and inherits theme vars from :root.
 const stickyProgress = span({ class: "progress" }, "0%");
-const stickyHeader = header(
-  { class: "sticky-header", id: "sticky" },
-  div({ class: "brand" }, "tosijs-product"),
-  stickyProgress
+const stickyHeader = tosiProductHeaderV2(
+  { threshold: 80 },
+  div(
+    { class: "sticky-bar" },
+    div({ class: "brand" }, "tosijs-product"),
+    stickyProgress
+  )
 );
 
 // === Engine ==================================================================
@@ -260,17 +262,15 @@ document.body.appendChild(stickyHeader);
 document.body.appendChild(app);
 document.body.appendChild(pageFooter);
 
-// === Sticky header behavior ===============================================
-// Show after scrolling past the page header height; update progress text.
-let lastScroll = 0;
-const STICKY_THRESHOLD = 80;
+// Show/hide is handled by tosi-product-header-v2; we just keep the progress
+// percentage in sync with scroll position.
 function onPageScroll() {
   const y = window.scrollY;
-  stickyHeader.classList.toggle("visible", y > STICKY_THRESHOLD);
   const docHeight = document.documentElement.scrollHeight - window.innerHeight;
   const pct = docHeight > 0 ? Math.round((y / docHeight) * 100) : 0;
   stickyProgress.textContent = `${pct}%`;
-  lastScroll = y;
 }
-window.addEventListener("scroll", () => requestAnimationFrame(onPageScroll), { passive: true });
+window.addEventListener("scroll", () => requestAnimationFrame(onPageScroll), {
+  passive: true,
+});
 onPageScroll();

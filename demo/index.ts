@@ -1,711 +1,511 @@
-// TODO: Mapbox and BabylonJS sections still require JS callbacks.
-// Goal is 100% declarative — needs tosi-interpolator to support writing
-// interpolated values as properties/attributes on target elements (not just
-// CSS styles), and tosi-map/tosi-3d to expose more declarative config.
-// Waiting on tosijs-ui component features to make this possible.
-
 import {
-  tosiProduct,
-  tosiProductSection,
-  tosiScrollMapper,
-  tosiFilmstrip,
-  tosiWaypoint,
-  tosiInterpolator,
-  tosiScrollCamera,
-  tosiCode,
-} from "../src/index";
-import { markdownViewer, bodymovinPlayer, b3d, mapBox } from "tosijs-ui";
+  tosiProductV2,
+  tosiProductSectionV2,
+  tosiProductHeaderV2,
+  TosiProductV2,
+} from "../src/tosi-product-v2";
+import { tosiInterpolator, tosiWaypoint } from "../src/tosi-interpolator";
+import { tosiCode } from "../src/tosi-code";
+import { markdownViewer } from "tosijs-ui";
 import { elements } from "tosijs";
 
+const { div, header, footer, nav, h1, h2, p, span, a } = elements;
+
+// === Themes =================================================================
+const themes = {
+  midnight: {
+    "--bg": "#08081a",
+    "--fg": "#f0f0f5",
+    "--muted": "#a0a0b8",
+    "--accent": "#9be7ff",
+    "--surface": "rgba(255,255,255,0.06)",
+    "--border": "rgba(255,255,255,0.12)",
+    "--code-bg": "rgba(255,255,255,0.04)",
+  },
+  forest: {
+    "--bg": "#0a1f14",
+    "--fg": "#e8f5ee",
+    "--muted": "#9bbaa6",
+    "--accent": "#7fdba0",
+    "--surface": "rgba(255,255,255,0.06)",
+    "--border": "rgba(255,255,255,0.12)",
+    "--code-bg": "rgba(255,255,255,0.04)",
+  },
+  paper: {
+    "--bg": "#f5f1e8",
+    "--fg": "#1a1815",
+    "--muted": "#6b6862",
+    "--accent": "#7c3aed",
+    "--surface": "rgba(0,0,0,0.04)",
+    "--border": "rgba(0,0,0,0.08)",
+    "--code-bg": "rgba(0,0,0,0.05)",
+  },
+  rose: {
+    "--bg": "#2a0820",
+    "--fg": "#ffeef5",
+    "--muted": "#d8a8c0",
+    "--accent": "#ff80b5",
+    "--surface": "rgba(255,255,255,0.06)",
+    "--border": "rgba(255,255,255,0.12)",
+    "--code-bg": "rgba(255,255,255,0.04)",
+  },
+};
+
+// === Styles =================================================================
 const style = document.createElement("style");
 style.textContent = `
   *, *::before, *::after { box-sizing: border-box; }
   body {
-    margin: 0; padding: 0; background: #000; color: #fff; overflow-x: hidden;
+    margin: 0; padding: 0;
+    background: var(--bg, #000);
+    color: var(--fg, #fff);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    transition: background-color 0.25s linear;
   }
-  tosi-product-section { display: block !important; width: 100% !important; position: relative !important; }
-  tosi-lottie, tosi-3d, tosi-map, video, tosi-filmstrip {
-    position: absolute !important;
-    top: 0 !important; left: 0 !important;
-    width: 100vw !important; height: 100vh !important;
-    object-fit: cover !important; display: block !important;
+
+  /* === Page chrome === */
+  .page-header, .page-footer, .sticky-bar {
+    background: var(--bg);
+    color: var(--fg);
+    transition:
+      background-color 0.25s linear,
+      color 0.25s linear,
+      border-color 0.25s linear;
   }
-  .overlay {
-    position: absolute !important; top: 0; left: 0;
-    width: 100vw; height: 100vh;
-    display: flex; align-items: center; justify-content: center;
-    pointer-events: none; z-index: 10;
+  .page-header {
+    border-bottom: 1px solid var(--border);
+    padding: 1rem 2rem;
+    display: flex; align-items: center; justify-content: space-between;
   }
-  .hero-text {
-    font-size: clamp(2rem, 8vw, 5rem); font-weight: 800; text-align: center;
-    background: linear-gradient(to bottom, #fff, #999);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-    padding: 0 20px; margin: 0;
-    filter: drop-shadow(0 2px 12px rgba(0,0,0,0.8)) drop-shadow(0 0 40px rgba(0,0,0,0.6));
+  .page-header .brand { font-weight: 700; font-size: 1.1rem; }
+  .page-header nav { display: flex; gap: 1.25rem; }
+  .page-header nav a {
+    color: var(--muted); text-decoration: none; font-size: 0.9rem;
+    transition: color 0.2s ease;
   }
-  .hero { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding-bottom: 18vh; pointer-events: none; z-index: 10; }
-  .hero h1 {
-    font-size: clamp(2rem, 8vw, 6rem); font-weight: 800; text-align: center; margin: 0;
-    background: linear-gradient(to bottom, #fff, #aaa);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  .page-header nav a:hover { color: var(--accent); }
+
+  .sticky-bar {
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0.7rem 2rem;
+    display: flex; align-items: center; justify-content: space-between;
   }
-  .hero p { font-size: clamp(1rem, 2.5vw, 1.5rem); text-align: center; color: #999; margin: 0.5em 0 0; max-width: 600px; padding: 0 20px; }
-  .scroll-hint {
-    position: absolute; left: 50%; bottom: 6vh; transform: translateX(-50%);
-    display: flex; flex-direction: column; align-items: center; gap: 14px;
-    color: rgba(255,255,255,0.55);
-    font-size: 0.7rem; font-weight: 500;
-    letter-spacing: 0.25em; text-transform: uppercase;
-    pointer-events: none; z-index: 11;
+  .sticky-bar .brand { font-weight: 700; font-size: 1rem; }
+  .sticky-bar .progress {
+    font-family: monospace; font-size: 0.8rem; color: var(--muted);
   }
-  .scroll-hint::after {
-    content: ''; display: block;
-    width: 10px; height: 10px;
-    border-right: 1.5px solid currentColor;
-    border-bottom: 1.5px solid currentColor;
-    transform: rotate(45deg);
-    animation: scroll-hint-bounce 1.8s ease-in-out infinite;
+
+  .page-footer {
+    border-top: 1px solid var(--border);
+    padding: 3rem 2rem;
+    text-align: center; color: var(--muted);
   }
-  @keyframes scroll-hint-bounce {
-    0%, 100% { transform: rotate(45deg) translate(0, 0); }
-    50% { transform: rotate(45deg) translate(4px, 4px); }
+  .page-footer p { margin: 0; }
+  .page-footer a { color: var(--accent); text-decoration: none; }
+
+  /* === Scenes === */
+  .scene {
+    height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 2rem; text-align: center; position: relative;
+    background: var(--bg); color: var(--fg);
+    transition: background-color 0.25s linear, color 0.25s linear;
   }
-  @media (prefers-reduced-motion: reduce) {
-    .scroll-hint::after { animation: none; }
+  .scene h1 {
+    font-size: clamp(2.5rem, 9vw, 6rem); margin: 0 0 0.2em; font-weight: 800;
+    letter-spacing: -0.02em;
   }
-  .feature-text {
-    position: absolute; inset: 0;
-    display: flex; align-items: center; justify-content: center;
-    pointer-events: none; z-index: 10;
+  .scene h2 {
+    font-size: clamp(2rem, 6vw, 4rem); margin: 0 0 0.4em; font-weight: 800;
   }
-  .feature-text h2 { font-size: clamp(1.5rem, 5vw, 3.5rem); font-weight: 700; text-align: center; margin: 0; padding: 0 20px; }
-  .feature-text p { font-size: clamp(0.875rem, 2vw, 1.25rem); text-align: center; color: #aaa; margin: 0.5em 0 0; max-width: 500px; padding: 0 20px; }
-  .gradient-bg { position: absolute; inset: 0; z-index: 0; }
-  .nested-scroll { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.2) transparent; }
-  .nested-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
-  .nested-scroll::-webkit-scrollbar-track { background: transparent; }
-  .nested-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
-  .intro-block {
-    background: #050510;
-    padding: clamp(4rem, 14vh, 10rem) 1.5rem;
+  .scene p {
+    font-size: clamp(1rem, 1.6vw, 1.25rem); color: var(--muted);
+    max-width: 580px; margin: 0;
+  }
+  .scene .pill {
+    display: inline-block; margin-top: 1.5em;
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--accent); font-family: monospace; font-size: 0.85rem;
+    padding: 0.5em 1.2em; border-radius: 999px;
+  }
+
+  /* === Markdown intro blocks === */
+  .intro {
+    background: var(--bg); color: var(--fg);
+    padding: clamp(3rem, 10vh, 7rem) 1.5rem;
     display: flex; justify-content: center;
+    transition: background-color 0.25s linear, color 0.25s linear;
   }
-  .intro-block tosi-md {
+  .intro tosi-md {
     display: block; max-width: 640px;
-    font-size: clamp(1rem, 2vw, 1.2rem); line-height: 1.7; color: #bbb;
+    line-height: 1.7; font-size: clamp(1rem, 1.55vw, 1.15rem);
   }
-  .intro-block tosi-md h2 {
-    font-size: clamp(1.5rem, 4vw, 2.5rem); font-weight: 700; margin: 0 0 0.8em;
-    background: linear-gradient(to bottom, #fff, #aaa);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  .intro tosi-md h2 {
+    font-size: clamp(1.6rem, 3.5vw, 2.4rem); margin: 0 0 0.6em; font-weight: 800;
   }
-  .intro-block tosi-md strong { color: #fff; }
-  .intro-block tosi-md code {
-    background: rgba(255,255,255,0.08); padding: 0.1em 0.4em;
+  .intro tosi-md p { color: var(--muted); margin: 0 0 1em; }
+  .intro tosi-md p:last-child { margin: 0; }
+  .intro tosi-md strong { color: var(--fg); }
+  .intro tosi-md code {
+    background: var(--code-bg); padding: 0.12em 0.4em;
     border-radius: 4px; font-size: 0.9em;
-    font-family: Consolas, Monaco, 'Courier New', monospace;
+    font-family: Consolas, Monaco, "Courier New", monospace;
+  }
+
+  /* === Staged reveal feature list === */
+  .feature-list {
+    display: flex; flex-direction: column; align-items: flex-start;
+    gap: 0.5em; max-width: 580px; padding: 0 1.5rem;
+  }
+  .feature-list h2, .feature-list p { text-align: left; }
+  .feature-row {
+    font-size: 1.05rem;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 0.7em 1.1em; margin-top: 0.3em;
+    font-family: monospace; color: var(--fg);
+  }
+
+  /* === Embedded vertical scroll region === */
+  .embed-host {
+    background: var(--bg); padding: clamp(2rem, 5vh, 4rem) 1.5rem;
+    transition: background-color 0.25s linear;
+  }
+  .embed-host h2 {
+    text-align: center; max-width: 720px; margin: 0 auto 0.4em;
+    font-size: clamp(1.5rem, 4vw, 2.2rem);
+  }
+  .embed-host > p {
+    text-align: center; max-width: 560px; margin: 0 auto 2em;
+    color: var(--muted);
+  }
+  .embed-frame {
+    height: 60vh; max-width: 880px; margin: 0 auto;
+    border: 1px solid var(--border); border-radius: 14px;
+    overflow: hidden; background: var(--surface);
+  }
+  .embed-frame.scroll-y { overflow-y: auto; overflow-x: hidden; }
+  .embed-frame.scroll-y::-webkit-scrollbar { width: 8px; }
+  .embed-frame.scroll-y::-webkit-scrollbar-thumb {
+    background: var(--border); border-radius: 4px;
+  }
+  .inner-scene {
+    height: 100%; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 2rem; text-align: center;
+    color: var(--fg);
+  }
+  .inner-scene h3 {
+    font-size: clamp(1.4rem, 3.5vw, 2rem); margin: 0 0 0.3em;
+    background: linear-gradient(180deg, var(--fg), var(--muted));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .inner-scene p {
+    color: var(--fg); max-width: 460px; margin: 0;
+    opacity: 0.85; font-size: 1rem;
+  }
+  .h-card {
+    width: 100%; height: 100%; flex-shrink: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 2rem; text-align: center; color: #fff;
+    white-space: normal;
+  }
+  .h-card h3 { font-size: 1.8rem; margin: 0 0 0.3em; }
+  .h-card p { max-width: 320px; opacity: 0.9; }
+
+  /* === Hero scroll-down arrow uses the theme accent === */
+  .hero-pill {
+    position: absolute; left: 50%; bottom: 6vh; transform: translateX(-50%);
+    color: var(--muted); font-size: 0.7rem;
+    letter-spacing: 0.25em; text-transform: uppercase;
   }
 `;
 document.head.appendChild(style);
 
-const { div, h1, h2, p, pre, code, span, video } = elements;
-const ease = (t: number) => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t);
+// === Page chrome ============================================================
+const pageHeader = header(
+  { class: "page-header" },
+  div({ class: "brand" }, "tosijs-product"),
+  nav(
+    a({ href: "https://github.com/tonioloewald/tosijs-product" }, "GitHub"),
+    a({ href: "https://tosijs.net" }, "tosijs"),
+    a({ href: "#" }, "Examples")
+  )
+);
 
-// --- helpers ---
+const stickyProgressLabel = span({ class: "progress" }, "0%");
+const stickyHeader = tosiProductHeaderV2(
+  { threshold: 80 },
+  div(
+    { class: "sticky-bar" },
+    div({ class: "brand" }, "tosijs-product"),
+    stickyProgressLabel
+  )
+);
 
-const overlay = (range: string, text: string, options: any = {}) =>
+const pageFooter = footer(
+  { class: "page-footer" },
+  p(
+    "Built with ",
+    a({ href: "https://tosijs.net" }, "tosijs"),
+    ". Source on ",
+    a({ href: "https://github.com/tonioloewald/tosijs-product" }, "GitHub"),
+    "."
+  )
+);
+
+// === Helpers ================================================================
+const md = (markdown: string) =>
+  div({ class: "intro" }, markdownViewer(markdown));
+
+const stagedRow = (label: string, start: number, end: number) =>
   tosiInterpolator(
-    { "data-scroll-animate": "interpolator", "data-scroll-range": range },
+    {
+      "data-scroll-animate": true,
+      "data-scroll-range": `${start},${end}`,
+      easing: "ease-in-out",
+    },
     tosiWaypoint({
       progress: 0,
-      style: { opacity: 0, transform: "translateY(20px)" },
+      style: { opacity: 0, transform: "translateX(-40px)" },
     }),
     tosiWaypoint({
       progress: 0.5,
-      style: { opacity: 1, transform: "translateY(0px)" },
+      style: { opacity: 1, transform: "translateX(0px)" },
     }),
     tosiWaypoint({
       progress: 1,
-      style: { opacity: 0, transform: "translateY(-20px)" },
+      style: { opacity: 1, transform: "translateX(0px)" },
     }),
-    div({ class: "overlay", ...options }, h1({ class: "hero-text" }, text))
+    div({ class: "feature-row" }, "✓ " + label)
   );
 
-const featureIntro = (
-  title: string,
-  description: string,
-  codeText: string,
-  bg = "#0a0a0a"
-) =>
-  tosiProductSection(
-    { scroll: 250, style: { background: bg } },
-    tosiInterpolator(
-      { "data-scroll-animate": true, easing: "ease-in-out" },
-      tosiWaypoint({
-        progress: 0.0,
-        style: { opacity: 0, transform: "translateY(60px)" },
-      }),
-      tosiWaypoint({
-        progress: 0.3,
-        style: { opacity: 1, transform: "translateY(0px)" },
-      }),
-      tosiWaypoint({
-        progress: 0.7,
-        style: { opacity: 1, transform: "translateY(0px)" },
-      }),
-      tosiWaypoint({
-        progress: 1.0,
-        style: { opacity: 0, transform: "translateY(-60px)" },
-      }),
-      div(
-        { class: "feature-text", style: { flexDirection: "column" } },
-        h2(title),
-        p(description),
-        ...(codeText ? [tosiCode({ language: "html" }, codeText)] : [])
-      )
-    )
-  );
-
-// --- data ---
-
-const hmb = { lat: 37.4636, lng: -122.4286 };
-const oulu = { lat: 65.0121, lng: 25.4651 };
-
-// --- app ---
-
-const app = tosiProduct(
+// === Engine =================================================================
+const app = tosiProductV2(
   // ===== HERO =====
-  tosiProductSection(
-    { scroll: 150, viewport: 70 },
-    div({
-      class: "gradient-bg",
-      style: {
-        background: "radial-gradient(ellipse at center, #1a1a2e 0%, #000 120%)",
-      },
-    }),
-    tosiInterpolator(
-      { "data-scroll-animate": true },
-      tosiWaypoint({
-        progress: 0.0,
-        style: { opacity: 1, transform: "translateY(0px) scale(1)" },
-      }),
-      tosiWaypoint({
-        progress: 0.8,
-        style: { opacity: 0, transform: "translateY(-100px) scale(0.9)" },
-      }),
-      div(
-        { class: "hero" },
-        h1("tosijs-product"),
-        p("Build scrolling pages that tell your product's story. With HTML.")
-      )
-    ),
-    tosiInterpolator(
-      { "data-scroll-animate": true },
-      tosiWaypoint({ progress: 0.0, style: { opacity: 1 } }),
-      tosiWaypoint({ progress: 0.1, style: { opacity: 0 } }),
-      div({ class: "scroll-hint" }, "Scroll")
+  tosiProductSectionV2(
+    { scroll: 100, theme: "midnight" },
+    div(
+      { class: "scene" },
+      tosiInterpolator(
+        { "data-scroll-animate": true, easing: "ease-in-out" },
+        tosiWaypoint({
+          progress: 0.0,
+          style: { transform: "scale(1) translateY(0px)" },
+        }),
+        tosiWaypoint({
+          progress: 1.0,
+          style: { transform: "scale(1.4) translateY(20px)" },
+        }),
+        h1("tosijs-product")
+      ),
+      p("Build cinematic product pages with HTML."),
+      div({ class: "hero-pill" }, "scroll")
     )
   ),
 
   // ===== INTRO =====
-  div(
-    { class: "intro-block" },
-    markdownViewer(
-      `## What is tosijs-product?
+  md(
+    `## What is tosijs-product?
 
 A small library for building **scroll-driven product pages** — the cinematic, "Apple-style" pages where scrolling becomes the timeline.
 
-Drop in a \`<tosi-product-section>\`, layer in waypoints, video scrubbing, 3D scenes, or maps. Everything is **declarative HTML** — no scroll listeners to wire up.
+You compose a stack of \`<tosi-product-section-v2>\` elements inside a \`<tosi-product-v2>\`. Each section claims a slice of scroll runway: it pins at the viewport top, animations run during pin, then it scrolls out at 1:1 as the next section takes over.
 
-Read on for what each piece does.`
+This whole page is one engine. Read on to see what each piece does.`
+  ),
+
+  // ===== INTERPOLATOR BASICS =====
+  tosiProductSectionV2(
+    { scroll: 200, theme: "midnight" },
+    div(
+      { class: "scene" },
+      tosiInterpolator(
+        { "data-scroll-animate": true, easing: "ease-in-out" },
+        tosiWaypoint({
+          progress: 0.0,
+          style: { opacity: 0, transform: "translateY(60px) scale(0.95)" },
+        }),
+        tosiWaypoint({
+          progress: 0.4,
+          style: { opacity: 1, transform: "translateY(0px) scale(1)" },
+        }),
+        tosiWaypoint({
+          progress: 1.0,
+          style: { opacity: 1, transform: "translateY(0px) scale(1)" },
+        }),
+        h2("Interpolator")
+      ),
+      p("A waypoint timeline for any CSS property. Set keyframes by progress and let the engine drive the rest."),
+      span({ class: "pill" }, "<tosi-interpolator>")
     )
   ),
 
-  // ===== 1. INTERPOLATOR =====
-  featureIntro(
-    "<tosi-interpolator>",
-    "Scrolling is progress. Orchestrate layers with declarative waypoints — opacity, transforms, any CSS property.",
-    `<tosi-interpolator data-scroll-animate>
-  <tosi-waypoint progress="0.0" style="opacity: 0"></tosi-waypoint>
-  <tosi-waypoint progress="0.5" style="opacity: 1"></tosi-waypoint>
-  <tosi-waypoint progress="1.0" style="opacity: 0"></tosi-waypoint>
-  <div>Your content here</div>
-</tosi-interpolator>`,
-    "#050510"
+  md(
+    `## Declarative interpolation
+
+\`<tosi-interpolator>\` interpolates inline styles between \`<tosi-waypoint>\` keyframes as the section's progress moves from 0 to 1. Numbers in transforms, opacity, colors — anything CSS understands.
+
+\`\`\`html
+<tosi-interpolator data-scroll-animate>
+  <tosi-waypoint progress="0" style="opacity: 0"></tosi-waypoint>
+  <tosi-waypoint progress="1" style="opacity: 1"></tosi-waypoint>
+  <div>I fade in.</div>
+</tosi-interpolator>
+\`\`\``
   ),
 
-  tosiProductSection(
-    { scroll: 300, style: { background: "#0a0a0a" } },
-    tosiInterpolator(
-      { "data-scroll-range": "0,0.5", easing: "ease-in-out" },
-      tosiWaypoint({
-        progress: 0.0,
-        style: { opacity: 0, transform: "translateX(-80px)" },
-      }),
-      tosiWaypoint({
-        progress: 0.4,
-        style: { opacity: 1, transform: "translateX(0px)" },
-      }),
-      tosiWaypoint({
-        progress: 1.0,
-        style: { opacity: 0, transform: "translateX(-80px)" },
-      }),
+  // ===== STAGED REVEAL =====
+  tosiProductSectionV2(
+    { scroll: 300, theme: "midnight" },
+    div(
+      { class: "scene" },
       div(
-        {
-          class: "feature-text",
-          style: {
-            flexDirection: "column",
-            alignItems: "flex-start",
-            paddingLeft: "10vw",
-          },
-        },
-        h2("Scroll Ranges"),
-        p("Constrain animations to any portion of a section's scroll.")
-      )
-    ),
-    tosiInterpolator(
-      { "data-scroll-range": "0.5,1", easing: "ease-in-out" },
-      tosiWaypoint({
-        progress: 0.0,
-        style: { opacity: 0, transform: "translateX(80px)" },
-      }),
-      tosiWaypoint({
-        progress: 0.5,
-        style: { opacity: 1, transform: "translateX(0px)" },
-      }),
-      tosiWaypoint({
-        progress: 1.0,
-        style: { opacity: 0, transform: "translateX(80px)" },
-      }),
-      div(
-        {
-          class: "feature-text",
-          style: {
-            flexDirection: "column",
-            alignItems: "flex-end",
-            paddingRight: "10vw",
-          },
-        },
-        h2("Layer by Layer"),
-        p("Choreograph multiple elements, each with its own timing.")
+        { class: "feature-list" },
+        h2("Staged reveal"),
+        p("Multiple interpolators in one section, each scoped to a slice of progress with data-scroll-range:"),
+        stagedRow("Sticky window pins the engine", 0.05, 0.2),
+        stagedRow("Stack translates as you scroll", 0.2, 0.35),
+        stagedRow("Sections pin then exit", 0.35, 0.5),
+        stagedRow("Sub-range staging schedules the rest", 0.5, 0.65)
       )
     )
   ),
 
-  // ===== 2. VIDEO SCRUBBING =====
-  featureIntro(
-    "Video Scrubbing",
-    'Scrub any video frame-by-frame via scroll position. Just add data-scroll-animate="currentTime" — you\'ll want a fast server or CDN.',
-    `<video src="clip.mp4" data-scroll-animate="currentTime" muted playsinline></video>`
-  ),
-
-  tosiProductSection(
-    { scroll: 300, style: { backgroundColor: "#000" } },
-    video({
-      src: "demo/assets/agent-owl.mp4",
-      "data-scroll-animate": "currentTime",
-      muted: true,
-      playsinline: true,
-      preload: "auto",
-    }),
-    overlay("0.1, 0.5", "Scrub any video. Frame by frame.")
-  ),
-
-  // ===== 3. FILMSTRIP MOSAIC =====
-  featureIntro(
-    "Filmstrip Mosaic",
-    "Convert video into a single mosaic image. No video decode, instant seeking, works everywhere. Use the tosi-mosaic CLI to generate.",
-    `<tosi-filmstrip
-  src="clip_10x10_100.jpg"
-  cols="10" rows="10" total="100"
-  data-scroll-animate
-></tosi-filmstrip>`
-  ),
-
-  tosiProductSection(
-    { scroll: 300, style: { backgroundColor: "#000" } },
-    tosiFilmstrip({
-      src: "demo/assets/agent-owl_10x10_100.jpg",
-      cols: 10,
-      rows: 10,
-      total: 100,
-      "data-scroll-animate": "true",
-    }),
-    overlay("0.1, 0.9", "100 frames. One image. Zero stutter.")
-  ),
-
-  // ===== 4. MAPBOX =====
-  featureIntro(
-    "Mapbox Integration",
-    "Travel the world with scroll-linked map navigation. Zoom out, pan across continents, zoom back in.",
-    `<tosi-scroll-mapper>
-  <tosi-map token="pk.ey..."
-    coords="37.46,-122.43,12"
-    map-style="mapbox://styles/mapbox/dark-v11">
-  </tosi-map>
-</tosi-scroll-mapper>`
-  ),
-
-  tosiProductSection(
-    { scroll: 500, style: { backgroundColor: "#fff" } },
-    tosiScrollMapper(
-      {
-        scrollCallback(progress: number) {
-          const map = (this as any).querySelector("tosi-map");
-          if (!map) return;
-          let moveP = 0;
-          if (progress > 0.1 && progress < 0.9) {
-            moveP = ease((progress - 0.1) / 0.8);
-          } else if (progress >= 0.9) {
-            moveP = 1;
-          }
-          const zp = Math.abs(progress - 0.5) * 2;
-          const zoom = 2 + zp * zp * 10;
-          const lat = hmb.lat + (oulu.lat - hmb.lat) * moveP;
-          const lng = hmb.lng + (oulu.lng - hmb.lng) * moveP;
-          map.coords = `${lat.toFixed(6)},${lng.toFixed(6)},${zoom.toFixed(4)}`;
-        },
-      },
-      mapBox({
-        token:
-          "pk.eyJ1IjoicG9kcGVyc29uIiwiYSI6ImNqc2JlbWU0bjA1ZmY0YW5ycHZod3VhbWcifQ.arvqfpOqMgFYkKgQ35UScA",
-        coords: `${hmb.lat},${hmb.lng},12`,
-        mapStyle: "mapbox://styles/mapbox/dark-v11",
-        style: { width: "100%", height: "100%", pointerEvents: "none" },
-      })
-    ),
-    overlay("0, 0.2", "Half Moon Bay"),
-    overlay("0.8, 1.0", "Oulu")
-  ),
-
-  // ===== 5. BABYLONJS 3D =====
-  featureIntro(
-    "3D Scenes",
-    "Animate BabylonJS scenes with scroll-driven camera waypoints. Load any GLB/glTF model.",
-    `<tosi-scroll-camera data-scroll-animate easing="ease-in-out">
-  <tosi-waypoint progress="0" alpha="-1.57" radius="110"></tosi-waypoint>
-  <tosi-waypoint progress="1" alpha="1.57" radius="76"></tosi-waypoint>
-</tosi-scroll-camera>`
-  ),
-
-  tosiProductSection(
-    { scroll: 400, style: { backgroundColor: "#111" } },
-    overlay("0, 0.5", "MacBook Neo."),
-    overlay("0.5, 1.0", "Every angle. Pure elegance."),
-    b3d({
-      "data-scroll-animate": "babylon",
-      async sceneCreated(element: any, BABYLON: any) {
-        const { scene } = element;
-        const camera = new BABYLON.ArcRotateCamera(
-          "camera",
-          -Math.PI / 2,
-          Math.PI / 3,
-          80,
-          new BABYLON.Vector3(0, 10, 0),
-          scene
-        );
-        scene.activeCamera = camera;
-        camera.minZ = 0.1;
-        camera.fov = camera.fov * 0.6;
-        scene.clearColor = new BABYLON.Color4(0, 0, 0, 0);
-        new BABYLON.HemisphericLight(
-          "hemi",
-          new BABYLON.Vector3(0, 1, 0),
-          scene
-        ).intensity = 0.6;
-        const dir = new BABYLON.DirectionalLight(
-          "dir",
-          new BABYLON.Vector3(-1, -2, 1),
-          scene
-        );
-        dir.intensity = 0.8;
-        element.loadScene("demo/assets/", "macbook_neo.glb");
-      },
-    }),
-    tosiScrollCamera(
-      { "data-scroll-animate": true, easing: "ease-in-out" },
-      tosiWaypoint({ progress: 0, alpha: -1.57, beta: 1.2, radius: 110 }),
-      tosiWaypoint({ progress: 0.5, alpha: 0, beta: 1.0, radius: 70 }),
-      tosiWaypoint({ progress: 1, alpha: 1.57, beta: 1.55, radius: 76 })
+  // ===== THEME TRANSITION =====
+  tosiProductSectionV2(
+    {
+      scroll: 250,
+      "theme-from": "midnight",
+      "theme-to": "paper",
+    },
+    div(
+      { class: "scene" },
+      tosiInterpolator(
+        { "data-scroll-animate": true, easing: "ease-in-out" },
+        tosiWaypoint({
+          progress: 0,
+          style: { transform: "translateY(40px)", opacity: 0 },
+        }),
+        tosiWaypoint({
+          progress: 0.4,
+          style: { transform: "translateY(0px)", opacity: 1 },
+        }),
+        tosiWaypoint({
+          progress: 1,
+          style: { transform: "translateY(0px)", opacity: 1 },
+        }),
+        h2("Theme transition")
+      ),
+      p("This section interpolates the theme from midnight to paper as you scroll through it. Page header, sticky bar, and footer all follow."),
+      span({ class: "pill" }, 'theme-from="midnight" theme-to="paper"')
     )
   ),
 
-  // ===== 6. LOTTIE =====
-  featureIntro(
-    "Lottie Animations",
-    "Scrub Lottie/Bodymovin animations with scroll progress. Frame-perfect control over vector animations.",
-    `<tosi-lottie
-  src="animation.json"
-  data-scroll-animate="lottie"
-></tosi-lottie>`
+  tosiProductSectionV2(
+    { scroll: 100, theme: "paper" },
+    div(
+      { class: "scene" },
+      h2("Paper"),
+      p("Light theme settled. The chrome above and below switched too."),
+      span({ class: "pill" }, "theme=paper")
+    )
   ),
 
-  tosiProductSection(
+  md(
+    `## Theming via CSS variables
+
+Themes are dictionaries of CSS custom properties. The engine writes the active section's resolved values to \`document.documentElement\`, so anything cascading from \`:root\` — including the page header, the sticky overlay, and the footer — re-themes in unison.
+
+For interpolated sections, color values blend through \`color-mix(in srgb, ...)\`; numeric strings interpolate per-number; everything else steps at the midpoint.
+
+\`\`\`html
+<tosi-product-section-v2
+  theme-from="midnight"
+  theme-to="paper">
+  ...
+</tosi-product-section-v2>
+\`\`\``
+  ),
+
+  tosiProductSectionV2(
     {
       scroll: 200,
-      style: { backgroundColor: "#000" },
+      "theme-from": "paper",
+      "theme-to": "rose",
     },
-    bodymovinPlayer({
-      src: "demo/assets/tosi-platform.json",
-      "data-scroll-animate": "lottie",
-      config: { renderer: "svg", autoplay: false, loop: false },
-    }),
-    overlay("0, 0.5", "Scroll-driven vector art."),
-    overlay("0.5, 1.0", "Any Lottie animation. Zero code.")
-  ),
-
-  // ===== 7. ONE SCRIPT TAG =====
-  tosiProductSection(
-    {
-      scroll: 200,
-      style: {
-        background: "radial-gradient(ellipse at center, #1a1a2e 0%, #000 70%)",
-      },
-    },
-    tosiInterpolator(
-      { "data-scroll-animate": true, easing: "ease-in-out" },
-      tosiWaypoint({
-        progress: 0.0,
-        style: { opacity: 0, transform: "translateY(40px)" },
-      }),
-      tosiWaypoint({
-        progress: 0.3,
-        style: { opacity: 1, transform: "translateY(0px)" },
-      }),
-      tosiWaypoint({
-        progress: 0.7,
-        style: { opacity: 1, transform: "translateY(0px)" },
-      }),
-      tosiWaypoint({
-        progress: 1.0,
-        style: { opacity: 0, transform: "translateY(-40px)" },
-      }),
-      div(
-        { class: "feature-text", style: { flexDirection: "column" } },
-        h2("One Script Tag"),
-        p(
-          "The IIFE build includes tosijs, tosijs-ui, and tosijs-product. Load it from a CDN and start building."
-        ),
-        tosiCode(
-          { language: "html" },
-          `<script src="https://cdn.jsdelivr.net/npm/tosijs-product/dist/index.js"></script>`
-        )
-      )
+    div(
+      { class: "scene" },
+      h2("Dusk"),
+      p("And back the other way. The transition is just a section with two themes."),
+      span({ class: "pill" }, 'theme-from="paper" theme-to="rose"')
     )
   ),
 
-  // ===== 8. NESTED SCROLLING =====
+  // ===== EMBEDDED VERTICAL =====
   div(
-    { style: { padding: "4em 1em", background: "#111", textAlign: "center" } },
-    h2(
-      {
-        style: { fontSize: "clamp(1.5rem, 4vw, 2.5rem)", margin: "0 0 0.5em" },
-      },
-      "Nested Scroll Containers"
-    ),
-    p({
-      style: { color: "#999", margin: "0 auto 2em", maxWidth: "500px" },
-      innerHTML:
-        "A <code>tosi-product</code> inside an <code>overflow-y: auto</code> div detects its scroll parent automatically.",
-    }),
+    { class: "embed-host" },
+    h2("Nested scroll engines"),
+    p("A tosi-product-v2 inside any scrollable container detects its scroll parent automatically. It works the same in a 60vh card as on the whole page."),
     div(
-      {
-        class: "nested-scroll",
-        style: {
-          height: "60vh",
-          overflowY: "auto",
-          border: "1px solid rgba(255,255,255,0.15)",
-          borderRadius: "12px",
-          maxWidth: "800px",
-          margin: "0 auto",
-          background: "#000",
-        },
-      },
-      tosiProduct(
-        ...(
-          [
-            [
-              "tosi-product",
-              "Top-level container. Wraps your scroll story.",
-              "#0a0a1a",
-              "#7ec8e3",
-            ],
-            [
-              "tosi-product-section",
-              "Converts scroll offset to 0\u21921 progress. Sticky viewport pinning.",
-              "#1a0a1a",
-              "#c792ea",
-            ],
-            [
-              "tosi-interpolator",
-              "Declarative CSS interpolation between waypoints.",
-              "#0a1a0a",
-              "#88e0a0",
-            ],
-            [
-              "tosi-filmstrip",
-              "Canvas-based frame animator from a single mosaic image.",
-              "#1a1a0a",
-              "#e0d888",
-            ],
-            [
-              "tosi-scroll-mapper",
-              "Generic scroll progress wrapper with a callback.",
-              "#0a0a1a",
-              "#e08888",
-            ],
-            [
-              "tosi-scroll-camera",
-              "Waypoint-driven camera controller for BabylonJS.",
-              "#1a0a0a",
-              "#c0a0e0",
-            ],
-          ] as [string, string, string, string][]
-        ).map(([name, desc, bg, color], i, arr) =>
-          tosiProductSection(
-            { scroll: 200, style: { background: bg } },
-            tosiInterpolator(
-              { "data-scroll-animate": true },
-              tosiWaypoint({
-                progress: 0.0,
-                style: {
-                  opacity: i === 0 ? 1 : 0,
-                  transform: i === 0 ? "translateY(0px)" : "translateY(40px)",
-                },
-              }),
-              tosiWaypoint({
-                progress: 0.3,
-                style: { opacity: 1, transform: "translateY(0px)" },
-              }),
-              tosiWaypoint({
-                progress: 0.7,
-                style: { opacity: 1, transform: "translateY(0px)" },
-              }),
-              tosiWaypoint({
-                progress: 1.0,
-                style: {
-                  opacity: i === arr.length - 1 ? 1 : 0,
-                  transform: i === arr.length - 1 ? "translateY(0px)" : "translateY(-40px)",
-                },
-              }),
-              div(
-                { class: "feature-text", style: { flexDirection: "column" } },
-                h2({ style: { color } }, `<${name}>`),
-                p(desc)
-              )
-            )
-          )
-        )
-      )
-    )
-  ),
-
-  // ===== 9. HORIZONTAL SCROLLING =====
-  div(
-    {
-      style: { padding: "4em 1em", background: "#0a0a0a", textAlign: "center" },
-    },
-    h2(
-      {
-        style: { fontSize: "clamp(1.5rem, 4vw, 2.5rem)", margin: "0 0 0.5em" },
-      },
-      "Horizontal Scrolling"
-    ),
-    p({
-      style: { color: "#999", margin: "0 auto 2em", maxWidth: "500px" },
-      innerHTML:
-        'Set <code>direction="horizontal"</code> for side-scrolling sections.',
-    }),
-    div(
-      {
-        class: "nested-scroll",
-        style: {
-          width: "100%",
-          maxWidth: "800px",
-          height: "60vh",
-          overflowX: "auto",
-          overflowY: "hidden",
-          border: "1px solid rgba(255,255,255,0.15)",
-          borderRadius: "12px",
-          margin: "0 auto",
-          background: "#000",
-          whiteSpace: "nowrap",
-        },
-      },
-      tosiProduct(
-        {
-          style: {
-            display: "inline-flex",
-            width: "max-content",
-            height: "100%",
-          },
-        },
-        ...(
-          [
-            [
-              "tosijs",
-              "A front-end library for leveraging web components and CSS3 with proxy-based state management and O(1) virtual lists.",
-              "#0a1a0a",
-              "#88e0a0",
-            ],
-            [
-              "tosijs-ui",
-              "Web components that complement the DOM instead of fighting it.",
-              "#1a1a0a",
-              "#e0d888",
-            ],
-            [
-              "tosijs-3d",
-              "A declarative 3D library built on BabylonJS.",
-              "#1a0a1a",
-              "#c792ea",
-            ],
-            [
-              "tjs-lang",
-              "Fulfills the promise of JavaScript, Lisp, and Dylan. Transpiles TypeScript, turns types into runtime contracts, provides safe eval.",
-              "#0a0a1a",
-              "#7ec8e3",
-            ],
-          ] as [string, string, string, string][]
-        ).map(([name, desc, bg, color], i, arr) =>
-          tosiProductSection(
+      { class: "embed-frame scroll-y" },
+      tosiProductV2(
+        ...["Hero", "Intro", "Reveal", "Theme", "Done"].map((label, i, arr) =>
+          tosiProductSectionV2(
             {
-              direction: "horizontal",
-              scroll: i === arr.length - 1 ? 0 : 200,
-              style: { background: bg, height: "100%", flexShrink: 0 },
+              scroll: 80,
+              theme: ["midnight", "forest", "paper", "rose", "midnight"][i],
             },
-            tosiInterpolator(
-              { "data-scroll-animate": true },
-              tosiWaypoint({
-                progress: 0.0,
-                style: {
-                  opacity: i === 0 ? 1 : 0,
-                  transform: i === 0 ? "translateX(0px)" : "translateX(60px)",
-                },
-              }),
-              tosiWaypoint({
-                progress: 0.3,
-                style: { opacity: 1, transform: "translateX(0px)" },
-              }),
-              tosiWaypoint({
-                progress: 0.7,
-                style: { opacity: 1, transform: "translateX(0px)" },
-              }),
-              tosiWaypoint({
-                progress: 1.0,
-                style: {
-                  opacity: i === arr.length - 1 ? 1 : 0,
-                  transform: i === arr.length - 1 ? "translateX(0px)" : "translateX(-60px)",
-                },
-              }),
+            div(
+              { class: "inner-scene" },
+              tosiInterpolator(
+                { "data-scroll-animate": true, easing: "ease-in-out" },
+                tosiWaypoint({
+                  progress: 0,
+                  style: { opacity: i === 0 ? 1 : 0, transform: "translateY(20px)" },
+                }),
+                tosiWaypoint({
+                  progress: 0.4,
+                  style: { opacity: 1, transform: "translateY(0)" },
+                }),
+                tosiWaypoint({
+                  progress: 1,
+                  style: { opacity: i === arr.length - 1 ? 1 : 0.85, transform: "translateY(0)" },
+                }),
+                elements.h3(label)
+              ),
+              p(`Inner section ${i + 1} of ${arr.length}. Note: this engine has its own theme set per section, but it doesn't write to :root — it would override the outer engine.`)
+            )
+          )
+        )
+      )
+    )
+  ),
+
+  // ===== EMBEDDED HORIZONTAL (follower mode) =====
+  tosiProductSectionV2(
+    { scroll: 250, theme: "rose" },
+    div(
+      { class: "embed-host", style: { padding: "2rem 1rem", background: "transparent" } },
+      h2("Horizontal nested engine"),
+      p("This section pins. Inside the pin, a horizontal tosi-product-v2 in follower mode — its panels slide as the outer's pin progress advances."),
+      div(
+        { class: "embed-frame", style: { height: "55vh" } },
+        tosiProductV2(
+          { direction: "horizontal" },
+          ...[
+            { name: "tosijs", desc: "Web components + proxy state.", bg: "#1a3a4a" },
+            { name: "tosijs-ui", desc: "UI components that respect the DOM.", bg: "#3a3a1a" },
+            { name: "tosijs-3d", desc: "BabylonJS, declaratively.", bg: "#3a1a3a" },
+            { name: "tosijs-product", desc: "You are here.", bg: "#1a1a3a" },
+          ].map((card) =>
+            tosiProductSectionV2(
+              { scroll: 100 },
               div(
-                {
-                  class: "feature-text",
-                  style: { flexDirection: "column", whiteSpace: "normal" },
-                },
-                h2({ style: { color } }, name),
-                p(desc)
+                { class: "h-card", style: { background: card.bg } },
+                elements.h3(card.name),
+                p(card.desc)
               )
             )
           )
@@ -714,28 +514,46 @@ Read on for what each piece does.`
     )
   ),
 
-  // ===== FOOTER =====
-  div(
-    {
-      style: {
-        textAlign: "center",
-        padding: "4em 1em",
-        background: "#000",
-        color: "#555",
-        fontSize: "0.9rem",
-      },
-    },
-    p(
-      "Built with ",
-      elements.a(
-        {
-          href: "https://tosijs.net",
-          style: { color: "#7ec8e3", textDecoration: "none" },
-        },
-        "tosijs"
-      )
-    )
+  // ===== CTA =====
+  md(
+    `## Get started
+
+\`\`\`html
+<script src="https://cdn.jsdelivr.net/npm/tosijs-product/dist/index.js"></script>
+\`\`\`
+
+Drop the IIFE into any page — \`tosijs\`, \`tosijs-ui\`, and \`tosijs-product\` are all bundled. Or install from npm:
+
+\`\`\`bash
+bun add tosijs-product tosijs tosijs-ui
+\`\`\`
+
+Then compose your scenes in HTML.`
   )
+) as TosiProductV2;
+
+app.themes = themes;
+app.defaultTheme = "midnight";
+
+// === Mount ==================================================================
+document.body.appendChild(pageHeader);
+document.body.appendChild(stickyHeader);
+document.body.appendChild(app);
+document.body.appendChild(pageFooter);
+
+// === Sticky header progress label ===========================================
+window.addEventListener(
+  "scroll",
+  () => {
+    requestAnimationFrame(() => {
+      const docH = document.documentElement.scrollHeight - window.innerHeight;
+      const pct = docH > 0 ? Math.round((window.scrollY / docH) * 100) : 0;
+      stickyProgressLabel.textContent = `${pct}%`;
+    });
+  },
+  { passive: true }
 );
 
-document.body.append(app);
+// Touch tosiCode so the import isn't tree-shaken; we'll use it later for
+// inline highlighted snippets in scene scenes.
+void tosiCode;

@@ -1,225 +1,446 @@
 // src/tosi-product.ts
-import { BodymovinPlayer, B3d } from "tosijs-ui";
 import { Component, elements } from "tosijs";
-var { div, span, slot } = elements;
-var scrollTargets = new Map;
-var scrollHandlers = new Map;
+var { div, slot } = elements;
+function isColor(s) {
+  const t = s.trim();
+  return t.startsWith("#") || t.startsWith("rgb") || t.startsWith("hsl") || t.startsWith("color(") || ["red", "blue", "green", "white", "black", "transparent", "currentColor"].includes(t);
+}
+function interpolateThemeValue(from, to, t) {
+  if (from === to || t <= 0)
+    return from;
+  if (t >= 1)
+    return to;
+  if (isColor(from) && isColor(to)) {
+    return `color-mix(in srgb, ${from} ${(1 - t) * 100}%, ${to})`;
+  }
+  const numRegex = /-?\d+(?:\.\d+)?/g;
+  const aNums = Array.from(from.matchAll(numRegex));
+  const bNums = Array.from(to.matchAll(numRegex));
+  if (aNums.length > 0 && aNums.length === bNums.length) {
+    let result = "";
+    let lastIndex = 0;
+    for (let i = 0;i < aNums.length; i++) {
+      const am = aNums[i];
+      const bm = bNums[i];
+      result += from.substring(lastIndex, am.index);
+      const v = parseFloat(am[0]) + (parseFloat(bm[0]) - parseFloat(am[0])) * t;
+      result += v.toFixed(4).replace(/0+$/, "").replace(/\.$/, "");
+      lastIndex = am.index + am[0].length;
+    }
+    result += from.substring(lastIndex);
+    return result;
+  }
+  return t < 0.5 ? from : to;
+}
+var reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 function getScrollParent(el) {
   let node = el.parentElement;
   while (node) {
-    if (node === document.body || node === document.documentElement) {
+    if (node === document.body || node === document.documentElement)
       break;
-    }
     const { overflow, overflowX, overflowY } = getComputedStyle(node);
-    if (/(auto|scroll)/.test(overflow + overflowX + overflowY)) {
+    if (/(auto|scroll)/.test(overflow + overflowX + overflowY))
       return node;
-    }
     node = node.parentElement;
   }
   return window;
 }
-function onScroll(target) {
-  requestAnimationFrame(() => {
-    const sections = scrollTargets.get(target);
-    if (sections) {
-      for (const section of sections) {
-        section.updateProgress();
-      }
+function findEnclosingSection(el) {
+  let node = el.parentElement;
+  while (node) {
+    if (node.tagName.toLowerCase() === "tosi-product-section") {
+      return node;
     }
-  });
+    node = node.parentElement;
+  }
+  return null;
 }
-var reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+function nearestEnclosingProduct(el) {
+  let node = el;
+  while (node) {
+    if (node.tagName.toLowerCase() === "tosi-product")
+      return node;
+    node = node.parentElement;
+  }
+  return null;
+}
 
-class TosiProductSection extends Component {
-  scrollCallback = null;
+class TosiProduct extends Component {
   static initAttributes = {
-    scroll: 100,
-    viewport: 100,
-    debug: false,
     direction: "vertical",
-    overflow: false
+    debug: false
   };
-  _debugInfo = null;
-  _scrollTarget = null;
-  _animators = null;
-  _observer = null;
   static styleSpec = {
     ":host": {
       display: "block",
       position: "relative",
-      backgroundColor: "#000",
-      color: "#fff"
+      width: "100%",
+      background: "var(--bg, #000)",
+      color: "var(--fg, #fff)"
+    },
+    ".window": {
+      position: "sticky",
+      top: "0",
+      left: "0",
+      width: "100%",
+      height: "100vh",
+      overflow: "hidden"
     },
     ":host([direction=horizontal])": {
-      display: "inline-block"
+      display: "inline-block",
+      width: "max-content"
     },
-    ".tosi-sticky": {
-      position: "sticky",
-      overflow: "hidden",
-      zIndex: 1,
-      backgroundColor: "inherit"
+    ":host([direction=horizontal]) .window": {
+      width: "100vw",
+      height: "100%"
     },
-    ".tosi-debug": {
+    ".stack": {
       position: "absolute",
+      top: "0",
+      left: "0",
+      width: "100%",
+      willChange: "transform"
+    },
+    ":host([direction=horizontal]) .stack": {
+      display: "flex",
+      flexDirection: "row",
+      width: "max-content",
+      height: "100%"
+    },
+    ".debug-panel": {
+      position: "fixed",
       top: "10px",
-      left: "10px",
-      background: "rgba(0,0,0,0.8)",
+      right: "10px",
+      background: "rgba(0,0,0,0.85)",
       color: "#0f0",
-      padding: "5px 10px",
+      padding: "6px 10px",
       fontFamily: "monospace",
-      fontSize: "12px",
-      zIndex: 100,
+      fontSize: "11px",
       borderRadius: "4px",
-      pointerEvents: "none"
+      zIndex: 1000,
+      pointerEvents: "none",
+      whiteSpace: "pre"
     }
   };
   content = () => [
-    div({ class: "tosi-sticky" }, slot(), span({ class: "tosi-debug", part: "debug-info", hidden: true }))
+    div({ class: "window", part: "window" }, div({ class: "stack", part: "stack" }, slot())),
+    div({ class: "debug-panel", part: "debug", hidden: true })
   ];
-  _getAnimators() {
-    if (this._animators === null) {
-      this._animators = Array.from(this.querySelectorAll("[data-scroll-animate], [data-scroll-range]"));
-    }
-    return this._animators;
-  }
-  _invalidateAnimators() {
-    this._animators = null;
-  }
+  themes = {};
+  defaultTheme = "";
+  themeTarget = document.documentElement;
+  _scrollTarget = null;
+  _stack = null;
+  _window = null;
+  _debugPanel = null;
+  _resizeObserver = null;
+  _mutationObserver = null;
+  _items = [];
+  _totalRunway = 0;
+  _scrollHandler = () => this._scheduleUpdate();
+  _rafPending = false;
+  _isNested = false;
+  _injectedProgress = 0;
+  _appliedThemeKeys = new Set;
   connectedCallback() {
-    this._scrollTarget = getScrollParent(this);
     super.connectedCallback();
-    this._debugInfo = this.shadowRoot?.querySelector(".tosi-debug");
-    let sections = scrollTargets.get(this._scrollTarget);
-    if (!sections) {
-      sections = new Set;
-      scrollTargets.set(this._scrollTarget, sections);
-      const target = this._scrollTarget;
-      const handler = () => onScroll(target);
-      scrollHandlers.set(target, handler);
-      target.addEventListener("scroll", handler, { passive: true });
+    this._stack = this.shadowRoot?.querySelector(".stack");
+    this._window = this.shadowRoot?.querySelector(".window");
+    this._debugPanel = this.shadowRoot?.querySelector(".debug-panel");
+    this._isNested = !!findEnclosingSection(this);
+    if (this._isNested) {
+      this.setAttribute("data-scroll-animate", "tosi-product");
+      if (this._window) {
+        this._window.style.position = "relative";
+        this._window.style.width = "100%";
+        this._window.style.height = "100%";
+      }
+      this.style.width = "100%";
+      this.style.height = "100%";
+      this.style.display = "block";
+      if (this.themeTarget === document.documentElement) {
+        this.themeTarget = this;
+      }
+    } else {
+      this._scrollTarget = getScrollParent(this);
+      this._scrollTarget.addEventListener("scroll", this._scrollHandler, {
+        passive: true
+      });
+      window.addEventListener("resize", this._scrollHandler, { passive: true });
     }
-    sections.add(this);
-    this._observer = new MutationObserver(() => this._invalidateAnimators());
-    this._observer.observe(this, {
+    this._mutationObserver = new MutationObserver(() => this._relayout());
+    this._mutationObserver.observe(this, {
       childList: true,
-      subtree: true,
       attributes: true,
-      attributeFilter: ["data-scroll-animate", "data-scroll-range"]
+      attributeFilter: ["scroll"]
     });
+    this._resizeObserver = new ResizeObserver(() => this._relayout());
+    for (const child of Array.from(this.children)) {
+      if (child instanceof HTMLElement)
+        this._resizeObserver.observe(child);
+    }
+    this._resizeObserver.observe(this);
     requestAnimationFrame(() => {
-      this.render();
-      this.updateProgress();
+      this._relayout();
+      this._update();
     });
   }
   disconnectedCallback() {
     super.disconnectedCallback();
-    if (this._observer) {
-      this._observer.disconnect();
-      this._observer = null;
+    if (!this._isNested) {
+      this._scrollTarget?.removeEventListener("scroll", this._scrollHandler);
+      window.removeEventListener("resize", this._scrollHandler);
     }
-    this._animators = null;
-    if (this._scrollTarget) {
-      const sections = scrollTargets.get(this._scrollTarget);
-      if (sections) {
-        sections.delete(this);
-        if (sections.size === 0) {
-          scrollTargets.delete(this._scrollTarget);
-          const handler = scrollHandlers.get(this._scrollTarget);
-          if (handler) {
-            this._scrollTarget.removeEventListener("scroll", handler);
-            scrollHandlers.delete(this._scrollTarget);
-          }
-        }
-      }
-    }
+    this._mutationObserver?.disconnect();
+    this._resizeObserver?.disconnect();
   }
-  render() {
-    super.render();
-    const scrollPct = this._getScrollPct();
-    const viewportPct = this._getViewportPct();
-    const horizontal = this.getAttribute("direction") === "horizontal";
-    const sticky = this.shadowRoot?.querySelector(".tosi-sticky");
-    const container = this._scrollTarget instanceof HTMLElement ? this._scrollTarget : null;
-    const containerSize = container ? horizontal ? container.clientWidth : container.clientHeight : null;
-    const stickyDim = containerSize !== null ? `${viewportPct / 100 * containerSize}px` : `${viewportPct}${horizontal ? "vw" : "vh"}`;
-    const scrollDim = containerSize !== null ? `${scrollPct / 100 * containerSize}px` : `${scrollPct}${horizontal ? "vw" : "vh"}`;
-    if (horizontal) {
-      this.style.width = `calc(${stickyDim} + ${scrollDim})`;
-      this.style.height = "100%";
-      if (sticky) {
-        sticky.style.left = "0";
-        sticky.style.top = "0";
-        sticky.style.width = stickyDim;
-        sticky.style.height = "100%";
-      }
-    } else {
-      this.style.height = `calc(${stickyDim} + ${scrollDim})`;
-      this.style.width = "100%";
-      if (sticky) {
-        sticky.style.top = "0";
-        sticky.style.left = "0";
-        sticky.style.height = stickyDim;
-        sticky.style.width = "100%";
-      }
-    }
-    if (this._debugInfo) {
-      this._debugInfo.hidden = this.getAttribute("debug") !== "true";
-    }
-  }
-  _getScrollPct() {
-    const raw = Number(this.getAttribute("scroll"));
-    return Number.isFinite(raw) && raw > 0 ? raw : 100;
-  }
-  _getViewportPct() {
-    const raw = Number(this.getAttribute("viewport"));
-    return Number.isFinite(raw) && raw > 0 ? raw : 100;
-  }
-  _getScrollAmountPx() {
-    const scrollPct = this._getScrollPct();
-    const horizontal = this.getAttribute("direction") === "horizontal";
-    const container = this._scrollTarget instanceof HTMLElement ? this._scrollTarget : null;
-    if (container) {
-      return scrollPct / 100 * (horizontal ? container.clientWidth : container.clientHeight);
-    }
-    return scrollPct / 100 * (horizontal ? window.innerWidth : window.innerHeight);
-  }
-  updateProgress() {
-    if (!this.isConnected)
+  setScrollProgress(progress) {
+    if (!this._isNested)
       return;
-    const scrollAmount = this._getScrollAmountPx();
-    if (scrollAmount <= 0)
-      return;
+    this._injectedProgress = Math.max(0, Math.min(1, progress));
+    this._update();
+  }
+  _isHorizontal() {
+    return this.getAttribute("direction") === "horizontal";
+  }
+  _viewSize() {
+    const horizontal = this._isHorizontal();
+    if (this._isNested) {
+      return horizontal ? this.clientWidth : this.clientHeight;
+    }
+    if (this._scrollTarget instanceof HTMLElement) {
+      return horizontal ? this._scrollTarget.clientWidth : this._scrollTarget.clientHeight;
+    }
+    return horizontal ? window.innerWidth : window.innerHeight;
+  }
+  _scrollPos() {
+    const horizontal = this._isHorizontal();
+    if (this._scrollTarget instanceof HTMLElement) {
+      return horizontal ? this._scrollTarget.scrollLeft : this._scrollTarget.scrollTop;
+    }
+    return horizontal ? window.scrollX : window.scrollY;
+  }
+  _hostStart() {
+    const horizontal = this._isHorizontal();
     const rect = this.getBoundingClientRect();
-    const horizontal = this.getAttribute("direction") === "horizontal";
-    let offset = horizontal ? rect.left : rect.top;
+    let edge = horizontal ? rect.left : rect.top;
     if (this._scrollTarget instanceof HTMLElement) {
       const containerRect = this._scrollTarget.getBoundingClientRect();
-      offset -= horizontal ? containerRect.left : containerRect.top;
+      edge -= horizontal ? containerRect.left : containerRect.top;
     }
-    const coreProgress = Math.max(0, Math.min(1, -offset / scrollAmount));
-    const overflow = this.overflow;
-    let progress = coreProgress;
-    if (overflow) {
-      const containerSize = horizontal ? this._scrollTarget instanceof HTMLElement ? this._scrollTarget.getBoundingClientRect().width : window.innerWidth : this._scrollTarget instanceof HTMLElement ? this._scrollTarget.getBoundingClientRect().height : window.innerHeight;
-      if (offset > 0) {
-        progress = -(offset / containerSize);
-      } else if (-offset > scrollAmount) {
-        progress = 1 + (-offset - scrollAmount) / containerSize;
+    return this._scrollPos() + edge;
+  }
+  _relayout() {
+    if (!this._stack)
+      return;
+    const horizontal = this._isHorizontal();
+    const view = this._viewSize();
+    const items = [];
+    let cumOffset = 0;
+    let cumRunway = 0;
+    for (const child of Array.from(this.children)) {
+      if (!(child instanceof HTMLElement))
+        continue;
+      const isSection = child.tagName.toLowerCase() === "tosi-product-section";
+      const naturalSize = horizontal ? child.offsetWidth : child.offsetHeight;
+      let pinDuration = 0;
+      if (isSection) {
+        const scrollAttr = child.getAttribute("scroll");
+        if (scrollAttr !== null) {
+          const pct = Number(scrollAttr);
+          if (Number.isFinite(pct) && pct >= 0) {
+            pinDuration = pct / 100 * view;
+          }
+        } else {
+          pinDuration = view;
+        }
       }
-      progress = Math.max(-1, Math.min(2, progress));
+      const exitDuration = naturalSize;
+      const rangeStart = cumRunway;
+      const pinEnd = rangeStart + pinDuration;
+      const rangeEnd = pinEnd + exitDuration;
+      items.push({
+        element: child,
+        isSection,
+        naturalSize,
+        pinDuration,
+        exitDuration,
+        offset: cumOffset,
+        rangeStart,
+        pinEnd,
+        rangeEnd
+      });
+      cumOffset += naturalSize;
+      cumRunway += pinDuration + exitDuration;
     }
-    this.dataset.progress = progress.toFixed(3);
-    if (this._debugInfo && !this._debugInfo.hidden) {
-      this._debugInfo.textContent = `Section: ${progress.toFixed(3)}`;
+    this._items = items;
+    this._totalRunway = cumRunway;
+    if (!this._isNested) {
+      const hostDim = horizontal ? "width" : "height";
+      this.style[hostDim] = `${cumRunway + view}px`;
     }
+    this._update();
+  }
+  _scheduleUpdate() {
+    if (this._rafPending)
+      return;
+    this._rafPending = true;
+    requestAnimationFrame(() => {
+      this._rafPending = false;
+      this._update();
+    });
+  }
+  _update() {
+    if (!this._stack || this._items.length === 0)
+      return;
+    const horizontal = this._isHorizontal();
+    const view = this._viewSize();
+    const local = this._isNested ? this._injectedProgress * this._totalRunway : this._scrollPos() - this._hostStart();
+    const last = this._items[this._items.length - 1];
+    const stackSize = last.offset + last.naturalSize;
+    const minTranslate = -Math.max(0, stackSize - view);
+    let translate = 0;
+    let activeIdx = -1;
+    let activeProgress = 0;
+    if (local <= 0) {
+      translate = 0;
+      activeIdx = 0;
+      activeProgress = 0;
+    } else if (local >= this._totalRunway) {
+      translate = minTranslate;
+      activeIdx = this._items.length - 1;
+      activeProgress = 1;
+    } else {
+      for (let i = 0;i < this._items.length; i++) {
+        const item = this._items[i];
+        if (local < item.rangeStart || local >= item.rangeEnd)
+          continue;
+        if (local < item.pinEnd) {
+          translate = -item.offset;
+          activeProgress = item.pinDuration > 0 ? (local - item.rangeStart) / item.pinDuration : 1;
+        } else {
+          const exitProgress = (local - item.pinEnd) / item.exitDuration;
+          translate = -item.offset - exitProgress * item.naturalSize;
+          activeProgress = 1;
+        }
+        activeIdx = i;
+        break;
+      }
+    }
+    if (translate < minTranslate)
+      translate = minTranslate;
+    const axis = horizontal ? "X" : "Y";
+    this._stack.style.transform = `translate${axis}(${translate}px)`;
+    for (let i = 0;i < this._items.length; i++) {
+      const item = this._items[i];
+      if (!item.isSection)
+        continue;
+      let progress;
+      if (i < activeIdx)
+        progress = 1;
+      else if (i > activeIdx)
+        progress = 0;
+      else
+        progress = activeProgress;
+      this._notify(item.element, progress);
+    }
+    this._applyTheme(activeIdx, activeProgress);
+    if (this._debugPanel) {
+      const showDebug = this.getAttribute("debug") === "true";
+      this._debugPanel.hidden = !showDebug;
+      if (showDebug) {
+        this._debugPanel.textContent = `local: ${local.toFixed(0)}px / ${this._totalRunway.toFixed(0)}
+` + `translate${axis}: ${translate.toFixed(0)}px
+` + `active: #${activeIdx} @ ${activeProgress.toFixed(3)}`;
+      }
+    }
+  }
+  _notify(section, progress) {
+    section.dataset.progress = progress.toFixed(3);
+    if (typeof section.setScrollProgress === "function") {
+      section.setScrollProgress(progress);
+    }
+  }
+  _applyTheme(activeIdx, activeProgress) {
+    const themeNames = Object.keys(this.themes);
+    if (themeNames.length === 0)
+      return;
+    let fromName = this.defaultTheme;
+    let toName = this.defaultTheme;
+    let t = 0;
+    let themeIdx = activeIdx;
+    while (themeIdx >= 0) {
+      const it = this._items[themeIdx];
+      const el = it.element;
+      const themeAttr = el.getAttribute("theme");
+      const fromAttr = el.getAttribute("theme-from");
+      const toAttr = el.getAttribute("theme-to");
+      if (themeAttr || fromAttr || toAttr) {
+        if (fromAttr && toAttr) {
+          fromName = fromAttr;
+          toName = toAttr;
+          t = themeIdx === activeIdx ? activeProgress : 1;
+        } else {
+          const single = themeAttr || fromAttr || toAttr;
+          fromName = single;
+          toName = single;
+        }
+        break;
+      }
+      themeIdx--;
+    }
+    const fromTheme = this.themes[fromName];
+    const toTheme = this.themes[toName];
+    if (!fromTheme && !toTheme)
+      return;
+    const target = this.themeTarget;
+    const allKeys = new Set([
+      ...Object.keys(fromTheme || {}),
+      ...Object.keys(toTheme || {})
+    ]);
+    const seen = new Set;
+    for (const key of allKeys) {
+      const fromVal = fromTheme?.[key] ?? toTheme?.[key];
+      const toVal = toTheme?.[key] ?? fromTheme?.[key];
+      if (fromVal === undefined || toVal === undefined)
+        continue;
+      const value = interpolateThemeValue(fromVal, toVal, t);
+      target.style.setProperty(key, value);
+      seen.add(key);
+    }
+    for (const key of this._appliedThemeKeys) {
+      if (!seen.has(key))
+        target.style.removeProperty(key);
+    }
+    this._appliedThemeKeys = seen;
+  }
+}
+
+class TosiProductSection extends Component {
+  static initAttributes = {
+    scroll: 100
+  };
+  static styleSpec = {
+    ":host": {
+      display: "block",
+      position: "relative",
+      width: "100%"
+    }
+  };
+  content = () => slot();
+  scrollCallback = null;
+  setScrollProgress(progress) {
     if (reducedMotion.matches) {
-      if (this.scrollCallback) {
+      if (this.scrollCallback)
         this.scrollCallback(progress, this);
-      }
       return;
     }
-    const animators = this._getAnimators();
-    for (const el of animators) {
+    const myProduct = this.closest("tosi-product");
+    const animators = this.querySelectorAll("[data-scroll-animate], [data-scroll-range]");
+    for (const el of Array.from(animators)) {
+      const ownerProduct = nearestEnclosingProduct(el === this ? null : el.parentElement);
+      if (ownerProduct !== myProduct)
+        continue;
       const rangeStr = el.getAttribute("data-scroll-range") || "0,1";
       const [start, end] = rangeStr.split(",").map(Number);
       const range = end - start;
@@ -230,61 +451,59 @@ class TosiProductSection extends Component {
         el.setScrollProgress(localProgress);
       } else if (el.getAttribute("data-scroll-animate") === "currentTime" && el.duration) {
         el.currentTime = localProgress * el.duration;
-      } else if (el.getAttribute("data-scroll-animate") === "lottie" && el.animation && (el instanceof BodymovinPlayer || el.tagName.includes("LOTTIE"))) {
-        el.animation.goToAndStop(localProgress * el.animation.totalFrames, true);
-      } else if (el.scene && (el instanceof B3d || el.tagName.includes("3D"))) {
-        if (el.scene.activeCamera && el.scene.activeCamera.alpha !== undefined) {
-          el.scene.activeCamera.alpha = localProgress * Math.PI * 2;
-        }
+      } else if (el.getAttribute("data-scroll-animate") === "lottie" && el.animation && typeof el.animation.goToAndStop === "function") {
+        const total = el.animation.totalFrames || 0;
+        el.animation.goToAndStop(localProgress * total, true);
       }
     }
-    if (this.scrollCallback) {
+    if (this.scrollCallback)
       this.scrollCallback(progress, this);
-    }
   }
 }
 
-class TosiProduct extends Component {
+class TosiProductHeader extends Component {
+  static initAttributes = {
+    threshold: 50
+  };
   static styleSpec = {
     ":host": {
-      display: "block",
-      position: "relative",
-      width: "100%",
-      background: "#000",
-      color: "#fff"
+      position: "fixed",
+      top: "0",
+      left: "0",
+      right: "0",
+      zIndex: "100",
+      transform: "translateY(-100%)",
+      transition: "transform 0.3s ease",
+      pointerEvents: "auto"
+    },
+    ":host([data-visible=true])": {
+      transform: "translateY(0)"
     }
   };
   content = () => slot();
-}
-
-class TosiScrollMapper extends Component {
-  scrollCallback = null;
-  static styleSpec = {
-    ":host": {
-      display: "block",
-      width: "100%",
-      height: "100%"
-    }
-  };
-  content = () => slot();
+  _scrollHandler = () => this._update();
   connectedCallback() {
     super.connectedCallback();
-    if (!this.hasAttribute("data-scroll-animate")) {
-      this.setAttribute("data-scroll-animate", "mapper");
-    }
+    window.addEventListener("scroll", this._scrollHandler, { passive: true });
+    this._update();
   }
-  setScrollProgress(progress) {
-    if (this.scrollCallback) {
-      this.scrollCallback(progress);
-    }
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    window.removeEventListener("scroll", this._scrollHandler);
+  }
+  _update() {
+    const threshold = Number(this.getAttribute("threshold")) || 50;
+    this.dataset.visible = window.scrollY > threshold ? "true" : "false";
   }
 }
-var tosiProduct = TosiProduct.elementCreator({ tag: "tosi-product" });
+var tosiProduct = TosiProduct.elementCreator({
+  tag: "tosi-product"
+});
 var tosiProductSection = TosiProductSection.elementCreator({
   tag: "tosi-product-section"
 });
-var tosiScrollMapper = TosiScrollMapper.elementCreator({
-  tag: "tosi-scroll-mapper"
+var tosiProductHeader = TosiProductHeader.elementCreator({
+  tag: "tosi-product-header"
 });
 // src/tosi-filmstrip.ts
 import { Component as Component2, elements as elements2 } from "tosijs";
@@ -467,8 +686,8 @@ var interpolateStrings = (a, b, t) => {
     result += a.substring(lastIndex);
     return result;
   }
-  const isColor = (s) => s.startsWith("#") || s.startsWith("rgb") || s.startsWith("hsl") || ["red", "blue", "white", "black", "transparent"].includes(s);
-  if (isColor(a) && isColor(b)) {
+  const isColor2 = (s) => s.startsWith("#") || s.startsWith("rgb") || s.startsWith("hsl") || ["red", "blue", "white", "black", "transparent"].includes(s);
+  if (isColor2(a) && isColor2(b)) {
     return `color-mix(in srgb, ${a} ${Math.round((1 - t) * 100)}%, ${b})`;
   }
   return t < 0.5 ? a : b;
@@ -814,10 +1033,10 @@ var tosiCode = TosiCode.elementCreator({ tag: "tosi-code" });
 export {
   tosiWaypoint,
   tosiScrollTime,
-  tosiScrollMapper,
   tosiScrollCamera,
   tosiScrollAnimation,
   tosiProductSection,
+  tosiProductHeader,
   tosiProduct,
   tosiInterpolator,
   tosiFilmstrip,
@@ -826,10 +1045,10 @@ export {
   interpolateStrings,
   TosiWaypoint,
   TosiScrollTime,
-  TosiScrollMapper,
   TosiScrollCamera,
   TosiScrollAnimation,
   TosiProductSection,
+  TosiProductHeader,
   TosiProduct,
   TosiInterpolator,
   TosiFilmstrip,

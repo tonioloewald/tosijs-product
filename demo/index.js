@@ -2166,7 +2166,7 @@ class wL extends u {
 }
 var gf = wL.elementCreator();
 
-// src/tosi-product-v2.ts
+// src/tosi-product.ts
 var { div, slot } = I;
 function isColor(s2) {
   const t2 = s2.trim();
@@ -2215,7 +2215,7 @@ function getScrollParent(el) {
 function findEnclosingSection(el) {
   let node = el.parentElement;
   while (node) {
-    if (node.tagName.toLowerCase() === "tosi-product-section-v2") {
+    if (node.tagName.toLowerCase() === "tosi-product-section") {
       return node;
     }
     node = node.parentElement;
@@ -2225,14 +2225,14 @@ function findEnclosingSection(el) {
 function nearestEnclosingProduct(el) {
   let node = el;
   while (node) {
-    if (node.tagName.toLowerCase() === "tosi-product-v2")
+    if (node.tagName.toLowerCase() === "tosi-product")
       return node;
     node = node.parentElement;
   }
   return null;
 }
 
-class TosiProductV2 extends u {
+class TosiProduct extends u {
   static initAttributes = {
     direction: "vertical",
     debug: false
@@ -2316,7 +2316,7 @@ class TosiProductV2 extends u {
     this._debugPanel = this.shadowRoot?.querySelector(".debug-panel");
     this._isNested = !!findEnclosingSection(this);
     if (this._isNested) {
-      this.setAttribute("data-scroll-animate", "tosi-product-v2");
+      this.setAttribute("data-scroll-animate", "tosi-product");
       if (this._window) {
         this._window.style.position = "relative";
         this._window.style.width = "100%";
@@ -2408,7 +2408,7 @@ class TosiProductV2 extends u {
     for (const child of Array.from(this.children)) {
       if (!(child instanceof HTMLElement))
         continue;
-      const isSection = child.tagName.toLowerCase() === "tosi-product-section-v2";
+      const isSection = child.tagName.toLowerCase() === "tosi-product-section";
       const naturalSize = horizontal ? child.offsetWidth : child.offsetHeight;
       let pinDuration = 0;
       if (isSection) {
@@ -2583,7 +2583,7 @@ class TosiProductV2 extends u {
   }
 }
 
-class TosiProductSectionV2 extends u {
+class TosiProductSection extends u {
   static initAttributes = {
     scroll: 100
   };
@@ -2602,7 +2602,7 @@ class TosiProductSectionV2 extends u {
         this.scrollCallback(progress, this);
       return;
     }
-    const myProduct = this.closest("tosi-product-v2");
+    const myProduct = this.closest("tosi-product");
     const animators = this.querySelectorAll("[data-scroll-animate], [data-scroll-range]");
     for (const el of Array.from(animators)) {
       const ownerProduct = nearestEnclosingProduct(el === this ? null : el.parentElement);
@@ -2628,7 +2628,7 @@ class TosiProductSectionV2 extends u {
   }
 }
 
-class TosiProductHeaderV2 extends u {
+class TosiProductHeader extends u {
   static initAttributes = {
     threshold: 50
   };
@@ -2663,14 +2663,14 @@ class TosiProductHeaderV2 extends u {
     this.dataset.visible = window.scrollY > threshold ? "true" : "false";
   }
 }
-var tosiProductV2 = TosiProductV2.elementCreator({
-  tag: "tosi-product-v2"
+var tosiProduct = TosiProduct.elementCreator({
+  tag: "tosi-product"
 });
-var tosiProductSectionV2 = TosiProductSectionV2.elementCreator({
-  tag: "tosi-product-section-v2"
+var tosiProductSection = TosiProductSection.elementCreator({
+  tag: "tosi-product-section"
 });
-var tosiProductHeaderV2 = TosiProductHeaderV2.elementCreator({
-  tag: "tosi-product-header-v2"
+var tosiProductHeader = TosiProductHeader.elementCreator({
+  tag: "tosi-product-header"
 });
 
 // src/tosi-interpolator.ts
@@ -7826,7 +7826,7 @@ style.textContent = `
 document.head.appendChild(style);
 var pageHeader = header({ class: "page-header" }, div2({ class: "brand" }, "tosijs-product"), nav(a5({ href: "https://github.com/tonioloewald/tosijs-product" }, "GitHub"), a5({ href: "https://tosijs.net" }, "tosijs"), a5({ href: "#" }, "Examples")));
 var stickyProgressLabel = span({ class: "progress" }, "0%");
-var stickyHeader = tosiProductHeaderV2({ threshold: 80 }, div2({ class: "sticky-bar" }, div2({ class: "brand" }, "tosijs-product"), stickyProgressLabel));
+var stickyHeader = tosiProductHeader({ threshold: 80 }, div2({ class: "sticky-bar" }, div2({ class: "brand" }, "tosijs-product"), stickyProgressLabel));
 var pageFooter = footer({ class: "page-footer" }, p3("Built with ", a5({ href: "https://tosijs.net" }, "tosijs"), ". Source on ", a5({ href: "https://github.com/tonioloewald/tosijs-product" }, "GitHub"), "."));
 var md = (markdown) => div2({ class: "intro" }, I9(markdown));
 var stagedRow = (label, start, end) => tosiInterpolator({
@@ -7843,7 +7843,7 @@ var stagedRow = (label, start, end) => tosiInterpolator({
   progress: 1,
   style: { opacity: 1, transform: "translateX(0px)" }
 }), div2({ class: "feature-row" }, "✓ " + label));
-var app = tosiProductV2(tosiProductSectionV2({ scroll: 100, theme: "midnight" }, div2({ class: "scene" }, tosiInterpolator({ "data-scroll-animate": true, easing: "ease-in-out" }, tosiWaypoint({
+var app = tosiProduct(tosiProductSection({ scroll: 100, theme: "midnight" }, div2({ class: "scene" }, tosiInterpolator({ "data-scroll-animate": true, easing: "ease-in-out" }, tosiWaypoint({
   progress: 0,
   style: { transform: "scale(1) translateY(0px)" }
 }), tosiWaypoint({
@@ -7853,9 +7853,9 @@ var app = tosiProductV2(tosiProductSectionV2({ scroll: 100, theme: "midnight" },
 
 A small library for building **scroll-driven product pages** — the cinematic, "Apple-style" pages where scrolling becomes the timeline.
 
-You compose a stack of \`<tosi-product-section-v2>\` elements inside a \`<tosi-product-v2>\`. Each section claims a slice of scroll runway: it pins at the viewport top, animations run during pin, then it scrolls out at 1:1 as the next section takes over.
+You compose a stack of \`<tosi-product-section>\` elements inside a \`<tosi-product>\`. Each section claims a slice of scroll runway: it pins at the viewport top, animations run during pin, then it scrolls out at 1:1 as the next section takes over.
 
-This whole page is one engine. Read on to see what each piece does.`), tosiProductSectionV2({ scroll: 200, theme: "midnight" }, div2({ class: "scene" }, tosiInterpolator({ "data-scroll-animate": true, easing: "ease-in-out" }, tosiWaypoint({
+This whole page is one engine. Read on to see what each piece does.`), tosiProductSection({ scroll: 200, theme: "midnight" }, div2({ class: "scene" }, tosiInterpolator({ "data-scroll-animate": true, easing: "ease-in-out" }, tosiWaypoint({
   progress: 0,
   style: { opacity: 0, transform: "translateY(60px) scale(0.95)" }
 }), tosiWaypoint({
@@ -7874,7 +7874,7 @@ This whole page is one engine. Read on to see what each piece does.`), tosiProdu
   <tosi-waypoint progress="1" style="opacity: 1"></tosi-waypoint>
   <div>I fade in.</div>
 </tosi-interpolator>
-\`\`\``), tosiProductSectionV2({ scroll: 300, theme: "midnight" }, div2({ class: "scene" }, div2({ class: "feature-list" }, h22("Staged reveal"), p3("Multiple interpolators in one section, each scoped to a slice of progress with data-scroll-range:"), stagedRow("Sticky window pins the engine", 0.05, 0.2), stagedRow("Stack translates as you scroll", 0.2, 0.35), stagedRow("Sections pin then exit", 0.35, 0.5), stagedRow("Sub-range staging schedules the rest", 0.5, 0.65)))), tosiProductSectionV2({
+\`\`\``), tosiProductSection({ scroll: 300, theme: "midnight" }, div2({ class: "scene" }, div2({ class: "feature-list" }, h22("Staged reveal"), p3("Multiple interpolators in one section, each scoped to a slice of progress with data-scroll-range:"), stagedRow("Sticky window pins the engine", 0.05, 0.2), stagedRow("Stack translates as you scroll", 0.2, 0.35), stagedRow("Sections pin then exit", 0.35, 0.5), stagedRow("Sub-range staging schedules the rest", 0.5, 0.65)))), tosiProductSection({
   scroll: 250,
   "theme-from": "midnight",
   "theme-to": "paper"
@@ -7887,23 +7887,23 @@ This whole page is one engine. Read on to see what each piece does.`), tosiProdu
 }), tosiWaypoint({
   progress: 1,
   style: { transform: "translateY(0px)", opacity: 1 }
-}), h22("Theme transition")), p3("This section interpolates the theme from midnight to paper as you scroll through it. Page header, sticky bar, and footer all follow."), span({ class: "pill" }, 'theme-from="midnight" theme-to="paper"'))), tosiProductSectionV2({ scroll: 100, theme: "paper" }, div2({ class: "scene" }, h22("Paper"), p3("Light theme settled. The chrome above and below switched too."), span({ class: "pill" }, "theme=paper"))), md(`## Theming via CSS variables
+}), h22("Theme transition")), p3("This section interpolates the theme from midnight to paper as you scroll through it. Page header, sticky bar, and footer all follow."), span({ class: "pill" }, 'theme-from="midnight" theme-to="paper"'))), tosiProductSection({ scroll: 100, theme: "paper" }, div2({ class: "scene" }, h22("Paper"), p3("Light theme settled. The chrome above and below switched too."), span({ class: "pill" }, "theme=paper"))), md(`## Theming via CSS variables
 
 Themes are dictionaries of CSS custom properties. The engine writes the active section's resolved values to \`document.documentElement\`, so anything cascading from \`:root\` — including the page header, the sticky overlay, and the footer — re-themes in unison.
 
 For interpolated sections, color values blend through \`color-mix(in srgb, ...)\`; numeric strings interpolate per-number; everything else steps at the midpoint.
 
 \`\`\`html
-<tosi-product-section-v2
+<tosi-product-section
   theme-from="midnight"
   theme-to="paper">
   ...
-</tosi-product-section-v2>
-\`\`\``), tosiProductSectionV2({
+</tosi-product-section>
+\`\`\``), tosiProductSection({
   scroll: 200,
   "theme-from": "paper",
   "theme-to": "rose"
-}, div2({ class: "scene" }, h22("Dusk"), p3("And back the other way. The transition is just a section with two themes."), span({ class: "pill" }, 'theme-from="paper" theme-to="rose"'))), div2({ class: "embed-host" }, h22("Nested scroll engines"), p3("A tosi-product-v2 inside any scrollable container detects its scroll parent automatically. It works the same in a 60vh card as on the whole page."), div2({ class: "embed-frame scroll-y" }, tosiProductV2(...["Hero", "Intro", "Reveal", "Theme", "Done"].map((label, i3, arr) => tosiProductSectionV2({
+}, div2({ class: "scene" }, h22("Dusk"), p3("And back the other way. The transition is just a section with two themes."), span({ class: "pill" }, 'theme-from="paper" theme-to="rose"'))), div2({ class: "embed-host" }, h22("Nested scroll engines"), p3("A tosi-product inside any scrollable container detects its scroll parent automatically. It works the same in a 60vh card as on the whole page."), div2({ class: "embed-frame scroll-y" }, tosiProduct(...["Hero", "Intro", "Reveal", "Theme", "Done"].map((label, i3, arr) => tosiProductSection({
   scroll: 80,
   theme: ["midnight", "forest", "paper", "rose", "midnight"][i3]
 }, div2({ class: "inner-scene" }, tosiInterpolator({ "data-scroll-animate": true, easing: "ease-in-out" }, tosiWaypoint({
@@ -7915,12 +7915,12 @@ For interpolated sections, color values blend through \`color-mix(in srgb, ...)\
 }), tosiWaypoint({
   progress: 1,
   style: { opacity: i3 === arr.length - 1 ? 1 : 0.85, transform: "translateY(0)" }
-}), I.h3(label)), p3(`Inner section ${i3 + 1} of ${arr.length}. Note: this engine has its own theme set per section, but it doesn't write to :root — it would override the outer engine.`))))))), tosiProductSectionV2({ scroll: 250, theme: "rose" }, div2({ class: "embed-host", style: { padding: "2rem 1rem", background: "transparent" } }, h22("Horizontal nested engine"), p3("This section pins. Inside the pin, a horizontal tosi-product-v2 in follower mode — its panels slide as the outer's pin progress advances."), div2({ class: "embed-frame", style: { height: "55vh" } }, tosiProductV2({ direction: "horizontal" }, ...[
+}), I.h3(label)), p3(`Inner section ${i3 + 1} of ${arr.length}. Note: this engine has its own theme set per section, but it doesn't write to :root — it would override the outer engine.`))))))), tosiProductSection({ scroll: 250, theme: "rose" }, div2({ class: "embed-host", style: { padding: "2rem 1rem", background: "transparent" } }, h22("Horizontal nested engine"), p3("This section pins. Inside the pin, a horizontal tosi-product in follower mode — its panels slide as the outer's pin progress advances."), div2({ class: "embed-frame", style: { height: "55vh" } }, tosiProduct({ direction: "horizontal" }, ...[
   { name: "tosijs", desc: "Web components + proxy state.", bg: "#1a3a4a" },
   { name: "tosijs-ui", desc: "UI components that respect the DOM.", bg: "#3a3a1a" },
   { name: "tosijs-3d", desc: "BabylonJS, declaratively.", bg: "#3a1a3a" },
   { name: "tosijs-product", desc: "You are here.", bg: "#1a1a3a" }
-].map((card) => tosiProductSectionV2({ scroll: 100 }, div2({ class: "h-card", style: { background: card.bg } }, I.h3(card.name), p3(card.desc)))))))), md(`## Get started
+].map((card) => tosiProductSection({ scroll: 100 }, div2({ class: "h-card", style: { background: card.bg } }, I.h3(card.name), p3(card.desc)))))))), md(`## Get started
 
 \`\`\`html
 <script src="https://cdn.jsdelivr.net/npm/tosijs-product/dist/index.js"></script>

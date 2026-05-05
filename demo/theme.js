@@ -2130,7 +2130,7 @@ class wL extends u {
 }
 var gf = wL.elementCreator();
 
-// src/tosi-product-v2.ts
+// src/tosi-product.ts
 var { div, slot } = I;
 function isColor(s2) {
   const t2 = s2.trim();
@@ -2179,7 +2179,7 @@ function getScrollParent(el) {
 function findEnclosingSection(el) {
   let node = el.parentElement;
   while (node) {
-    if (node.tagName.toLowerCase() === "tosi-product-section-v2") {
+    if (node.tagName.toLowerCase() === "tosi-product-section") {
       return node;
     }
     node = node.parentElement;
@@ -2189,14 +2189,14 @@ function findEnclosingSection(el) {
 function nearestEnclosingProduct(el) {
   let node = el;
   while (node) {
-    if (node.tagName.toLowerCase() === "tosi-product-v2")
+    if (node.tagName.toLowerCase() === "tosi-product")
       return node;
     node = node.parentElement;
   }
   return null;
 }
 
-class TosiProductV2 extends u {
+class TosiProduct extends u {
   static initAttributes = {
     direction: "vertical",
     debug: false
@@ -2280,7 +2280,7 @@ class TosiProductV2 extends u {
     this._debugPanel = this.shadowRoot?.querySelector(".debug-panel");
     this._isNested = !!findEnclosingSection(this);
     if (this._isNested) {
-      this.setAttribute("data-scroll-animate", "tosi-product-v2");
+      this.setAttribute("data-scroll-animate", "tosi-product");
       if (this._window) {
         this._window.style.position = "relative";
         this._window.style.width = "100%";
@@ -2372,7 +2372,7 @@ class TosiProductV2 extends u {
     for (const child of Array.from(this.children)) {
       if (!(child instanceof HTMLElement))
         continue;
-      const isSection = child.tagName.toLowerCase() === "tosi-product-section-v2";
+      const isSection = child.tagName.toLowerCase() === "tosi-product-section";
       const naturalSize = horizontal ? child.offsetWidth : child.offsetHeight;
       let pinDuration = 0;
       if (isSection) {
@@ -2547,7 +2547,7 @@ class TosiProductV2 extends u {
   }
 }
 
-class TosiProductSectionV2 extends u {
+class TosiProductSection extends u {
   static initAttributes = {
     scroll: 100
   };
@@ -2566,7 +2566,7 @@ class TosiProductSectionV2 extends u {
         this.scrollCallback(progress, this);
       return;
     }
-    const myProduct = this.closest("tosi-product-v2");
+    const myProduct = this.closest("tosi-product");
     const animators = this.querySelectorAll("[data-scroll-animate], [data-scroll-range]");
     for (const el of Array.from(animators)) {
       const ownerProduct = nearestEnclosingProduct(el === this ? null : el.parentElement);
@@ -2592,7 +2592,7 @@ class TosiProductSectionV2 extends u {
   }
 }
 
-class TosiProductHeaderV2 extends u {
+class TosiProductHeader extends u {
   static initAttributes = {
     threshold: 50
   };
@@ -2627,94 +2627,169 @@ class TosiProductHeaderV2 extends u {
     this.dataset.visible = window.scrollY > threshold ? "true" : "false";
   }
 }
-var tosiProductV2 = TosiProductV2.elementCreator({
-  tag: "tosi-product-v2"
+var tosiProduct = TosiProduct.elementCreator({
+  tag: "tosi-product"
 });
-var tosiProductSectionV2 = TosiProductSectionV2.elementCreator({
-  tag: "tosi-product-section-v2"
+var tosiProductSection = TosiProductSection.elementCreator({
+  tag: "tosi-product-section"
 });
-var tosiProductHeaderV2 = TosiProductHeaderV2.elementCreator({
-  tag: "tosi-product-header-v2"
+var tosiProductHeader = TosiProductHeader.elementCreator({
+  tag: "tosi-product-header"
 });
 
-// demo/v2-embed.ts
-var { div: div2, header, footer, section, h1, h2, h3, p: p2, span } = I;
+// demo/theme.ts
+var { div: div2, header, footer, nav, h1, h2, h3, p: p2, span, a: a2 } = I;
+var themes = {
+  midnight: {
+    "--bg": "#08081a",
+    "--fg": "#f0f0f5",
+    "--muted": "#a0a0b8",
+    "--accent": "#9be7ff",
+    "--surface": "rgba(255,255,255,0.06)",
+    "--border": "rgba(255,255,255,0.12)"
+  },
+  forest: {
+    "--bg": "#0a1f14",
+    "--fg": "#e8f5ee",
+    "--muted": "#9bbaa6",
+    "--accent": "#7fdba0",
+    "--surface": "rgba(255,255,255,0.06)",
+    "--border": "rgba(255,255,255,0.12)"
+  },
+  paper: {
+    "--bg": "#f5f1e8",
+    "--fg": "#1a1815",
+    "--muted": "#6b6862",
+    "--accent": "#7c3aed",
+    "--surface": "rgba(0,0,0,0.04)",
+    "--border": "rgba(0,0,0,0.08)"
+  },
+  rose: {
+    "--bg": "#2a0820",
+    "--fg": "#ffeef5",
+    "--muted": "#d8a8c0",
+    "--accent": "#ff80b5",
+    "--surface": "rgba(255,255,255,0.06)",
+    "--border": "rgba(255,255,255,0.12)"
+  }
+};
 var style = document.createElement("style");
 style.textContent = `
   *, *::before, *::after { box-sizing: border-box; }
   body {
-    margin: 0; padding: 0; background: #0a0a0a; color: #fff;
+    margin: 0; padding: 0;
+    background: var(--bg, #000);
+    color: var(--fg, #fff);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    transition: background-color 0.25s linear;
   }
 
-  /* Page header — sibling above tosi-product-v2 */
+  /* === Page header (sibling above engine) === */
   .page-header {
-    background: #1a1a2e;
-    padding: 1.5rem 2rem;
-    border-bottom: 2px solid #333;
+    background: var(--bg);
+    color: var(--fg);
+    border-bottom: 1px solid var(--border);
+    padding: 1rem 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    transition: background-color 0.25s linear, color 0.25s linear, border-color 0.25s linear;
   }
-  .page-header h1 { margin: 0; font-size: 1.4rem; }
-  .page-header p { margin: 0.25em 0 0; color: #888; font-size: 0.9rem; }
+  .page-header .brand { font-weight: 700; font-size: 1.1rem; }
+  .page-header nav { display: flex; gap: 1.25rem; }
+  .page-header nav a {
+    color: var(--muted); text-decoration: none; font-size: 0.9rem;
+    transition: color 0.2s ease;
+  }
+  .page-header nav a:hover { color: var(--accent); }
 
-  /* Page footer — sibling below tosi-product-v2 */
+  /* === Sticky header content (the chrome lives inside tosi-product-header) === */
+  .sticky-bar {
+    background: color-mix(in srgb, var(--bg) 85%, transparent);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: var(--fg);
+    border-bottom: 1px solid var(--border);
+    padding: 0.7rem 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    transition:
+      background-color 0.3s linear,
+      color 0.3s linear,
+      border-color 0.3s linear;
+  }
+  .sticky-bar .brand { font-weight: 700; font-size: 1rem; }
+  .sticky-bar .progress {
+    font-family: monospace; font-size: 0.8rem; color: var(--muted);
+  }
+
+  /* === Page footer (sibling below engine) === */
   .page-footer {
-    background: #1a1a2e;
-    padding: 2rem;
+    background: var(--bg);
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+    padding: 2.5rem 2rem;
     text-align: center;
-    border-top: 2px solid #333;
-    color: #888;
+    transition: background-color 0.25s linear, color 0.25s linear, border-color 0.25s linear;
   }
+  .page-footer p { margin: 0; }
 
-  /* Outer panel content */
-  .outer-panel {
+  /* === Section content === */
+  .scene {
     height: 100vh;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    text-align: center;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 2rem; text-align: center;
+    background: var(--bg); color: var(--fg);
+    transition: background-color 0.25s linear, color 0.25s linear;
   }
-  .outer-panel h2 { font-size: 2.5rem; margin: 0 0 0.4em; }
-  .outer-panel p { color: #aaa; max-width: 480px; margin: 0; padding: 0 1rem; }
-  .outer-a { background: linear-gradient(180deg, #102030 0%, #051020 100%); }
-  .outer-c { background: linear-gradient(180deg, #2a1030 0%, #100520 100%); }
+  .scene h2 {
+    font-size: clamp(2rem, 6vw, 4rem); margin: 0 0 0.4em; font-weight: 800;
+  }
+  .scene p {
+    font-size: clamp(1rem, 1.6vw, 1.2rem); color: var(--muted);
+    max-width: 560px; margin: 0;
+  }
+  .scene .pill {
+    display: inline-block; margin-top: 1.5em;
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--accent); font-family: monospace; font-size: 0.85rem;
+    padding: 0.5em 1.2em; border-radius: 999px;
+  }
 
-  /* Nested horizontal tosi-product container */
-  .nested-host {
-    height: 100vh;
-    background: #082010;
-    display: flex; flex-direction: column;
+  .intro {
+    background: var(--bg); color: var(--fg);
+    padding: clamp(3rem, 8vh, 6rem) 1.5rem;
+    display: flex; justify-content: center;
+    transition: background-color 0.25s linear, color 0.25s linear;
   }
-  .nested-host h2 {
-    margin: 0; padding: 1rem 2rem; font-size: 1.4rem; flex-shrink: 0;
-  }
-  .nested-host .nested-frame {
-    flex: 1; min-height: 0; overflow: hidden;
-    border: 1px dashed #888;
-    margin: 0 1rem 1rem;
-  }
-  /* Inner horizontal sub-panels */
-  .h-panel {
-    width: 100vw; height: 100%;
-    display: flex; align-items: center; justify-content: center;
-    text-align: center; font-size: 2rem; font-weight: 600;
-    flex-shrink: 0;
-  }
-  .h-a { background: #1a4030; }
-  .h-b { background: #1a2050; }
-  .h-c { background: #501a30; }
-
-  .marker {
-    display: inline-block;
-    background: rgba(255,255,255,0.1);
-    padding: 0.4em 0.9em; border-radius: 999px;
-    font-family: monospace; font-size: 0.8rem;
-    margin-top: 1em;
-  }
+  .intro-inner { max-width: 640px; line-height: 1.7; }
+  .intro-inner h3 { font-size: 1.5rem; margin: 0 0 0.6em; }
+  .intro-inner p { color: var(--muted); margin: 0; }
 `;
 document.head.appendChild(style);
-var pageHeader = header({ class: "page-header" }, h1("v2 embeddability test"), p2("Page header above. tosi-product-v2 below. Footer below that. Inside the middle vertical section: a nested horizontal tosi-product-v2."));
-var innerHorizontal = tosiProductV2({ direction: "horizontal" }, tosiProductSectionV2({ scroll: 100 }, div2({ class: "h-panel h-a" }, "Inner H-1", span({ class: "marker" }, "horizontal section"))), tosiProductSectionV2({ scroll: 100 }, div2({ class: "h-panel h-b" }, "Inner H-2", span({ class: "marker" }, "horizontal section"))), tosiProductSectionV2({ scroll: 100 }, div2({ class: "h-panel h-c" }, "Inner H-3", span({ class: "marker" }, "horizontal section"))));
-var outerEngine = tosiProductV2(tosiProductSectionV2({ scroll: 100 }, div2({ class: "outer-panel outer-a" }, h2("Outer Section A"), p2("Vertical tosi-product-v2. Page header above me, footer below the engine."), span({ class: "marker" }, "outer / vertical"))), tosiProductSectionV2({ scroll: 200 }, div2({ class: "nested-host" }, h2("Outer Section B — contains nested horizontal engine"), div2({ class: "nested-frame" }, innerHorizontal))), tosiProductSectionV2({ scroll: 100 }, div2({ class: "outer-panel outer-c" }, h2("Outer Section C"), p2("Engine continues vertically after the nested region."), span({ class: "marker" }, "outer / vertical"))));
-var pageFooter = footer({ class: "page-footer" }, p2("Page footer below. If you can see this after scrolling past the engine, embeddability works."));
+var pageHeader = header({ class: "page-header" }, div2({ class: "brand" }, "tosijs-product"), nav(a2({ href: "#" }, "Docs"), a2({ href: "#" }, "Examples"), a2({ href: "#" }, "GitHub")));
+var stickyProgress = span({ class: "progress" }, "0%");
+var stickyHeader = tosiProductHeader({ threshold: 80 }, div2({ class: "sticky-bar" }, div2({ class: "brand" }, "tosijs-product"), stickyProgress));
+var app = tosiProduct(tosiProductSection({ scroll: 100, theme: "midnight" }, div2({ class: "scene" }, h2("Midnight"), p2("First section pinned with a constant midnight theme. Scroll to enter the next scene."), span({ class: "pill" }, "theme=midnight"))), div2({ class: "intro" }, div2({ class: "intro-inner" }, h3("Why themes?"), p2("Themes are dictionaries of CSS custom properties. tosi-product reads the active section's theme attributes and writes the resolved values to document.documentElement, so everything cascading from there — including the sticky header above — re-themes in unison."))), tosiProductSection({ scroll: 100, theme: "forest" }, div2({ class: "scene" }, h2("Forest"), p2("Different theme, same layout. Notice the page header and sticky header both follow."), span({ class: "pill" }, "theme=forest"))), tosiProductSection({
+  scroll: 250,
+  "theme-from": "forest",
+  "theme-to": "paper"
+}, div2({ class: "scene" }, h2("Dawn"), p2("This section's pin progress interpolates the theme from forest into paper. By the time pinning ends, you're in light mode — and so is the page above and below."), span({ class: "pill" }, 'theme-from="forest" theme-to="paper"'))), tosiProductSection({ scroll: 100, theme: "paper" }, div2({ class: "scene" }, h2("Paper"), p2("Light theme settled. Sticky header is themed in light too."), span({ class: "pill" }, "theme=paper"))), tosiProductSection({
+  scroll: 200,
+  "theme-from": "paper",
+  "theme-to": "rose"
+}, div2({ class: "scene" }, h2("Dusk"), p2("And back the other way — paper interpolating to rose."), span({ class: "pill" }, 'theme-from="paper" theme-to="rose"'))), tosiProductSection({ scroll: 100, theme: "rose" }, div2({ class: "scene" }, h2("Rose"), p2("Last section. The footer below inherits this theme too."), span({ class: "pill" }, "theme=rose"))));
+app.themes = themes;
+app.defaultTheme = "midnight";
+var pageFooter = footer({ class: "page-footer" }, p2("Page footer — themed by whatever section ended the engine."));
 document.body.appendChild(pageHeader);
-document.body.appendChild(outerEngine);
+document.body.appendChild(stickyHeader);
+document.body.appendChild(app);
 document.body.appendChild(pageFooter);
+function onPageScroll() {
+  const y = window.scrollY;
+  const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+  const pct = docHeight > 0 ? Math.round(y / docHeight * 100) : 0;
+  stickyProgress.textContent = `${pct}%`;
+}
+window.addEventListener("scroll", () => requestAnimationFrame(onPageScroll), {
+  passive: true
+});
+onPageScroll();

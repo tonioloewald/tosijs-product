@@ -1,9 +1,9 @@
 import {
-  tosiProductV2,
-  tosiProductSectionV2,
-  tosiProductHeaderV2,
-  TosiProductV2,
-} from "../src/tosi-product-v2";
+  tosiProduct,
+  tosiProductSection,
+  tosiProductHeader,
+  TosiProduct,
+} from "../src/tosi-product";
 import { tosiInterpolator, tosiWaypoint } from "../src/tosi-interpolator";
 import { tosiCode } from "../src/tosi-code";
 import { markdownViewer } from "tosijs-ui";
@@ -235,7 +235,7 @@ const pageHeader = header(
 );
 
 const stickyProgressLabel = span({ class: "progress" }, "0%");
-const stickyHeader = tosiProductHeaderV2(
+const stickyHeader = tosiProductHeader(
   { threshold: 80 },
   div(
     { class: "sticky-bar" },
@@ -282,9 +282,9 @@ const stagedRow = (label: string, start: number, end: number) =>
   );
 
 // === Engine =================================================================
-const app = tosiProductV2(
+const app = tosiProduct(
   // ===== HERO =====
-  tosiProductSectionV2(
+  tosiProductSection(
     { scroll: 100, theme: "midnight" },
     div(
       { class: "scene" },
@@ -311,13 +311,13 @@ const app = tosiProductV2(
 
 A small library for building **scroll-driven product pages** — the cinematic, "Apple-style" pages where scrolling becomes the timeline.
 
-You compose a stack of \`<tosi-product-section-v2>\` elements inside a \`<tosi-product-v2>\`. Each section claims a slice of scroll runway: it pins at the viewport top, animations run during pin, then it scrolls out at 1:1 as the next section takes over.
+You compose a stack of \`<tosi-product-section>\` elements inside a \`<tosi-product>\`. Each section claims a slice of scroll runway: it pins at the viewport top, animations run during pin, then it scrolls out at 1:1 as the next section takes over.
 
 This whole page is one engine. Read on to see what each piece does.`
   ),
 
   // ===== INTERPOLATOR BASICS =====
-  tosiProductSectionV2(
+  tosiProductSection(
     { scroll: 200, theme: "midnight" },
     div(
       { class: "scene" },
@@ -357,7 +357,7 @@ This whole page is one engine. Read on to see what each piece does.`
   ),
 
   // ===== STAGED REVEAL =====
-  tosiProductSectionV2(
+  tosiProductSection(
     { scroll: 300, theme: "midnight" },
     div(
       { class: "scene" },
@@ -374,7 +374,7 @@ This whole page is one engine. Read on to see what each piece does.`
   ),
 
   // ===== THEME TRANSITION =====
-  tosiProductSectionV2(
+  tosiProductSection(
     {
       scroll: 250,
       "theme-from": "midnight",
@@ -403,7 +403,7 @@ This whole page is one engine. Read on to see what each piece does.`
     )
   ),
 
-  tosiProductSectionV2(
+  tosiProductSection(
     { scroll: 100, theme: "paper" },
     div(
       { class: "scene" },
@@ -421,15 +421,15 @@ Themes are dictionaries of CSS custom properties. The engine writes the active s
 For interpolated sections, color values blend through \`color-mix(in srgb, ...)\`; numeric strings interpolate per-number; everything else steps at the midpoint.
 
 \`\`\`html
-<tosi-product-section-v2
+<tosi-product-section
   theme-from="midnight"
   theme-to="paper">
   ...
-</tosi-product-section-v2>
+</tosi-product-section>
 \`\`\``
   ),
 
-  tosiProductSectionV2(
+  tosiProductSection(
     {
       scroll: 200,
       "theme-from": "paper",
@@ -447,12 +447,12 @@ For interpolated sections, color values blend through \`color-mix(in srgb, ...)\
   div(
     { class: "embed-host" },
     h2("Nested scroll engines"),
-    p("A tosi-product-v2 inside any scrollable container detects its scroll parent automatically. It works the same in a 60vh card as on the whole page."),
+    p("A tosi-product inside any scrollable container detects its scroll parent automatically. It works the same in a 60vh card as on the whole page."),
     div(
       { class: "embed-frame scroll-y" },
-      tosiProductV2(
+      tosiProduct(
         ...["Hero", "Intro", "Reveal", "Theme", "Done"].map((label, i, arr) =>
-          tosiProductSectionV2(
+          tosiProductSection(
             {
               scroll: 80,
               theme: ["midnight", "forest", "paper", "rose", "midnight"][i],
@@ -484,15 +484,15 @@ For interpolated sections, color values blend through \`color-mix(in srgb, ...)\
   ),
 
   // ===== EMBEDDED HORIZONTAL (follower mode) =====
-  tosiProductSectionV2(
+  tosiProductSection(
     { scroll: 250, theme: "rose" },
     div(
       { class: "embed-host", style: { padding: "2rem 1rem", background: "transparent" } },
       h2("Horizontal nested engine"),
-      p("This section pins. Inside the pin, a horizontal tosi-product-v2 in follower mode — its panels slide as the outer's pin progress advances."),
+      p("This section pins. Inside the pin, a horizontal tosi-product in follower mode — its panels slide as the outer's pin progress advances."),
       div(
         { class: "embed-frame", style: { height: "55vh" } },
-        tosiProductV2(
+        tosiProduct(
           { direction: "horizontal" },
           ...[
             { name: "tosijs", desc: "Web components + proxy state.", bg: "#1a3a4a" },
@@ -500,7 +500,7 @@ For interpolated sections, color values blend through \`color-mix(in srgb, ...)\
             { name: "tosijs-3d", desc: "BabylonJS, declaratively.", bg: "#3a1a3a" },
             { name: "tosijs-product", desc: "You are here.", bg: "#1a1a3a" },
           ].map((card) =>
-            tosiProductSectionV2(
+            tosiProductSection(
               { scroll: 100 },
               div(
                 { class: "h-card", style: { background: card.bg } },
@@ -530,7 +530,7 @@ bun add tosijs-product tosijs tosijs-ui
 
 Then compose your scenes in HTML.`
   )
-) as TosiProductV2;
+) as TosiProduct;
 
 app.themes = themes;
 app.defaultTheme = "midnight";

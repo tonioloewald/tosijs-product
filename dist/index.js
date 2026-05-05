@@ -19,10 +19,10 @@
   __export(exports_src, {
     tosiWaypoint: () => tosiWaypoint,
     tosiScrollTime: () => tosiScrollTime,
-    tosiScrollMapper: () => tosiScrollMapper,
     tosiScrollCamera: () => tosiScrollCamera,
     tosiScrollAnimation: () => tosiScrollAnimation,
     tosiProductSection: () => tosiProductSection,
+    tosiProductHeader: () => tosiProductHeader,
     tosiProduct: () => tosiProduct,
     tosiInterpolator: () => tosiInterpolator,
     tosiFilmstrip: () => tosiFilmstrip,
@@ -31,193 +31,14 @@
     interpolateStrings: () => interpolateStrings,
     TosiWaypoint: () => TosiWaypoint,
     TosiScrollTime: () => TosiScrollTime,
-    TosiScrollMapper: () => TosiScrollMapper,
     TosiScrollCamera: () => TosiScrollCamera,
     TosiScrollAnimation: () => TosiScrollAnimation,
     TosiProductSection: () => TosiProductSection,
+    TosiProductHeader: () => TosiProductHeader,
     TosiProduct: () => TosiProduct,
     TosiInterpolator: () => TosiInterpolator,
     TosiFilmstrip: () => TosiFilmstrip,
     TosiCode: () => TosiCode
-  });
-
-  // node_modules/tosijs-ui/dist/index.js
-  var exports_dist = {};
-  __export(exports_dist, {
-    xrControllersText: () => F8,
-    xrControllers: () => A8,
-    xinTagList: () => Ks,
-    xinTag: () => Zs,
-    xinTabs: () => r6,
-    xinTable: () => G9,
-    xinSizer: () => Os,
-    xinSidenav: () => N6,
-    xinSelect: () => r9,
-    xinSegmented: () => Ms,
-    xinRating: () => rs,
-    xinPasswordStrength: () => S8,
-    xinNotification: () => D8,
-    xinMenu: () => A9,
-    xinMd: () => u9,
-    xinLocalized: () => C9,
-    xinForm: () => z8,
-    xinFloat: () => Y3,
-    xinField: () => B8,
-    xinCarousel: () => F3,
-    version: () => Nl,
-    updateLocalized: () => O0,
-    trackDrag: () => G2,
-    tosijs: () => exports_module,
-    tosiTagList: () => Yl,
-    tosiTag: () => P4,
-    tosiTabs: () => T1,
-    tosiTable: () => Y0,
-    tosiSizer: () => Gl,
-    tosiSidenav: () => o2,
-    tosiSelect: () => X3,
-    tosiSegmented: () => Pl,
-    tosiRichText: () => jl,
-    tosiRating: () => Cl,
-    tosiPasswordStrength: () => cl,
-    tosiNotification: () => z4,
-    tosiMonth: () => X8,
-    tosiMenu: () => q5,
-    tosiMd: () => G1,
-    tosiLocalized: () => l1,
-    tosiLocalePicker: () => k5,
-    tosiForm: () => Ei,
-    tosiFloat: () => m1,
-    tosiField: () => Di,
-    tosiDialog: () => _2,
-    tosiCarousel: () => S4,
-    testManager: () => Y,
-    tabSelector: () => h6,
-    svgIcon: () => t32,
-    svg2DataUrl: () => g0,
-    styleSheet: () => c2,
-    spacer: () => Y1,
-    sizeBreak: () => js,
-    sideNav: () => Y6,
-    setLocale: () => c9,
-    scriptTag: () => Z,
-    runTests: () => X22,
-    richTextWidgets: () => Hl,
-    richText: () => fs,
-    rewriteImports: () => C1,
-    removeLastMenu: () => p1,
-    postNotification: () => E8,
-    positionFloat: () => x5,
-    popMenu: () => J2,
-    popFloat: () => A0,
-    menu: () => F5,
-    markdownViewer: () => I9,
-    mapBox: () => O8,
-    makeSorter: () => C22,
-    localize: () => z2,
-    localePicker: () => f9,
-    loadTransform: () => $2,
-    liveExample: () => Y2,
-    legacyAliases: () => ul,
-    isBreached: () => nl,
-    insertExamples: () => U2,
-    initLocalization: () => p9,
-    icons: () => t3,
-    i18n: () => A,
-    gamepadText: () => j8,
-    gamepadState: () => Ii,
-    findHighestZ: () => B1,
-    filterPart: () => D2,
-    filterBuilder: () => C8,
-    expect: () => l4,
-    executeInline: () => b22,
-    executeInIframe: () => G22,
-    executeCode: () => ii,
-    enableTests: () => y4,
-    elastic: () => ps,
-    editableRect: () => y8,
-    dragAndDrop: () => B2,
-    disableTests: () => e4,
-    digest: () => xl,
-    defineIcons: () => n3,
-    defaultColors: () => $4,
-    dataTable: () => b9,
-    createThemeWithLegacy: () => ms,
-    createTheme: () => t0,
-    createTestContext: () => s4,
-    createSubMenu: () => j5,
-    createMenuItem: () => A5,
-    createMenuAction: () => H5,
-    createDocBrowser: () => l8,
-    createDarkTheme: () => Il,
-    componentVars: () => Ss,
-    commandButton: () => S3,
-    colorInput: () => j0,
-    codeEditor: () => $1,
-    bringToFront: () => t1,
-    bodymovinPlayer: () => M3,
-    blockStyle: () => A4,
-    baseVariables: () => Dl,
-    baseTheme: () => Is,
-    baseDarkTheme: () => us,
-    b3d: () => a3,
-    availableFilters: () => f4,
-    applyTheme: () => Es,
-    abTest: () => Tl,
-    XinWord: () => ds,
-    XinTagList: () => Xs,
-    XinTag: () => Us,
-    XinSizer: () => _s,
-    XinSelect: () => h9,
-    XinSegmented: () => vs,
-    XinRating: () => hs,
-    XinPasswordStrength: () => m8,
-    XinNotification: () => R8,
-    XinMenu: () => F9,
-    XinLocalized: () => a2,
-    XinForm: () => M8,
-    XinFloat: () => K3,
-    XinField: () => v8,
-    XinCarousel: () => A3,
-    TosiTagList: () => W1,
-    TosiTag: () => y2,
-    TosiTabs: () => P22,
-    TosiTable: () => H2,
-    TosiSizer: () => e0,
-    TosiSidenav: () => A1,
-    TosiSelect: () => T3,
-    TosiSegmented: () => N1,
-    TosiRating: () => r0,
-    TosiPasswordStrength: () => o0,
-    TosiNotification: () => k1,
-    TosiMonth: () => M4,
-    TosiMenu: () => w2,
-    TosiMd: () => O2,
-    TosiLocalized: () => i1,
-    TosiLocalePicker: () => g2,
-    TosiForm: () => m22,
-    TosiFloat: () => r1,
-    TosiField: () => u22,
-    TosiDialog: () => W0,
-    TosiCarousel: () => d2,
-    TabSelector: () => o6,
-    SvgIcon: () => k0,
-    SizeBreak: () => L4,
-    SideNav: () => K6,
-    STORAGE_KEY: () => Q2,
-    RichText: () => y0,
-    RemoteSyncManager: () => i2,
-    MarkdownViewer: () => E9,
-    MapBox: () => q1,
-    LocalePicker: () => d9,
-    LiveExample: () => g1,
-    FilterPart: () => C4,
-    FilterBuilder: () => a4,
-    EditableRect: () => m3,
-    DataTable: () => Q9,
-    CodeEditor: () => M1,
-    BodymovinPlayer: () => P1,
-    B3d: () => v0,
-    AbTest: () => _1
   });
 
   // ../tosijs/dist/module.js
@@ -2800,6 +2621,1212 @@ ${$}
     }
   }
   var gf = wL.elementCreator();
+
+  // src/tosi-product.ts
+  var { div, slot } = I;
+  function isColor(s2) {
+    const t2 = s2.trim();
+    return t2.startsWith("#") || t2.startsWith("rgb") || t2.startsWith("hsl") || t2.startsWith("color(") || ["red", "blue", "green", "white", "black", "transparent", "currentColor"].includes(t2);
+  }
+  function interpolateThemeValue(from, to, t2) {
+    if (from === to || t2 <= 0)
+      return from;
+    if (t2 >= 1)
+      return to;
+    if (isColor(from) && isColor(to)) {
+      return `color-mix(in srgb, ${from} ${(1 - t2) * 100}%, ${to})`;
+    }
+    const numRegex = /-?\d+(?:\.\d+)?/g;
+    const aNums = Array.from(from.matchAll(numRegex));
+    const bNums = Array.from(to.matchAll(numRegex));
+    if (aNums.length > 0 && aNums.length === bNums.length) {
+      let result = "";
+      let lastIndex = 0;
+      for (let i2 = 0;i2 < aNums.length; i2++) {
+        const am = aNums[i2];
+        const bm = bNums[i2];
+        result += from.substring(lastIndex, am.index);
+        const v2 = parseFloat(am[0]) + (parseFloat(bm[0]) - parseFloat(am[0])) * t2;
+        result += v2.toFixed(4).replace(/0+$/, "").replace(/\.$/, "");
+        lastIndex = am.index + am[0].length;
+      }
+      result += from.substring(lastIndex);
+      return result;
+    }
+    return t2 < 0.5 ? from : to;
+  }
+  var reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  function getScrollParent(el) {
+    let node = el.parentElement;
+    while (node) {
+      if (node === document.body || node === document.documentElement)
+        break;
+      const { overflow, overflowX, overflowY } = getComputedStyle(node);
+      if (/(auto|scroll)/.test(overflow + overflowX + overflowY))
+        return node;
+      node = node.parentElement;
+    }
+    return window;
+  }
+  function findEnclosingSection(el) {
+    let node = el.parentElement;
+    while (node) {
+      if (node.tagName.toLowerCase() === "tosi-product-section") {
+        return node;
+      }
+      node = node.parentElement;
+    }
+    return null;
+  }
+  function nearestEnclosingProduct(el) {
+    let node = el;
+    while (node) {
+      if (node.tagName.toLowerCase() === "tosi-product")
+        return node;
+      node = node.parentElement;
+    }
+    return null;
+  }
+
+  class TosiProduct extends u {
+    static initAttributes = {
+      direction: "vertical",
+      debug: false
+    };
+    static styleSpec = {
+      ":host": {
+        display: "block",
+        position: "relative",
+        width: "100%",
+        background: "var(--bg, #000)",
+        color: "var(--fg, #fff)"
+      },
+      ".window": {
+        position: "sticky",
+        top: "0",
+        left: "0",
+        width: "100%",
+        height: "100vh",
+        overflow: "hidden"
+      },
+      ":host([direction=horizontal])": {
+        display: "inline-block",
+        width: "max-content"
+      },
+      ":host([direction=horizontal]) .window": {
+        width: "100vw",
+        height: "100%"
+      },
+      ".stack": {
+        position: "absolute",
+        top: "0",
+        left: "0",
+        width: "100%",
+        willChange: "transform"
+      },
+      ":host([direction=horizontal]) .stack": {
+        display: "flex",
+        flexDirection: "row",
+        width: "max-content",
+        height: "100%"
+      },
+      ".debug-panel": {
+        position: "fixed",
+        top: "10px",
+        right: "10px",
+        background: "rgba(0,0,0,0.85)",
+        color: "#0f0",
+        padding: "6px 10px",
+        fontFamily: "monospace",
+        fontSize: "11px",
+        borderRadius: "4px",
+        zIndex: 1000,
+        pointerEvents: "none",
+        whiteSpace: "pre"
+      }
+    };
+    content = () => [
+      div({ class: "window", part: "window" }, div({ class: "stack", part: "stack" }, slot())),
+      div({ class: "debug-panel", part: "debug", hidden: true })
+    ];
+    themes = {};
+    defaultTheme = "";
+    themeTarget = document.documentElement;
+    _scrollTarget = null;
+    _stack = null;
+    _window = null;
+    _debugPanel = null;
+    _resizeObserver = null;
+    _mutationObserver = null;
+    _items = [];
+    _totalRunway = 0;
+    _scrollHandler = () => this._scheduleUpdate();
+    _rafPending = false;
+    _isNested = false;
+    _injectedProgress = 0;
+    _appliedThemeKeys = new Set;
+    connectedCallback() {
+      super.connectedCallback();
+      this._stack = this.shadowRoot?.querySelector(".stack");
+      this._window = this.shadowRoot?.querySelector(".window");
+      this._debugPanel = this.shadowRoot?.querySelector(".debug-panel");
+      this._isNested = !!findEnclosingSection(this);
+      if (this._isNested) {
+        this.setAttribute("data-scroll-animate", "tosi-product");
+        if (this._window) {
+          this._window.style.position = "relative";
+          this._window.style.width = "100%";
+          this._window.style.height = "100%";
+        }
+        this.style.width = "100%";
+        this.style.height = "100%";
+        this.style.display = "block";
+        if (this.themeTarget === document.documentElement) {
+          this.themeTarget = this;
+        }
+      } else {
+        this._scrollTarget = getScrollParent(this);
+        this._scrollTarget.addEventListener("scroll", this._scrollHandler, {
+          passive: true
+        });
+        window.addEventListener("resize", this._scrollHandler, { passive: true });
+      }
+      this._mutationObserver = new MutationObserver(() => this._relayout());
+      this._mutationObserver.observe(this, {
+        childList: true,
+        attributes: true,
+        attributeFilter: ["scroll"]
+      });
+      this._resizeObserver = new ResizeObserver(() => this._relayout());
+      for (const child of Array.from(this.children)) {
+        if (child instanceof HTMLElement)
+          this._resizeObserver.observe(child);
+      }
+      this._resizeObserver.observe(this);
+      requestAnimationFrame(() => {
+        this._relayout();
+        this._update();
+      });
+    }
+    disconnectedCallback() {
+      super.disconnectedCallback();
+      if (!this._isNested) {
+        this._scrollTarget?.removeEventListener("scroll", this._scrollHandler);
+        window.removeEventListener("resize", this._scrollHandler);
+      }
+      this._mutationObserver?.disconnect();
+      this._resizeObserver?.disconnect();
+    }
+    setScrollProgress(progress) {
+      if (!this._isNested)
+        return;
+      this._injectedProgress = Math.max(0, Math.min(1, progress));
+      this._update();
+    }
+    _isHorizontal() {
+      return this.getAttribute("direction") === "horizontal";
+    }
+    _viewSize() {
+      const horizontal = this._isHorizontal();
+      if (this._isNested) {
+        return horizontal ? this.clientWidth : this.clientHeight;
+      }
+      if (this._scrollTarget instanceof HTMLElement) {
+        return horizontal ? this._scrollTarget.clientWidth : this._scrollTarget.clientHeight;
+      }
+      return horizontal ? window.innerWidth : window.innerHeight;
+    }
+    _scrollPos() {
+      const horizontal = this._isHorizontal();
+      if (this._scrollTarget instanceof HTMLElement) {
+        return horizontal ? this._scrollTarget.scrollLeft : this._scrollTarget.scrollTop;
+      }
+      return horizontal ? window.scrollX : window.scrollY;
+    }
+    _hostStart() {
+      const horizontal = this._isHorizontal();
+      const rect = this.getBoundingClientRect();
+      let edge = horizontal ? rect.left : rect.top;
+      if (this._scrollTarget instanceof HTMLElement) {
+        const containerRect = this._scrollTarget.getBoundingClientRect();
+        edge -= horizontal ? containerRect.left : containerRect.top;
+      }
+      return this._scrollPos() + edge;
+    }
+    _relayout() {
+      if (!this._stack)
+        return;
+      const horizontal = this._isHorizontal();
+      const view = this._viewSize();
+      const items = [];
+      let cumOffset = 0;
+      let cumRunway = 0;
+      for (const child of Array.from(this.children)) {
+        if (!(child instanceof HTMLElement))
+          continue;
+        const isSection = child.tagName.toLowerCase() === "tosi-product-section";
+        const naturalSize = horizontal ? child.offsetWidth : child.offsetHeight;
+        let pinDuration = 0;
+        if (isSection) {
+          const scrollAttr = child.getAttribute("scroll");
+          if (scrollAttr !== null) {
+            const pct = Number(scrollAttr);
+            if (Number.isFinite(pct) && pct >= 0) {
+              pinDuration = pct / 100 * view;
+            }
+          } else {
+            pinDuration = view;
+          }
+        }
+        const exitDuration = naturalSize;
+        const rangeStart = cumRunway;
+        const pinEnd = rangeStart + pinDuration;
+        const rangeEnd = pinEnd + exitDuration;
+        items.push({
+          element: child,
+          isSection,
+          naturalSize,
+          pinDuration,
+          exitDuration,
+          offset: cumOffset,
+          rangeStart,
+          pinEnd,
+          rangeEnd
+        });
+        cumOffset += naturalSize;
+        cumRunway += pinDuration + exitDuration;
+      }
+      this._items = items;
+      this._totalRunway = cumRunway;
+      if (!this._isNested) {
+        const hostDim = horizontal ? "width" : "height";
+        this.style[hostDim] = `${cumRunway + view}px`;
+      }
+      this._update();
+    }
+    _scheduleUpdate() {
+      if (this._rafPending)
+        return;
+      this._rafPending = true;
+      requestAnimationFrame(() => {
+        this._rafPending = false;
+        this._update();
+      });
+    }
+    _update() {
+      if (!this._stack || this._items.length === 0)
+        return;
+      const horizontal = this._isHorizontal();
+      const view = this._viewSize();
+      const local = this._isNested ? this._injectedProgress * this._totalRunway : this._scrollPos() - this._hostStart();
+      const last = this._items[this._items.length - 1];
+      const stackSize = last.offset + last.naturalSize;
+      const minTranslate = -Math.max(0, stackSize - view);
+      let translate = 0;
+      let activeIdx = -1;
+      let activeProgress = 0;
+      if (local <= 0) {
+        translate = 0;
+        activeIdx = 0;
+        activeProgress = 0;
+      } else if (local >= this._totalRunway) {
+        translate = minTranslate;
+        activeIdx = this._items.length - 1;
+        activeProgress = 1;
+      } else {
+        for (let i2 = 0;i2 < this._items.length; i2++) {
+          const item = this._items[i2];
+          if (local < item.rangeStart || local >= item.rangeEnd)
+            continue;
+          if (local < item.pinEnd) {
+            translate = -item.offset;
+            activeProgress = item.pinDuration > 0 ? (local - item.rangeStart) / item.pinDuration : 1;
+          } else {
+            const exitProgress = (local - item.pinEnd) / item.exitDuration;
+            translate = -item.offset - exitProgress * item.naturalSize;
+            activeProgress = 1;
+          }
+          activeIdx = i2;
+          break;
+        }
+      }
+      if (translate < minTranslate)
+        translate = minTranslate;
+      const axis = horizontal ? "X" : "Y";
+      this._stack.style.transform = `translate${axis}(${translate}px)`;
+      for (let i2 = 0;i2 < this._items.length; i2++) {
+        const item = this._items[i2];
+        if (!item.isSection)
+          continue;
+        let progress;
+        if (i2 < activeIdx)
+          progress = 1;
+        else if (i2 > activeIdx)
+          progress = 0;
+        else
+          progress = activeProgress;
+        this._notify(item.element, progress);
+      }
+      this._applyTheme(activeIdx, activeProgress);
+      if (this._debugPanel) {
+        const showDebug = this.getAttribute("debug") === "true";
+        this._debugPanel.hidden = !showDebug;
+        if (showDebug) {
+          this._debugPanel.textContent = `local: ${local.toFixed(0)}px / ${this._totalRunway.toFixed(0)}
+` + `translate${axis}: ${translate.toFixed(0)}px
+` + `active: #${activeIdx} @ ${activeProgress.toFixed(3)}`;
+        }
+      }
+    }
+    _notify(section, progress) {
+      section.dataset.progress = progress.toFixed(3);
+      if (typeof section.setScrollProgress === "function") {
+        section.setScrollProgress(progress);
+      }
+    }
+    _applyTheme(activeIdx, activeProgress) {
+      const themeNames = Object.keys(this.themes);
+      if (themeNames.length === 0)
+        return;
+      let fromName = this.defaultTheme;
+      let toName = this.defaultTheme;
+      let t2 = 0;
+      let themeIdx = activeIdx;
+      while (themeIdx >= 0) {
+        const it = this._items[themeIdx];
+        const el = it.element;
+        const themeAttr = el.getAttribute("theme");
+        const fromAttr = el.getAttribute("theme-from");
+        const toAttr = el.getAttribute("theme-to");
+        if (themeAttr || fromAttr || toAttr) {
+          if (fromAttr && toAttr) {
+            fromName = fromAttr;
+            toName = toAttr;
+            t2 = themeIdx === activeIdx ? activeProgress : 1;
+          } else {
+            const single = themeAttr || fromAttr || toAttr;
+            fromName = single;
+            toName = single;
+          }
+          break;
+        }
+        themeIdx--;
+      }
+      const fromTheme = this.themes[fromName];
+      const toTheme = this.themes[toName];
+      if (!fromTheme && !toTheme)
+        return;
+      const target = this.themeTarget;
+      const allKeys = new Set([
+        ...Object.keys(fromTheme || {}),
+        ...Object.keys(toTheme || {})
+      ]);
+      const seen = new Set;
+      for (const key of allKeys) {
+        const fromVal = fromTheme?.[key] ?? toTheme?.[key];
+        const toVal = toTheme?.[key] ?? fromTheme?.[key];
+        if (fromVal === undefined || toVal === undefined)
+          continue;
+        const value = interpolateThemeValue(fromVal, toVal, t2);
+        target.style.setProperty(key, value);
+        seen.add(key);
+      }
+      for (const key of this._appliedThemeKeys) {
+        if (!seen.has(key))
+          target.style.removeProperty(key);
+      }
+      this._appliedThemeKeys = seen;
+    }
+  }
+
+  class TosiProductSection extends u {
+    static initAttributes = {
+      scroll: 100
+    };
+    static styleSpec = {
+      ":host": {
+        display: "block",
+        position: "relative",
+        width: "100%"
+      }
+    };
+    content = () => slot();
+    scrollCallback = null;
+    setScrollProgress(progress) {
+      if (reducedMotion.matches) {
+        if (this.scrollCallback)
+          this.scrollCallback(progress, this);
+        return;
+      }
+      const myProduct = this.closest("tosi-product");
+      const animators = this.querySelectorAll("[data-scroll-animate], [data-scroll-range]");
+      for (const el of Array.from(animators)) {
+        const ownerProduct = nearestEnclosingProduct(el === this ? null : el.parentElement);
+        if (ownerProduct !== myProduct)
+          continue;
+        const rangeStr = el.getAttribute("data-scroll-range") || "0,1";
+        const [start, end] = rangeStr.split(",").map(Number);
+        const range = end - start;
+        const localProgress = range <= 0 ? progress >= end ? 1 : 0 : Math.max(0, Math.min(1, (progress - start) / range));
+        el.style.setProperty("--local-progress", localProgress.toString());
+        el.dataset.localProgress = localProgress.toFixed(3);
+        if (typeof el.setScrollProgress === "function") {
+          el.setScrollProgress(localProgress);
+        } else if (el.getAttribute("data-scroll-animate") === "currentTime" && el.duration) {
+          el.currentTime = localProgress * el.duration;
+        } else if (el.getAttribute("data-scroll-animate") === "lottie" && el.animation && typeof el.animation.goToAndStop === "function") {
+          const total = el.animation.totalFrames || 0;
+          el.animation.goToAndStop(localProgress * total, true);
+        }
+      }
+      if (this.scrollCallback)
+        this.scrollCallback(progress, this);
+    }
+  }
+
+  class TosiProductHeader extends u {
+    static initAttributes = {
+      threshold: 50
+    };
+    static styleSpec = {
+      ":host": {
+        position: "fixed",
+        top: "0",
+        left: "0",
+        right: "0",
+        zIndex: "100",
+        transform: "translateY(-100%)",
+        transition: "transform 0.3s ease",
+        pointerEvents: "auto"
+      },
+      ":host([data-visible=true])": {
+        transform: "translateY(0)"
+      }
+    };
+    content = () => slot();
+    _scrollHandler = () => this._update();
+    connectedCallback() {
+      super.connectedCallback();
+      window.addEventListener("scroll", this._scrollHandler, { passive: true });
+      this._update();
+    }
+    disconnectedCallback() {
+      super.disconnectedCallback();
+      window.removeEventListener("scroll", this._scrollHandler);
+    }
+    _update() {
+      const threshold = Number(this.getAttribute("threshold")) || 50;
+      this.dataset.visible = window.scrollY > threshold ? "true" : "false";
+    }
+  }
+  var tosiProduct = TosiProduct.elementCreator({
+    tag: "tosi-product"
+  });
+  var tosiProductSection = TosiProductSection.elementCreator({
+    tag: "tosi-product-section"
+  });
+  var tosiProductHeader = TosiProductHeader.elementCreator({
+    tag: "tosi-product-header"
+  });
+  // src/tosi-filmstrip.ts
+  var { canvas } = I;
+
+  class TosiFilmstrip extends u {
+    static initAttributes = {
+      src: "",
+      cols: 0,
+      rows: 0,
+      total: 0
+    };
+    _img = null;
+    _ctx = null;
+    _lastProgress = 0;
+    _canvas = null;
+    _loadedSrc = "";
+    _loadId = 0;
+    static styleSpec = {
+      ":host": {
+        display: "block",
+        position: "relative",
+        width: "100%",
+        height: "100%"
+      },
+      canvas: {
+        width: "100%",
+        height: "100%",
+        objectFit: "contain",
+        display: "block"
+      }
+    };
+    content = () => {
+      this._canvas = canvas({ part: "canvas" });
+      return this._canvas;
+    };
+    _parseGrid() {
+      const src = this.getAttribute("src") || "";
+      let cols = Number(this.getAttribute("cols")) || 0;
+      let rows = Number(this.getAttribute("rows")) || 0;
+      let total = Number(this.getAttribute("total")) || 0;
+      if (!cols || !rows || !total) {
+        const match = src.match(/(\d+)x(\d+)_(\d+)\.(webp|jpg|png|data)/i);
+        if (match) {
+          if (!cols)
+            cols = parseInt(match[1]);
+          if (!rows)
+            rows = parseInt(match[2]);
+          if (!total)
+            total = parseInt(match[3]);
+        }
+      }
+      if (!total || !cols || !rows)
+        return null;
+      return { cols, rows, total };
+    }
+    load() {
+      const src = this.getAttribute("src") || "";
+      if (!src)
+        return;
+      const grid = this._parseGrid();
+      if (!grid)
+        return;
+      const loadId = ++this._loadId;
+      this._loadedSrc = src;
+      const img = new Image;
+      img.onload = () => {
+        if (loadId !== this._loadId)
+          return;
+        this._img = img;
+        this.setScrollProgress(this._lastProgress);
+      };
+      img.onerror = () => {
+        if (loadId !== this._loadId)
+          return;
+        console.warn(`[tosi-filmstrip] Failed to load: ${src}`);
+        this._img = null;
+      };
+      img.src = src;
+    }
+    setScrollProgress(progress) {
+      this._lastProgress = progress;
+      if (!this._img)
+        return;
+      const grid = this._parseGrid();
+      if (!grid)
+        return;
+      const { cols, rows, total } = grid;
+      const cvs = this._canvas || this.parts && this.parts.canvas;
+      if (!cvs)
+        return;
+      if (!this._ctx)
+        this._ctx = cvs.getContext("2d");
+      if (!this._ctx)
+        return;
+      const frameIndex = Math.max(0, Math.min(total - 1, Math.floor(progress * total)));
+      const col = frameIndex % cols;
+      const row = Math.floor(frameIndex / cols);
+      const fw = this._img.width / cols;
+      const fh = this._img.height / rows;
+      if (cvs.width !== fw || cvs.height !== fh) {
+        cvs.width = fw;
+        cvs.height = fh;
+      }
+      this._ctx.clearRect(0, 0, fw, fh);
+      this._ctx.drawImage(this._img, col * fw, row * fh, fw, fh, 0, 0, fw, fh);
+    }
+    connectedCallback() {
+      super.connectedCallback();
+      this.load();
+    }
+    disconnectedCallback() {
+      super.disconnectedCallback();
+      this._loadId++;
+      this._img = null;
+    }
+    render() {
+      super.render();
+      const currentSrc = this.getAttribute("src") || "";
+      if (!this._img || this._loadedSrc !== currentSrc) {
+        this.load();
+      } else {
+        this.setScrollProgress(this._lastProgress);
+      }
+    }
+  }
+  var tosiFilmstrip = TosiFilmstrip.elementCreator({
+    tag: "tosi-filmstrip"
+  });
+  // src/waypoints.ts
+  var interpolateWaypoints = (progress, waypoints) => {
+    if (!waypoints || waypoints.length === 0)
+      return null;
+    waypoints = [...waypoints].sort((a2, b2) => a2.progress - b2.progress);
+    if (progress <= waypoints[0].progress)
+      return waypoints[0];
+    if (progress >= waypoints[waypoints.length - 1].progress) {
+      return waypoints[waypoints.length - 1];
+    }
+    for (let i2 = 0;i2 < waypoints.length - 1; i2++) {
+      const wp1 = waypoints[i2];
+      const wp2 = waypoints[i2 + 1];
+      if (progress >= wp1.progress && progress <= wp2.progress) {
+        const t2 = (progress - wp1.progress) / (wp2.progress - wp1.progress);
+        const e2 = t2 < 0.5 ? 2 * t2 * t2 : -1 + (4 - 2 * t2) * t2;
+        const result = { progress };
+        for (const k2 in wp1) {
+          if (k2 !== "progress") {
+            result[k2] = wp1[k2] + (wp2[k2] - wp1[k2]) * e2;
+          }
+        }
+        return result;
+      }
+    }
+    return waypoints[0];
+  };
+  // src/tosi-interpolator.ts
+  var interpolateStrings = (a2, b2, t2) => {
+    const numRegex = /-?\d+(?:\.\d+)?/g;
+    const aNums = Array.from(a2.matchAll(numRegex));
+    const bNums = Array.from(b2.matchAll(numRegex));
+    if (aNums.length > 0 && aNums.length === bNums.length) {
+      let result = "";
+      let lastIndex = 0;
+      for (let i2 = 0;i2 < aNums.length; i2++) {
+        const aMatch = aNums[i2];
+        const bMatch = bNums[i2];
+        result += a2.substring(lastIndex, aMatch.index);
+        const n1 = parseFloat(aMatch[0]);
+        const n2 = parseFloat(bMatch[0]);
+        const interpolated = n1 + (n2 - n1) * t2;
+        let numStr = interpolated.toFixed(4);
+        if (numStr.includes(".")) {
+          numStr = numStr.replace(/0+$/, "").replace(/\.$/, "");
+        }
+        result += numStr;
+        lastIndex = aMatch.index + aMatch[0].length;
+      }
+      result += a2.substring(lastIndex);
+      return result;
+    }
+    const isColor2 = (s2) => s2.startsWith("#") || s2.startsWith("rgb") || s2.startsWith("hsl") || ["red", "blue", "white", "black", "transparent"].includes(s2);
+    if (isColor2(a2) && isColor2(b2)) {
+      return `color-mix(in srgb, ${a2} ${Math.round((1 - t2) * 100)}%, ${b2})`;
+    }
+    return t2 < 0.5 ? a2 : b2;
+  };
+
+  class TosiInterpolator extends u {
+    static styleSpec = {
+      ":host": {
+        display: "contents"
+      }
+    };
+    setScrollProgress(progress) {
+      const waypointsNodes = Array.from(this.querySelectorAll("tosi-waypoint"));
+      if (waypointsNodes.length === 0)
+        return;
+      const waypoints = waypointsNodes.map((w) => {
+        const styles = {};
+        const htmlEl = w;
+        for (let i2 = 0;i2 < htmlEl.style.length; i2++) {
+          const prop = htmlEl.style[i2];
+          styles[prop] = htmlEl.style.getPropertyValue(prop);
+        }
+        return {
+          progress: Number(w.getAttribute("progress") || 0),
+          styles
+        };
+      }).sort((a2, b2) => a2.progress - b2.progress);
+      let wp1 = waypoints[0];
+      let wp2 = waypoints[waypoints.length - 1];
+      let t2 = 0;
+      if (progress <= wp1.progress) {
+        wp2 = wp1;
+        t2 = 0;
+      } else if (progress >= wp2.progress) {
+        wp1 = wp2;
+        t2 = 1;
+      } else {
+        for (let i2 = 0;i2 < waypoints.length - 1; i2++) {
+          if (progress >= waypoints[i2].progress && progress <= waypoints[i2 + 1].progress) {
+            wp1 = waypoints[i2];
+            wp2 = waypoints[i2 + 1];
+            const rawT = (progress - wp1.progress) / (wp2.progress - wp1.progress);
+            const easing = this.getAttribute("easing");
+            if (easing === "ease-in-out") {
+              t2 = rawT < 0.5 ? 2 * rawT * rawT : -1 + (4 - 2 * rawT) * rawT;
+            } else {
+              t2 = rawT;
+            }
+            break;
+          }
+        }
+      }
+      const currentStyles = {};
+      for (const prop in wp1.styles) {
+        const val1 = wp1.styles[prop];
+        const val2 = wp2.styles[prop] || val1;
+        currentStyles[prop] = interpolateStrings(val1, val2, t2);
+      }
+      const targets = Array.from(this.children).filter((c2) => c2.tagName !== "TOSI-WAYPOINT");
+      targets.forEach((target) => {
+        const el = target;
+        for (const prop in currentStyles) {
+          el.style.setProperty(prop, currentStyles[prop]);
+        }
+      });
+    }
+  }
+
+  class TosiWaypoint extends u {
+    static initAttributes = {
+      progress: 0
+    };
+    static styleSpec = {
+      ":host": {
+        display: "none"
+      }
+    };
+    content = null;
+  }
+  var tosiInterpolator = TosiInterpolator.elementCreator({
+    tag: "tosi-interpolator"
+  });
+  var tosiWaypoint = TosiWaypoint.elementCreator({
+    tag: "tosi-waypoint"
+  });
+  // src/tosi-b3d-scroll.ts
+  var { slot: slot2 } = I;
+  function findScene(el) {
+    let node = el.parentElement;
+    while (node) {
+      if ("scene" in node)
+        return node;
+      for (const child of Array.from(node.children)) {
+        if (child !== el && "scene" in child)
+          return child;
+      }
+      node = node.parentElement;
+    }
+    return null;
+  }
+  function easeInOutQuad(t2) {
+    return t2 < 0.5 ? 2 * t2 * t2 : -1 + (4 - 2 * t2) * t2;
+  }
+  function interpolateWaypoints2(progress, waypoints, easing) {
+    if (waypoints.length === 0)
+      return {};
+    if (waypoints.length === 1)
+      return waypoints[0];
+    if (progress <= waypoints[0].progress)
+      return waypoints[0];
+    if (progress >= waypoints[waypoints.length - 1].progress) {
+      return waypoints[waypoints.length - 1];
+    }
+    for (let i2 = 0;i2 < waypoints.length - 1; i2++) {
+      const wp1 = waypoints[i2];
+      const wp2 = waypoints[i2 + 1];
+      if (progress >= wp1.progress && progress <= wp2.progress) {
+        const rawT = (progress - wp1.progress) / (wp2.progress - wp1.progress);
+        const t2 = easing ? easeInOutQuad(rawT) : rawT;
+        const result = {};
+        for (const key in wp1) {
+          if (key === "progress")
+            continue;
+          const v1 = wp1[key] ?? 0;
+          const v2 = wp2[key] ?? v1;
+          result[key] = v1 + (v2 - v1) * t2;
+        }
+        return result;
+      }
+    }
+    return waypoints[0];
+  }
+  function readWaypoints(host) {
+    return Array.from(host.querySelectorAll("tosi-waypoint")).map((wp) => {
+      const result = {
+        progress: Number(wp.getAttribute("progress") || 0)
+      };
+      for (const attr of Array.from(wp.attributes)) {
+        if (attr.name === "progress")
+          continue;
+        const val = Number(attr.value);
+        if (Number.isFinite(val)) {
+          const key = attr.name.replace(/-([a-z])/g, (_, c2) => c2.toUpperCase());
+          result[key] = val;
+        }
+      }
+      return result;
+    }).sort((a2, b2) => a2.progress - b2.progress);
+  }
+
+  class TosiScrollCamera extends u {
+    static initAttributes = {
+      easing: ""
+    };
+    static styleSpec = {
+      ":host": { display: "none" }
+    };
+    content = () => slot2();
+    setScrollProgress(progress) {
+      const owner = findScene(this);
+      if (!owner?.scene?.activeCamera)
+        return;
+      const camera = owner.scene.activeCamera;
+      const waypoints = readWaypoints(this);
+      if (waypoints.length === 0)
+        return;
+      const easing = this.getAttribute("easing") === "ease-in-out";
+      const v2 = interpolateWaypoints2(progress, waypoints, easing);
+      if ("alpha" in v2 && camera.alpha !== undefined)
+        camera.alpha = v2.alpha;
+      if ("beta" in v2 && camera.beta !== undefined)
+        camera.beta = v2.beta;
+      if ("radius" in v2 && camera.radius !== undefined)
+        camera.radius = v2.radius;
+      if (camera.target && typeof camera.target.copyFromFloats === "function") {
+        if ("targetX" in v2 || "targetY" in v2 || "targetZ" in v2) {
+          camera.target.copyFromFloats(v2.targetX ?? camera.target.x, v2.targetY ?? camera.target.y, v2.targetZ ?? camera.target.z);
+        }
+      }
+      if (camera.position) {
+        if ("x" in v2)
+          camera.position.x = v2.x;
+        if ("y" in v2)
+          camera.position.y = v2.y;
+        if ("z" in v2)
+          camera.position.z = v2.z;
+      }
+      if ("fov" in v2 && camera.fov !== undefined)
+        camera.fov = v2.fov;
+    }
+  }
+
+  class TosiScrollTime extends u {
+    static initAttributes = {
+      from: 0,
+      to: 24
+    };
+    static styleSpec = {
+      ":host": { display: "none" }
+    };
+    content = null;
+    setScrollProgress(progress) {
+      const owner = findScene(this);
+      if (!owner)
+        return;
+      const from = Number(this.getAttribute("from")) || 0;
+      const to = Number(this.getAttribute("to")) || 24;
+      const time = from + (to - from) * progress;
+      const skybox = owner.querySelector("tosi-b3d-skybox");
+      if (skybox) {
+        skybox.timeOfDay = time;
+      }
+    }
+  }
+
+  class TosiScrollAnimation extends u {
+    static initAttributes = {
+      name: ""
+    };
+    static styleSpec = {
+      ":host": { display: "none" }
+    };
+    content = null;
+    _animGroup = null;
+    _started = false;
+    setScrollProgress(progress) {
+      const owner = findScene(this);
+      if (!owner?.scene)
+        return;
+      const name = this.getAttribute("name") || "";
+      if (!name)
+        return;
+      if (!this._animGroup || this._animGroup.name !== name) {
+        this._animGroup = owner.scene.animationGroups?.find((g) => g.name === name);
+        this._started = false;
+      }
+      if (!this._animGroup)
+        return;
+      if (!this._started) {
+        this._animGroup.start(false, 0);
+        this._started = true;
+      }
+      const from = this._animGroup.from ?? 0;
+      const to = this._animGroup.to ?? 1;
+      const frame = from + (to - from) * progress;
+      this._animGroup.goToFrame(frame);
+    }
+    disconnectedCallback() {
+      super.disconnectedCallback();
+      if (this._animGroup && this._started) {
+        this._animGroup.stop();
+      }
+      this._animGroup = null;
+      this._started = false;
+    }
+  }
+  var tosiScrollCamera = TosiScrollCamera.elementCreator({
+    tag: "tosi-scroll-camera"
+  });
+  var tosiScrollTime = TosiScrollTime.elementCreator({
+    tag: "tosi-scroll-time"
+  });
+  var tosiScrollAnimation = TosiScrollAnimation.elementCreator({
+    tag: "tosi-scroll-animation"
+  });
+  // src/tosi-code.ts
+  var prismLoaded = null;
+  function loadPrism() {
+    if (prismLoaded)
+      return prismLoaded;
+    prismLoaded = new Promise((resolve) => {
+      const link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = "https://cdn.jsdelivr.net/npm/prismjs@1/themes/prism-tomorrow.min.css";
+      document.head.appendChild(link);
+      const script = document.createElement("script");
+      script.src = "https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-core.min.js";
+      script.onload = () => {
+        const markup = document.createElement("script");
+        markup.src = "https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-markup.min.js";
+        markup.onload = () => resolve();
+        document.head.appendChild(markup);
+      };
+      document.head.appendChild(script);
+    });
+    return prismLoaded;
+  }
+
+  class TosiCode extends u {
+    static initAttributes = {
+      language: "html"
+    };
+    static lightStyleSpec = {
+      ":host": {
+        display: "block"
+      },
+      ":host pre": {
+        background: "rgba(255,255,255,0.05)",
+        border: "1px solid rgba(255,255,255,0.1)",
+        borderRadius: "12px",
+        padding: "1.5em",
+        fontSize: "clamp(0.75rem, 1.5vw, 1rem)",
+        lineHeight: 1.6,
+        maxWidth: "90vw",
+        overflowX: "auto",
+        backdropFilter: "blur(20px)",
+        margin: "1em 0 0",
+        textAlign: "left"
+      },
+      ":host code": {
+        fontFamily: "Consolas, Monaco, 'Courier New', monospace",
+        whiteSpace: "pre"
+      }
+    };
+    content = null;
+    connectedCallback() {
+      super.connectedCallback();
+      this._highlight();
+    }
+    async _highlight() {
+      const raw = this.textContent || "";
+      if (!raw.trim())
+        return;
+      await loadPrism();
+      const lang = this.language || "html";
+      const grammar = globalThis.Prism?.languages?.[lang];
+      const codeEl = document.createElement("code");
+      codeEl.className = `language-${lang}`;
+      if (grammar) {
+        codeEl.innerHTML = globalThis.Prism.highlight(raw.trim(), grammar, lang);
+      } else {
+        codeEl.textContent = raw.trim();
+      }
+      const preEl = document.createElement("pre");
+      preEl.appendChild(codeEl);
+      this.textContent = "";
+      this.appendChild(preEl);
+    }
+  }
+  var tosiCode = TosiCode.elementCreator({ tag: "tosi-code" });
+  // node_modules/tosijs-ui/dist/index.js
+  var exports_dist = {};
+  __export(exports_dist, {
+    xrControllersText: () => F8,
+    xrControllers: () => A8,
+    xinTagList: () => Ks,
+    xinTag: () => Zs,
+    xinTabs: () => r6,
+    xinTable: () => G9,
+    xinSizer: () => Os,
+    xinSidenav: () => N6,
+    xinSelect: () => r9,
+    xinSegmented: () => Ms,
+    xinRating: () => rs,
+    xinPasswordStrength: () => S8,
+    xinNotification: () => D8,
+    xinMenu: () => A9,
+    xinMd: () => u9,
+    xinLocalized: () => C9,
+    xinForm: () => z8,
+    xinFloat: () => Y3,
+    xinField: () => B8,
+    xinCarousel: () => F3,
+    version: () => Nl,
+    updateLocalized: () => O0,
+    trackDrag: () => G2,
+    tosijs: () => exports_module,
+    tosiTagList: () => Yl,
+    tosiTag: () => P4,
+    tosiTabs: () => T1,
+    tosiTable: () => Y0,
+    tosiSizer: () => Gl,
+    tosiSidenav: () => o2,
+    tosiSelect: () => X3,
+    tosiSegmented: () => Pl,
+    tosiRichText: () => jl,
+    tosiRating: () => Cl,
+    tosiPasswordStrength: () => cl,
+    tosiNotification: () => z4,
+    tosiMonth: () => X8,
+    tosiMenu: () => q5,
+    tosiMd: () => G1,
+    tosiLocalized: () => l1,
+    tosiLocalePicker: () => k5,
+    tosiForm: () => Ei,
+    tosiFloat: () => m1,
+    tosiField: () => Di,
+    tosiDialog: () => _2,
+    tosiCarousel: () => S4,
+    testManager: () => Y,
+    tabSelector: () => h6,
+    svgIcon: () => t32,
+    svg2DataUrl: () => g0,
+    styleSheet: () => c2,
+    spacer: () => Y1,
+    sizeBreak: () => js,
+    sideNav: () => Y6,
+    setLocale: () => c9,
+    scriptTag: () => Z,
+    runTests: () => X22,
+    richTextWidgets: () => Hl,
+    richText: () => fs,
+    rewriteImports: () => C1,
+    removeLastMenu: () => p1,
+    postNotification: () => E8,
+    positionFloat: () => x5,
+    popMenu: () => J2,
+    popFloat: () => A0,
+    menu: () => F5,
+    markdownViewer: () => I9,
+    mapBox: () => O8,
+    makeSorter: () => C22,
+    localize: () => z2,
+    localePicker: () => f9,
+    loadTransform: () => $2,
+    liveExample: () => Y2,
+    legacyAliases: () => ul,
+    isBreached: () => nl,
+    insertExamples: () => U2,
+    initLocalization: () => p9,
+    icons: () => t3,
+    i18n: () => A,
+    gamepadText: () => j8,
+    gamepadState: () => Ii,
+    findHighestZ: () => B1,
+    filterPart: () => D2,
+    filterBuilder: () => C8,
+    expect: () => l4,
+    executeInline: () => b22,
+    executeInIframe: () => G22,
+    executeCode: () => ii,
+    enableTests: () => y4,
+    elastic: () => ps,
+    editableRect: () => y8,
+    dragAndDrop: () => B2,
+    disableTests: () => e4,
+    digest: () => xl,
+    defineIcons: () => n3,
+    defaultColors: () => $4,
+    dataTable: () => b9,
+    createThemeWithLegacy: () => ms,
+    createTheme: () => t0,
+    createTestContext: () => s4,
+    createSubMenu: () => j5,
+    createMenuItem: () => A5,
+    createMenuAction: () => H5,
+    createDocBrowser: () => l8,
+    createDarkTheme: () => Il,
+    componentVars: () => Ss,
+    commandButton: () => S3,
+    colorInput: () => j0,
+    codeEditor: () => $1,
+    bringToFront: () => t1,
+    bodymovinPlayer: () => M3,
+    blockStyle: () => A4,
+    baseVariables: () => Dl,
+    baseTheme: () => Is,
+    baseDarkTheme: () => us,
+    b3d: () => a3,
+    availableFilters: () => f4,
+    applyTheme: () => Es,
+    abTest: () => Tl,
+    XinWord: () => ds,
+    XinTagList: () => Xs,
+    XinTag: () => Us,
+    XinSizer: () => _s,
+    XinSelect: () => h9,
+    XinSegmented: () => vs,
+    XinRating: () => hs,
+    XinPasswordStrength: () => m8,
+    XinNotification: () => R8,
+    XinMenu: () => F9,
+    XinLocalized: () => a2,
+    XinForm: () => M8,
+    XinFloat: () => K3,
+    XinField: () => v8,
+    XinCarousel: () => A3,
+    TosiTagList: () => W1,
+    TosiTag: () => y2,
+    TosiTabs: () => P22,
+    TosiTable: () => H2,
+    TosiSizer: () => e0,
+    TosiSidenav: () => A1,
+    TosiSelect: () => T3,
+    TosiSegmented: () => N1,
+    TosiRating: () => r0,
+    TosiPasswordStrength: () => o0,
+    TosiNotification: () => k1,
+    TosiMonth: () => M4,
+    TosiMenu: () => w2,
+    TosiMd: () => O2,
+    TosiLocalized: () => i1,
+    TosiLocalePicker: () => g2,
+    TosiForm: () => m22,
+    TosiFloat: () => r1,
+    TosiField: () => u22,
+    TosiDialog: () => W0,
+    TosiCarousel: () => d2,
+    TabSelector: () => o6,
+    SvgIcon: () => k0,
+    SizeBreak: () => L4,
+    SideNav: () => K6,
+    STORAGE_KEY: () => Q2,
+    RichText: () => y0,
+    RemoteSyncManager: () => i2,
+    MarkdownViewer: () => E9,
+    MapBox: () => q1,
+    LocalePicker: () => d9,
+    LiveExample: () => g1,
+    FilterPart: () => C4,
+    FilterBuilder: () => a4,
+    EditableRect: () => m3,
+    DataTable: () => Q9,
+    CodeEditor: () => M1,
+    BodymovinPlayer: () => P1,
+    B3d: () => v0,
+    AbTest: () => _1
+  });
 
   // node_modules/marked/lib/marked.esm.js
   function L() {
@@ -7900,813 +8927,6 @@ ${o3}`;
     return s2;
   }
 
-  // src/tosi-product.ts
-  var { div, span, slot } = I;
-  var scrollTargets = new Map;
-  var scrollHandlers = new Map;
-  function getScrollParent(el) {
-    let node = el.parentElement;
-    while (node) {
-      if (node === document.body || node === document.documentElement) {
-        break;
-      }
-      const { overflow, overflowX, overflowY } = getComputedStyle(node);
-      if (/(auto|scroll)/.test(overflow + overflowX + overflowY)) {
-        return node;
-      }
-      node = node.parentElement;
-    }
-    return window;
-  }
-  function onScroll(target) {
-    requestAnimationFrame(() => {
-      const sections = scrollTargets.get(target);
-      if (sections) {
-        for (const section of sections) {
-          section.updateProgress();
-        }
-      }
-    });
-  }
-  var reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-
-  class TosiProductSection extends u {
-    scrollCallback = null;
-    static initAttributes = {
-      scroll: 100,
-      viewport: 100,
-      debug: false,
-      direction: "vertical",
-      overflow: false
-    };
-    _debugInfo = null;
-    _scrollTarget = null;
-    _animators = null;
-    _observer = null;
-    static styleSpec = {
-      ":host": {
-        display: "block",
-        position: "relative",
-        backgroundColor: "#000",
-        color: "#fff"
-      },
-      ":host([direction=horizontal])": {
-        display: "inline-block"
-      },
-      ".tosi-sticky": {
-        position: "sticky",
-        overflow: "hidden",
-        zIndex: 1,
-        backgroundColor: "inherit"
-      },
-      ".tosi-debug": {
-        position: "absolute",
-        top: "10px",
-        left: "10px",
-        background: "rgba(0,0,0,0.8)",
-        color: "#0f0",
-        padding: "5px 10px",
-        fontFamily: "monospace",
-        fontSize: "12px",
-        zIndex: 100,
-        borderRadius: "4px",
-        pointerEvents: "none"
-      }
-    };
-    content = () => [
-      div({ class: "tosi-sticky" }, slot(), span({ class: "tosi-debug", part: "debug-info", hidden: true }))
-    ];
-    _getAnimators() {
-      if (this._animators === null) {
-        this._animators = Array.from(this.querySelectorAll("[data-scroll-animate], [data-scroll-range]"));
-      }
-      return this._animators;
-    }
-    _invalidateAnimators() {
-      this._animators = null;
-    }
-    connectedCallback() {
-      this._scrollTarget = getScrollParent(this);
-      super.connectedCallback();
-      this._debugInfo = this.shadowRoot?.querySelector(".tosi-debug");
-      let sections = scrollTargets.get(this._scrollTarget);
-      if (!sections) {
-        sections = new Set;
-        scrollTargets.set(this._scrollTarget, sections);
-        const target = this._scrollTarget;
-        const handler = () => onScroll(target);
-        scrollHandlers.set(target, handler);
-        target.addEventListener("scroll", handler, { passive: true });
-      }
-      sections.add(this);
-      this._observer = new MutationObserver(() => this._invalidateAnimators());
-      this._observer.observe(this, {
-        childList: true,
-        subtree: true,
-        attributes: true,
-        attributeFilter: ["data-scroll-animate", "data-scroll-range"]
-      });
-      requestAnimationFrame(() => {
-        this.render();
-        this.updateProgress();
-      });
-    }
-    disconnectedCallback() {
-      super.disconnectedCallback();
-      if (this._observer) {
-        this._observer.disconnect();
-        this._observer = null;
-      }
-      this._animators = null;
-      if (this._scrollTarget) {
-        const sections = scrollTargets.get(this._scrollTarget);
-        if (sections) {
-          sections.delete(this);
-          if (sections.size === 0) {
-            scrollTargets.delete(this._scrollTarget);
-            const handler = scrollHandlers.get(this._scrollTarget);
-            if (handler) {
-              this._scrollTarget.removeEventListener("scroll", handler);
-              scrollHandlers.delete(this._scrollTarget);
-            }
-          }
-        }
-      }
-    }
-    render() {
-      super.render();
-      const scrollPct = this._getScrollPct();
-      const viewportPct = this._getViewportPct();
-      const horizontal = this.getAttribute("direction") === "horizontal";
-      const sticky = this.shadowRoot?.querySelector(".tosi-sticky");
-      const container = this._scrollTarget instanceof HTMLElement ? this._scrollTarget : null;
-      const containerSize = container ? horizontal ? container.clientWidth : container.clientHeight : null;
-      const stickyDim = containerSize !== null ? `${viewportPct / 100 * containerSize}px` : `${viewportPct}${horizontal ? "vw" : "vh"}`;
-      const scrollDim = containerSize !== null ? `${scrollPct / 100 * containerSize}px` : `${scrollPct}${horizontal ? "vw" : "vh"}`;
-      if (horizontal) {
-        this.style.width = `calc(${stickyDim} + ${scrollDim})`;
-        this.style.height = "100%";
-        if (sticky) {
-          sticky.style.left = "0";
-          sticky.style.top = "0";
-          sticky.style.width = stickyDim;
-          sticky.style.height = "100%";
-        }
-      } else {
-        this.style.height = `calc(${stickyDim} + ${scrollDim})`;
-        this.style.width = "100%";
-        if (sticky) {
-          sticky.style.top = "0";
-          sticky.style.left = "0";
-          sticky.style.height = stickyDim;
-          sticky.style.width = "100%";
-        }
-      }
-      if (this._debugInfo) {
-        this._debugInfo.hidden = this.getAttribute("debug") !== "true";
-      }
-    }
-    _getScrollPct() {
-      const raw = Number(this.getAttribute("scroll"));
-      return Number.isFinite(raw) && raw > 0 ? raw : 100;
-    }
-    _getViewportPct() {
-      const raw = Number(this.getAttribute("viewport"));
-      return Number.isFinite(raw) && raw > 0 ? raw : 100;
-    }
-    _getScrollAmountPx() {
-      const scrollPct = this._getScrollPct();
-      const horizontal = this.getAttribute("direction") === "horizontal";
-      const container = this._scrollTarget instanceof HTMLElement ? this._scrollTarget : null;
-      if (container) {
-        return scrollPct / 100 * (horizontal ? container.clientWidth : container.clientHeight);
-      }
-      return scrollPct / 100 * (horizontal ? window.innerWidth : window.innerHeight);
-    }
-    updateProgress() {
-      if (!this.isConnected)
-        return;
-      const scrollAmount = this._getScrollAmountPx();
-      if (scrollAmount <= 0)
-        return;
-      const rect = this.getBoundingClientRect();
-      const horizontal = this.getAttribute("direction") === "horizontal";
-      let offset = horizontal ? rect.left : rect.top;
-      if (this._scrollTarget instanceof HTMLElement) {
-        const containerRect = this._scrollTarget.getBoundingClientRect();
-        offset -= horizontal ? containerRect.left : containerRect.top;
-      }
-      const coreProgress = Math.max(0, Math.min(1, -offset / scrollAmount));
-      const overflow = this.overflow;
-      let progress = coreProgress;
-      if (overflow) {
-        const containerSize = horizontal ? this._scrollTarget instanceof HTMLElement ? this._scrollTarget.getBoundingClientRect().width : window.innerWidth : this._scrollTarget instanceof HTMLElement ? this._scrollTarget.getBoundingClientRect().height : window.innerHeight;
-        if (offset > 0) {
-          progress = -(offset / containerSize);
-        } else if (-offset > scrollAmount) {
-          progress = 1 + (-offset - scrollAmount) / containerSize;
-        }
-        progress = Math.max(-1, Math.min(2, progress));
-      }
-      this.dataset.progress = progress.toFixed(3);
-      if (this._debugInfo && !this._debugInfo.hidden) {
-        this._debugInfo.textContent = `Section: ${progress.toFixed(3)}`;
-      }
-      if (reducedMotion.matches) {
-        if (this.scrollCallback) {
-          this.scrollCallback(progress, this);
-        }
-        return;
-      }
-      const animators = this._getAnimators();
-      for (const el of animators) {
-        const rangeStr = el.getAttribute("data-scroll-range") || "0,1";
-        const [start, end] = rangeStr.split(",").map(Number);
-        const range = end - start;
-        const localProgress = range <= 0 ? progress >= end ? 1 : 0 : Math.max(0, Math.min(1, (progress - start) / range));
-        el.style.setProperty("--local-progress", localProgress.toString());
-        el.dataset.localProgress = localProgress.toFixed(3);
-        if (typeof el.setScrollProgress === "function") {
-          el.setScrollProgress(localProgress);
-        } else if (el.getAttribute("data-scroll-animate") === "currentTime" && el.duration) {
-          el.currentTime = localProgress * el.duration;
-        } else if (el.getAttribute("data-scroll-animate") === "lottie" && el.animation && (el instanceof P1 || el.tagName.includes("LOTTIE"))) {
-          el.animation.goToAndStop(localProgress * el.animation.totalFrames, true);
-        } else if (el.scene && (el instanceof v0 || el.tagName.includes("3D"))) {
-          if (el.scene.activeCamera && el.scene.activeCamera.alpha !== undefined) {
-            el.scene.activeCamera.alpha = localProgress * Math.PI * 2;
-          }
-        }
-      }
-      if (this.scrollCallback) {
-        this.scrollCallback(progress, this);
-      }
-    }
-  }
-
-  class TosiProduct extends u {
-    static styleSpec = {
-      ":host": {
-        display: "block",
-        position: "relative",
-        width: "100%",
-        background: "#000",
-        color: "#fff"
-      }
-    };
-    content = () => slot();
-  }
-
-  class TosiScrollMapper extends u {
-    scrollCallback = null;
-    static styleSpec = {
-      ":host": {
-        display: "block",
-        width: "100%",
-        height: "100%"
-      }
-    };
-    content = () => slot();
-    connectedCallback() {
-      super.connectedCallback();
-      if (!this.hasAttribute("data-scroll-animate")) {
-        this.setAttribute("data-scroll-animate", "mapper");
-      }
-    }
-    setScrollProgress(progress) {
-      if (this.scrollCallback) {
-        this.scrollCallback(progress);
-      }
-    }
-  }
-  var tosiProduct = TosiProduct.elementCreator({ tag: "tosi-product" });
-  var tosiProductSection = TosiProductSection.elementCreator({
-    tag: "tosi-product-section"
-  });
-  var tosiScrollMapper = TosiScrollMapper.elementCreator({
-    tag: "tosi-scroll-mapper"
-  });
-  // src/tosi-filmstrip.ts
-  var { canvas } = I;
-
-  class TosiFilmstrip extends u {
-    static initAttributes = {
-      src: "",
-      cols: 0,
-      rows: 0,
-      total: 0
-    };
-    _img = null;
-    _ctx = null;
-    _lastProgress = 0;
-    _canvas = null;
-    _loadedSrc = "";
-    _loadId = 0;
-    static styleSpec = {
-      ":host": {
-        display: "block",
-        position: "relative",
-        width: "100%",
-        height: "100%"
-      },
-      canvas: {
-        width: "100%",
-        height: "100%",
-        objectFit: "contain",
-        display: "block"
-      }
-    };
-    content = () => {
-      this._canvas = canvas({ part: "canvas" });
-      return this._canvas;
-    };
-    _parseGrid() {
-      const src = this.getAttribute("src") || "";
-      let cols = Number(this.getAttribute("cols")) || 0;
-      let rows = Number(this.getAttribute("rows")) || 0;
-      let total = Number(this.getAttribute("total")) || 0;
-      if (!cols || !rows || !total) {
-        const match = src.match(/(\d+)x(\d+)_(\d+)\.(webp|jpg|png|data)/i);
-        if (match) {
-          if (!cols)
-            cols = parseInt(match[1]);
-          if (!rows)
-            rows = parseInt(match[2]);
-          if (!total)
-            total = parseInt(match[3]);
-        }
-      }
-      if (!total || !cols || !rows)
-        return null;
-      return { cols, rows, total };
-    }
-    load() {
-      const src = this.getAttribute("src") || "";
-      if (!src)
-        return;
-      const grid = this._parseGrid();
-      if (!grid)
-        return;
-      const loadId = ++this._loadId;
-      this._loadedSrc = src;
-      const img = new Image;
-      img.onload = () => {
-        if (loadId !== this._loadId)
-          return;
-        this._img = img;
-        this.setScrollProgress(this._lastProgress);
-      };
-      img.onerror = () => {
-        if (loadId !== this._loadId)
-          return;
-        console.warn(`[tosi-filmstrip] Failed to load: ${src}`);
-        this._img = null;
-      };
-      img.src = src;
-    }
-    setScrollProgress(progress) {
-      this._lastProgress = progress;
-      if (!this._img)
-        return;
-      const grid = this._parseGrid();
-      if (!grid)
-        return;
-      const { cols, rows, total } = grid;
-      const cvs = this._canvas || this.parts && this.parts.canvas;
-      if (!cvs)
-        return;
-      if (!this._ctx)
-        this._ctx = cvs.getContext("2d");
-      if (!this._ctx)
-        return;
-      const frameIndex = Math.max(0, Math.min(total - 1, Math.floor(progress * total)));
-      const col = frameIndex % cols;
-      const row = Math.floor(frameIndex / cols);
-      const fw = this._img.width / cols;
-      const fh = this._img.height / rows;
-      if (cvs.width !== fw || cvs.height !== fh) {
-        cvs.width = fw;
-        cvs.height = fh;
-      }
-      this._ctx.clearRect(0, 0, fw, fh);
-      this._ctx.drawImage(this._img, col * fw, row * fh, fw, fh, 0, 0, fw, fh);
-    }
-    connectedCallback() {
-      super.connectedCallback();
-      this.load();
-    }
-    disconnectedCallback() {
-      super.disconnectedCallback();
-      this._loadId++;
-      this._img = null;
-    }
-    render() {
-      super.render();
-      const currentSrc = this.getAttribute("src") || "";
-      if (!this._img || this._loadedSrc !== currentSrc) {
-        this.load();
-      } else {
-        this.setScrollProgress(this._lastProgress);
-      }
-    }
-  }
-  var tosiFilmstrip = TosiFilmstrip.elementCreator({
-    tag: "tosi-filmstrip"
-  });
-  // src/waypoints.ts
-  var interpolateWaypoints = (progress, waypoints) => {
-    if (!waypoints || waypoints.length === 0)
-      return null;
-    waypoints = [...waypoints].sort((a5, b3) => a5.progress - b3.progress);
-    if (progress <= waypoints[0].progress)
-      return waypoints[0];
-    if (progress >= waypoints[waypoints.length - 1].progress) {
-      return waypoints[waypoints.length - 1];
-    }
-    for (let i3 = 0;i3 < waypoints.length - 1; i3++) {
-      const wp1 = waypoints[i3];
-      const wp2 = waypoints[i3 + 1];
-      if (progress >= wp1.progress && progress <= wp2.progress) {
-        const t5 = (progress - wp1.progress) / (wp2.progress - wp1.progress);
-        const e2 = t5 < 0.5 ? 2 * t5 * t5 : -1 + (4 - 2 * t5) * t5;
-        const result = { progress };
-        for (const k3 in wp1) {
-          if (k3 !== "progress") {
-            result[k3] = wp1[k3] + (wp2[k3] - wp1[k3]) * e2;
-          }
-        }
-        return result;
-      }
-    }
-    return waypoints[0];
-  };
-  // src/tosi-interpolator.ts
-  var interpolateStrings = (a5, b3, t5) => {
-    const numRegex = /-?\d+(?:\.\d+)?/g;
-    const aNums = Array.from(a5.matchAll(numRegex));
-    const bNums = Array.from(b3.matchAll(numRegex));
-    if (aNums.length > 0 && aNums.length === bNums.length) {
-      let result = "";
-      let lastIndex = 0;
-      for (let i3 = 0;i3 < aNums.length; i3++) {
-        const aMatch = aNums[i3];
-        const bMatch = bNums[i3];
-        result += a5.substring(lastIndex, aMatch.index);
-        const n12 = parseFloat(aMatch[0]);
-        const n22 = parseFloat(bMatch[0]);
-        const interpolated = n12 + (n22 - n12) * t5;
-        let numStr = interpolated.toFixed(4);
-        if (numStr.includes(".")) {
-          numStr = numStr.replace(/0+$/, "").replace(/\.$/, "");
-        }
-        result += numStr;
-        lastIndex = aMatch.index + aMatch[0].length;
-      }
-      result += a5.substring(lastIndex);
-      return result;
-    }
-    const isColor = (s2) => s2.startsWith("#") || s2.startsWith("rgb") || s2.startsWith("hsl") || ["red", "blue", "white", "black", "transparent"].includes(s2);
-    if (isColor(a5) && isColor(b3)) {
-      return `color-mix(in srgb, ${a5} ${Math.round((1 - t5) * 100)}%, ${b3})`;
-    }
-    return t5 < 0.5 ? a5 : b3;
-  };
-
-  class TosiInterpolator extends u {
-    static styleSpec = {
-      ":host": {
-        display: "contents"
-      }
-    };
-    setScrollProgress(progress) {
-      const waypointsNodes = Array.from(this.querySelectorAll("tosi-waypoint"));
-      if (waypointsNodes.length === 0)
-        return;
-      const waypoints = waypointsNodes.map((w3) => {
-        const styles = {};
-        const htmlEl = w3;
-        for (let i3 = 0;i3 < htmlEl.style.length; i3++) {
-          const prop = htmlEl.style[i3];
-          styles[prop] = htmlEl.style.getPropertyValue(prop);
-        }
-        return {
-          progress: Number(w3.getAttribute("progress") || 0),
-          styles
-        };
-      }).sort((a5, b3) => a5.progress - b3.progress);
-      let wp1 = waypoints[0];
-      let wp2 = waypoints[waypoints.length - 1];
-      let t5 = 0;
-      if (progress <= wp1.progress) {
-        wp2 = wp1;
-        t5 = 0;
-      } else if (progress >= wp2.progress) {
-        wp1 = wp2;
-        t5 = 1;
-      } else {
-        for (let i3 = 0;i3 < waypoints.length - 1; i3++) {
-          if (progress >= waypoints[i3].progress && progress <= waypoints[i3 + 1].progress) {
-            wp1 = waypoints[i3];
-            wp2 = waypoints[i3 + 1];
-            const rawT = (progress - wp1.progress) / (wp2.progress - wp1.progress);
-            const easing = this.getAttribute("easing");
-            if (easing === "ease-in-out") {
-              t5 = rawT < 0.5 ? 2 * rawT * rawT : -1 + (4 - 2 * rawT) * rawT;
-            } else {
-              t5 = rawT;
-            }
-            break;
-          }
-        }
-      }
-      const currentStyles = {};
-      for (const prop in wp1.styles) {
-        const val1 = wp1.styles[prop];
-        const val2 = wp2.styles[prop] || val1;
-        currentStyles[prop] = interpolateStrings(val1, val2, t5);
-      }
-      const targets = Array.from(this.children).filter((c3) => c3.tagName !== "TOSI-WAYPOINT");
-      targets.forEach((target) => {
-        const el = target;
-        for (const prop in currentStyles) {
-          el.style.setProperty(prop, currentStyles[prop]);
-        }
-      });
-    }
-  }
-
-  class TosiWaypoint extends u {
-    static initAttributes = {
-      progress: 0
-    };
-    static styleSpec = {
-      ":host": {
-        display: "none"
-      }
-    };
-    content = null;
-  }
-  var tosiInterpolator = TosiInterpolator.elementCreator({
-    tag: "tosi-interpolator"
-  });
-  var tosiWaypoint = TosiWaypoint.elementCreator({
-    tag: "tosi-waypoint"
-  });
-  // src/tosi-b3d-scroll.ts
-  var { slot: slot2 } = I;
-  function findScene(el) {
-    let node = el.parentElement;
-    while (node) {
-      if ("scene" in node)
-        return node;
-      for (const child of Array.from(node.children)) {
-        if (child !== el && "scene" in child)
-          return child;
-      }
-      node = node.parentElement;
-    }
-    return null;
-  }
-  function easeInOutQuad(t5) {
-    return t5 < 0.5 ? 2 * t5 * t5 : -1 + (4 - 2 * t5) * t5;
-  }
-  function interpolateWaypoints2(progress, waypoints, easing) {
-    if (waypoints.length === 0)
-      return {};
-    if (waypoints.length === 1)
-      return waypoints[0];
-    if (progress <= waypoints[0].progress)
-      return waypoints[0];
-    if (progress >= waypoints[waypoints.length - 1].progress) {
-      return waypoints[waypoints.length - 1];
-    }
-    for (let i3 = 0;i3 < waypoints.length - 1; i3++) {
-      const wp1 = waypoints[i3];
-      const wp2 = waypoints[i3 + 1];
-      if (progress >= wp1.progress && progress <= wp2.progress) {
-        const rawT = (progress - wp1.progress) / (wp2.progress - wp1.progress);
-        const t5 = easing ? easeInOutQuad(rawT) : rawT;
-        const result = {};
-        for (const key in wp1) {
-          if (key === "progress")
-            continue;
-          const v1 = wp1[key] ?? 0;
-          const v23 = wp2[key] ?? v1;
-          result[key] = v1 + (v23 - v1) * t5;
-        }
-        return result;
-      }
-    }
-    return waypoints[0];
-  }
-  function readWaypoints(host) {
-    return Array.from(host.querySelectorAll("tosi-waypoint")).map((wp) => {
-      const result = {
-        progress: Number(wp.getAttribute("progress") || 0)
-      };
-      for (const attr of Array.from(wp.attributes)) {
-        if (attr.name === "progress")
-          continue;
-        const val = Number(attr.value);
-        if (Number.isFinite(val)) {
-          const key = attr.name.replace(/-([a-z])/g, (_3, c3) => c3.toUpperCase());
-          result[key] = val;
-        }
-      }
-      return result;
-    }).sort((a5, b3) => a5.progress - b3.progress);
-  }
-
-  class TosiScrollCamera extends u {
-    static initAttributes = {
-      easing: ""
-    };
-    static styleSpec = {
-      ":host": { display: "none" }
-    };
-    content = () => slot2();
-    setScrollProgress(progress) {
-      const owner = findScene(this);
-      if (!owner?.scene?.activeCamera)
-        return;
-      const camera = owner.scene.activeCamera;
-      const waypoints = readWaypoints(this);
-      if (waypoints.length === 0)
-        return;
-      const easing = this.getAttribute("easing") === "ease-in-out";
-      const v3 = interpolateWaypoints2(progress, waypoints, easing);
-      if ("alpha" in v3 && camera.alpha !== undefined)
-        camera.alpha = v3.alpha;
-      if ("beta" in v3 && camera.beta !== undefined)
-        camera.beta = v3.beta;
-      if ("radius" in v3 && camera.radius !== undefined)
-        camera.radius = v3.radius;
-      if (camera.target && typeof camera.target.copyFromFloats === "function") {
-        if ("targetX" in v3 || "targetY" in v3 || "targetZ" in v3) {
-          camera.target.copyFromFloats(v3.targetX ?? camera.target.x, v3.targetY ?? camera.target.y, v3.targetZ ?? camera.target.z);
-        }
-      }
-      if (camera.position) {
-        if ("x" in v3)
-          camera.position.x = v3.x;
-        if ("y" in v3)
-          camera.position.y = v3.y;
-        if ("z" in v3)
-          camera.position.z = v3.z;
-      }
-      if ("fov" in v3 && camera.fov !== undefined)
-        camera.fov = v3.fov;
-    }
-  }
-
-  class TosiScrollTime extends u {
-    static initAttributes = {
-      from: 0,
-      to: 24
-    };
-    static styleSpec = {
-      ":host": { display: "none" }
-    };
-    content = null;
-    setScrollProgress(progress) {
-      const owner = findScene(this);
-      if (!owner)
-        return;
-      const from = Number(this.getAttribute("from")) || 0;
-      const to = Number(this.getAttribute("to")) || 24;
-      const time = from + (to - from) * progress;
-      const skybox = owner.querySelector("tosi-b3d-skybox");
-      if (skybox) {
-        skybox.timeOfDay = time;
-      }
-    }
-  }
-
-  class TosiScrollAnimation extends u {
-    static initAttributes = {
-      name: ""
-    };
-    static styleSpec = {
-      ":host": { display: "none" }
-    };
-    content = null;
-    _animGroup = null;
-    _started = false;
-    setScrollProgress(progress) {
-      const owner = findScene(this);
-      if (!owner?.scene)
-        return;
-      const name = this.getAttribute("name") || "";
-      if (!name)
-        return;
-      if (!this._animGroup || this._animGroup.name !== name) {
-        this._animGroup = owner.scene.animationGroups?.find((g) => g.name === name);
-        this._started = false;
-      }
-      if (!this._animGroup)
-        return;
-      if (!this._started) {
-        this._animGroup.start(false, 0);
-        this._started = true;
-      }
-      const from = this._animGroup.from ?? 0;
-      const to = this._animGroup.to ?? 1;
-      const frame = from + (to - from) * progress;
-      this._animGroup.goToFrame(frame);
-    }
-    disconnectedCallback() {
-      super.disconnectedCallback();
-      if (this._animGroup && this._started) {
-        this._animGroup.stop();
-      }
-      this._animGroup = null;
-      this._started = false;
-    }
-  }
-  var tosiScrollCamera = TosiScrollCamera.elementCreator({
-    tag: "tosi-scroll-camera"
-  });
-  var tosiScrollTime = TosiScrollTime.elementCreator({
-    tag: "tosi-scroll-time"
-  });
-  var tosiScrollAnimation = TosiScrollAnimation.elementCreator({
-    tag: "tosi-scroll-animation"
-  });
-  // src/tosi-code.ts
-  var prismLoaded = null;
-  function loadPrism() {
-    if (prismLoaded)
-      return prismLoaded;
-    prismLoaded = new Promise((resolve) => {
-      const link = document.createElement("link");
-      link.rel = "stylesheet";
-      link.href = "https://cdn.jsdelivr.net/npm/prismjs@1/themes/prism-tomorrow.min.css";
-      document.head.appendChild(link);
-      const script = document.createElement("script");
-      script.src = "https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-core.min.js";
-      script.onload = () => {
-        const markup = document.createElement("script");
-        markup.src = "https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-markup.min.js";
-        markup.onload = () => resolve();
-        document.head.appendChild(markup);
-      };
-      document.head.appendChild(script);
-    });
-    return prismLoaded;
-  }
-
-  class TosiCode extends u {
-    static initAttributes = {
-      language: "html"
-    };
-    static lightStyleSpec = {
-      ":host": {
-        display: "block"
-      },
-      ":host pre": {
-        background: "rgba(255,255,255,0.05)",
-        border: "1px solid rgba(255,255,255,0.1)",
-        borderRadius: "12px",
-        padding: "1.5em",
-        fontSize: "clamp(0.75rem, 1.5vw, 1rem)",
-        lineHeight: 1.6,
-        maxWidth: "90vw",
-        overflowX: "auto",
-        backdropFilter: "blur(20px)",
-        margin: "1em 0 0",
-        textAlign: "left"
-      },
-      ":host code": {
-        fontFamily: "Consolas, Monaco, 'Courier New', monospace",
-        whiteSpace: "pre"
-      }
-    };
-    content = null;
-    connectedCallback() {
-      super.connectedCallback();
-      this._highlight();
-    }
-    async _highlight() {
-      const raw = this.textContent || "";
-      if (!raw.trim())
-        return;
-      await loadPrism();
-      const lang = this.language || "html";
-      const grammar = globalThis.Prism?.languages?.[lang];
-      const codeEl = document.createElement("code");
-      codeEl.className = `language-${lang}`;
-      if (grammar) {
-        codeEl.innerHTML = globalThis.Prism.highlight(raw.trim(), grammar, lang);
-      } else {
-        codeEl.textContent = raw.trim();
-      }
-      const preEl = document.createElement("pre");
-      preEl.appendChild(codeEl);
-      this.textContent = "";
-      this.appendChild(preEl);
-    }
-  }
-  var tosiCode = TosiCode.elementCreator({ tag: "tosi-code" });
   // src/index-iife.ts
   Object.assign(globalThis, { tosijs: exports_module, tosijsUi: exports_dist, tosijsProduct: exports_src });
 })();

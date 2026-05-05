@@ -46,27 +46,19 @@ async function build() {
   });
 
   await Bun.build({
-    entrypoints: ["./demo/v2.ts"],
+    entrypoints: ["./demo/embed.ts"],
     outdir: PUBLIC,
     target: "browser",
     format: "esm",
-    naming: "v2.js",
+    naming: "embed.js",
   });
 
   await Bun.build({
-    entrypoints: ["./demo/v2-embed.ts"],
+    entrypoints: ["./demo/theme.ts"],
     outdir: PUBLIC,
     target: "browser",
     format: "esm",
-    naming: "v2-embed.js",
-  });
-
-  await Bun.build({
-    entrypoints: ["./demo/v2-theme.ts"],
-    outdir: PUBLIC,
-    target: "browser",
-    format: "esm",
-    naming: "v2-theme.js",
+    naming: "theme.js",
   });
   console.timeEnd("build");
 }

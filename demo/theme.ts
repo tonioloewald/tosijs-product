@@ -1,15 +1,15 @@
 import {
-  tosiProductV2,
-  tosiProductSectionV2,
-  tosiProductHeaderV2,
-  TosiProductV2,
-} from "../src/tosi-product-v2";
+  tosiProduct,
+  tosiProductSection,
+  tosiProductHeader,
+  TosiProduct,
+} from "../src/tosi-product";
 import { elements } from "tosijs";
 
 const { div, header, footer, nav, h1, h2, h3, p, span, a } = elements;
 
 // === Theme registry ============================================================
-// Themes are dictionaries of CSS custom properties. tosi-product-v2 sets these
+// Themes are dictionaries of CSS custom properties. tosi-product sets these
 // on document.documentElement so they cascade to everything (including the page
 // header, footer, and the sticky overlay outside the engine).
 const themes = {
@@ -75,7 +75,7 @@ style.textContent = `
   }
   .page-header nav a:hover { color: var(--accent); }
 
-  /* === Sticky header content (the chrome lives inside tosi-product-header-v2) === */
+  /* === Sticky header content (the chrome lives inside tosi-product-header) === */
   .sticky-bar {
     background: color-mix(in srgb, var(--bg) 85%, transparent);
     backdrop-filter: blur(10px);
@@ -151,10 +151,10 @@ const pageHeader = header(
 );
 
 // === Sticky header (overlay) ==================================================
-// tosi-product-header-v2 handles show/hide animation; the slotted .sticky-bar
+// tosi-product-header handles show/hide animation; the slotted .sticky-bar
 // provides the chrome and inherits theme vars from :root.
 const stickyProgress = span({ class: "progress" }, "0%");
-const stickyHeader = tosiProductHeaderV2(
+const stickyHeader = tosiProductHeader(
   { threshold: 80 },
   div(
     { class: "sticky-bar" },
@@ -164,8 +164,8 @@ const stickyHeader = tosiProductHeaderV2(
 );
 
 // === Engine ==================================================================
-const app = tosiProductV2(
-  tosiProductSectionV2(
+const app = tosiProduct(
+  tosiProductSection(
     { scroll: 100, theme: "midnight" },
     div(
       { class: "scene" },
@@ -181,12 +181,12 @@ const app = tosiProductV2(
       { class: "intro-inner" },
       h3("Why themes?"),
       p(
-        "Themes are dictionaries of CSS custom properties. tosi-product-v2 reads the active section's theme attributes and writes the resolved values to document.documentElement, so everything cascading from there — including the sticky header above — re-themes in unison."
+        "Themes are dictionaries of CSS custom properties. tosi-product reads the active section's theme attributes and writes the resolved values to document.documentElement, so everything cascading from there — including the sticky header above — re-themes in unison."
       )
     )
   ),
 
-  tosiProductSectionV2(
+  tosiProductSection(
     { scroll: 100, theme: "forest" },
     div(
       { class: "scene" },
@@ -197,7 +197,7 @@ const app = tosiProductV2(
   ),
 
   // The transition section: dark → light over its pin range
-  tosiProductSectionV2(
+  tosiProductSection(
     {
       scroll: 250,
       "theme-from": "forest",
@@ -211,7 +211,7 @@ const app = tosiProductV2(
     )
   ),
 
-  tosiProductSectionV2(
+  tosiProductSection(
     { scroll: 100, theme: "paper" },
     div(
       { class: "scene" },
@@ -222,7 +222,7 @@ const app = tosiProductV2(
   ),
 
   // Transition back to dark for the closing scene
-  tosiProductSectionV2(
+  tosiProductSection(
     {
       scroll: 200,
       "theme-from": "paper",
@@ -236,7 +236,7 @@ const app = tosiProductV2(
     )
   ),
 
-  tosiProductSectionV2(
+  tosiProductSection(
     { scroll: 100, theme: "rose" },
     div(
       { class: "scene" },
@@ -245,7 +245,7 @@ const app = tosiProductV2(
       span({ class: "pill" }, "theme=rose")
     )
   )
-) as TosiProductV2;
+) as TosiProduct;
 
 // Configure themes on the engine instance.
 app.themes = themes;
@@ -262,7 +262,7 @@ document.body.appendChild(stickyHeader);
 document.body.appendChild(app);
 document.body.appendChild(pageFooter);
 
-// Show/hide is handled by tosi-product-header-v2; we just keep the progress
+// Show/hide is handled by tosi-product-header; we just keep the progress
 // percentage in sync with scroll position.
 function onPageScroll() {
   const y = window.scrollY;

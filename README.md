@@ -2,21 +2,26 @@
 
 A cinematic product page component library for `tosijs`.
 
-`tosijs-product` provides high-performance, scroll-linked animation components designed to create immersive, "Apple-style" product stories with minimal code. It unifies Lottie, Video, BabylonJS 3D, Mapbox flights, and declarative CSS interpolation under a single, declarative scrolling model.
+`tosijs-product` provides high-performance, scroll-linked animation components designed to create immersive, "Apple-style" product stories with minimal code. It unifies Lottie, video, BabylonJS 3D, Mapbox flights, themes, and declarative CSS interpolation under a single scroll engine.
 
 [**View the Live Demo**](https://tonioloewald.github.io/tosijs-product/)
 
-## Key Components
+## Architecture in one paragraph
 
-- **`tosiProduct`**: The main container that wraps your product page.
-- **`tosiProductSection`**: A container that pins content to the viewport using `sticky` positioning and translates scroll position into a normalized `0..1` progress value.
-- **`tosiInterpolator` & `tosiWaypoint`**: A declarative system for interpolating CSS properties between keyframes as the user scrolls.
-- **`tosiFilmstrip`**: A high-performance frame-based animator that uses WebP/PNG mosaics (grids) instead of standard video for buttery-smooth scrubbing.
-- **`tosiScrollMapper`**: A general-purpose wrapper that maps scroll progress to custom elements via an `onProgress` callback (ideal for things like programmatic Mapbox flights).
+`<tosi-product>` is a **scroll engine**. It owns the page (or any scrollable region) it lives in: it computes a runway from its sections, hosts a sticky viewport-sized window in shadow DOM, and translates an absolute-positioned stack as you scroll. Each `<tosi-product-section>` declares a pin duration via `scroll`; during pin the section sits motionless at the viewport top while interpolators run, then it scrolls out at 1:1 and yields to the next. Themes are dictionaries of CSS custom properties — the engine writes the active section's resolved values to `:root`, so external siblings (page header, sticky overlay, footer) re-theme through the cascade.
 
-## Getting Started
+## Key components
 
-### 1. Pure HTML Page (Zero JS Orchestration)
+- **`tosi-product`** — the scroll engine. Owns the runway, the sticky window, the stack translation, the theme registry. A `tosi-product` placed inside another `tosi-product`'s section automatically runs in **follower mode**, driven by the parent section's pin progress (so you can nest a horizontal engine inside a vertical one).
+- **`tosi-product-section`** — a slotted container with `scroll` (pin duration in viewport %), `theme` / `theme-from` / `theme-to`, and a `direction` inherited from its engine.
+- **`tosi-product-header`** — a sticky overlay header that slides in once `window.scrollY > threshold`. Inherits theme via the CSS cascade.
+- **`tosi-interpolator`** + **`tosi-waypoint`** — declarative CSS interpolation between progress keyframes.
+- **`tosi-filmstrip`** — frame-based animator using a WebP/PNG mosaic grid for buttery-smooth video-style scrubbing.
+- **`tosi-code`** — Prism-highlighted code block (lazy-loads PrismJS from CDN).
+
+## Getting started
+
+### Pure HTML (zero JS orchestration)
 
 The IIFE build is self-contained — a single script tag gives you `tosijs`, `tosijsUi`, and `tosijsProduct` as globals, with all custom elements registered automatically:
 
@@ -26,23 +31,17 @@ The IIFE build is self-contained — a single script tag gives you `tosijs`, `to
 <head>
   <meta charset="utf-8">
   <title>My Product</title>
-  <style>
-    body { margin: 0; background: #000; color: #fff; overflow-x: hidden; }
-  </style>
-  <!-- One script tag — includes everything -->
+  <style>body { margin: 0; }</style>
   <script src="https://cdn.jsdelivr.net/npm/tosijs-product/dist/index.js"></script>
 </head>
 <body>
   <tosi-product>
-    <tosi-product-section scroll="2000">
+    <tosi-product-section scroll="200">
       <tosi-interpolator data-scroll-animate easing="ease-in-out">
-        <tosi-waypoint progress="0.0" style="opacity: 0; transform: translateY(50px);"></tosi-waypoint>
-        <tosi-waypoint progress="0.3" style="opacity: 1; transform: translateY(0px);"></tosi-waypoint>
-        <tosi-waypoint progress="0.7" style="opacity: 1; transform: translateY(0px);"></tosi-waypoint>
-        <tosi-waypoint progress="1.0" style="opacity: 0; transform: translateY(-50px);"></tosi-waypoint>
-        <h1 style="position: absolute; width: 100vw; text-align: center;">
-          Pure HTML. Zero JS.
-        </h1>
+        <tosi-waypoint progress="0" style="opacity: 0; transform: translateY(50px)"></tosi-waypoint>
+        <tosi-waypoint progress="0.5" style="opacity: 1; transform: translateY(0px)"></tosi-waypoint>
+        <tosi-waypoint progress="1" style="opacity: 1; transform: scale(1.2)"></tosi-waypoint>
+        <h1 style="text-align: center;">Pinned for 2× viewport.</h1>
       </tosi-interpolator>
     </tosi-product-section>
   </tosi-product>
@@ -50,9 +49,7 @@ The IIFE build is self-contained — a single script tag gives you `tosijs`, `to
 </html>
 ```
 
-### 2. Modern Web App (ESM)
-
-For bundled apps (Vite, Webpack, etc.), install the package and its peer dependencies:
+### Modern web app (ESM)
 
 ```bash
 bun install tosijs tosijs-ui tosijs-product
@@ -62,12 +59,12 @@ bun install tosijs tosijs-ui tosijs-product
 import { tosiProduct, tosiProductSection, tosiInterpolator, tosiWaypoint } from 'tosijs-product'
 
 const app = tosiProduct(
-  tosiProductSection({ scroll: 2000 },
-    tosiInterpolator({ 'data-scroll-animate': '', easing: 'ease-in-out' },
+  tosiProductSection({ scroll: 200 },
+    tosiInterpolator({ 'data-scroll-animate': true, easing: 'ease-in-out' },
       tosiWaypoint({ progress: 0, style: 'opacity: 0; transform: translateY(50px)' }),
       tosiWaypoint({ progress: 0.5, style: 'opacity: 1; transform: translateY(0px)' }),
-      tosiWaypoint({ progress: 1, style: 'opacity: 0; transform: translateY(-50px)' }),
-      document.createElement('h1')  // your content here
+      tosiWaypoint({ progress: 1, style: 'opacity: 1; transform: scale(1.2)' }),
+      document.createElement('h1')
     )
   )
 )
@@ -75,43 +72,45 @@ const app = tosiProduct(
 document.body.append(app)
 ```
 
-## Features
+## The `scroll` attribute
 
-### Frame-Based Animation (The Apple Way)
+`scroll` on a section is its **pin duration**, expressed as a percentage of the viewport. `scroll="200"` means "pin this section for 2× viewport of scroll." When pin progress reaches 1, the section enters its **exit phase** and scrolls out at 1:1 over its own height. So total scroll claimed = `(scroll / 100) * viewport + naturalSize`.
 
-Standard video scrubbing (`video.currentTime`) often stutters because decoders aren't designed for random-access seeking. `tosijs-product` provides a CLI tool to convert videos into a single WebP mosaic grid, which the `tosiFilmstrip` component then scrubs through using a hardware-accelerated Canvas.
+## Themes
 
-**1. Create a Mosaic:**
-Use the included CLI tool to convert your video:
+Register themes (each is a dictionary of CSS custom properties) and reference them from sections:
+
+```ts
+const app = tosiProduct(
+  tosiProductSection({ scroll: 100, theme: 'midnight' }, /* ... */),
+  tosiProductSection({ scroll: 200, 'theme-from': 'midnight', 'theme-to': 'paper' }, /* ... */),
+  tosiProductSection({ scroll: 100, theme: 'paper' }, /* ... */),
+)
+
+app.themes = {
+  midnight: { '--bg': '#08081a', '--fg': '#f0f0f5', '--accent': '#9be7ff' },
+  paper: { '--bg': '#f5f1e8', '--fg': '#1a1815', '--accent': '#7c3aed' },
+}
+app.defaultTheme = 'midnight'
+```
+
+The transition section interpolates its CSS variables (color values use `color-mix(in srgb, …)`) over its pin progress, and writes them to `document.documentElement`. Anything cascading from `:root` — including a `<tosi-product-header>` overlay outside the engine — re-themes in unison.
+
+## Frame-based animation
+
+Standard video scrubbing (`video.currentTime`) often stutters because decoders aren't designed for random-access seeking. The `tosi-mosaic` CLI converts a video to a single WebP mosaic grid, and `<tosi-filmstrip>` scrubs through it using a hardware-accelerated canvas.
+
 ```bash
 bunx tosi-mosaic my-video.mp4 --frames 100 --width 1280
 ```
-This produces `my-video_10x10_100.webp`. The filename contains the grid dimensions (`10x10`) and total frames (`100`), which the component uses for automatic configuration.
 
-**2. Use the Component:**
-```html
-<tosi-filmstrip src="my-video_10x10_100.webp" data-scroll-animate="true"></tosi-filmstrip>
-```
-
-*Note: A Matrix (Grid) is used rather than a single long strip because browsers have maximum image dimension limits (often 16,384px). A 10x10 matrix keeps the dimensions well within GPU limits while delivering 100 frames in a single network request.*
-
-### Declarative CSS Interpolation
-
-You can choreograph complex, multi-layered animations (like SVG pan & zoom or text reveals) using the `<tosi-interpolator>` and `<tosi-waypoint>` system. Set starting, middle, and ending CSS styles, and the orchestrator handles the easing.
+Produces `my-video_10x10_100.webp` (the filename encodes grid + total frames):
 
 ```html
-<tosi-product-section scroll="4000">
-  <tosi-interpolator data-scroll-animate="interpolator">
-    <!-- Waypoints define the timeline -->
-    <tosi-waypoint progress="0.0" style="transform: scale(1.0); opacity: 0.2;"></tosi-waypoint>
-    <tosi-waypoint progress="0.5" style="transform: scale(3.0); opacity: 1.0;"></tosi-waypoint>
-    <tosi-waypoint progress="1.0" style="transform: scale(0.5); opacity: 0.2;"></tosi-waypoint>
-    
-    <!-- The target element receives the interpolated styles -->
-    <img src="background.svg" class="bg">
-  </tosi-interpolator>
-</tosi-product-section>
+<tosi-filmstrip src="my-video_10x10_100.webp" data-scroll-animate></tosi-filmstrip>
 ```
+
+A grid (rather than a single long strip) keeps dimensions inside the browser's max image size (commonly 16,384px) while delivering all frames in one request.
 
 ## License
 

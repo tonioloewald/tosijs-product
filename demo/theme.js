@@ -2214,7 +2214,7 @@ class TosiProduct extends u {
       top: "0",
       left: "0",
       width: "100%",
-      height: "100vh",
+      height: "var(--tosi-view-size, 100vh)",
       overflow: "hidden"
     },
     ":host([direction=horizontal])": {
@@ -2222,7 +2222,7 @@ class TosiProduct extends u {
       width: "max-content"
     },
     ":host([direction=horizontal]) .window": {
-      width: "100vw",
+      width: "var(--tosi-view-size, 100vw)",
       height: "100%"
     },
     ".stack": {
@@ -2366,6 +2366,7 @@ class TosiProduct extends u {
       return;
     const horizontal = this._isHorizontal();
     const view = this._viewSize();
+    this.style.setProperty("--tosi-view-size", `${view}px`);
     const items = [];
     let cumOffset = 0;
     let cumRunway = 0;

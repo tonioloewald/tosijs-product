@@ -108,7 +108,7 @@ export class TosiProduct extends Component {
       top: "0",
       left: "0",
       width: "100%",
-      height: "100vh",
+      height: "var(--tosi-view-size, 100vh)",
       overflow: "hidden",
     },
     ":host([direction=horizontal])": {
@@ -116,7 +116,7 @@ export class TosiProduct extends Component {
       width: "max-content",
     },
     ":host([direction=horizontal]) .window": {
-      width: "100vw",
+      width: "var(--tosi-view-size, 100vw)",
       height: "100%",
     },
     ".stack": {
@@ -298,6 +298,11 @@ export class TosiProduct extends Component {
     if (!this._stack) return;
     const horizontal = this._isHorizontal();
     const view = this._viewSize();
+
+    // Publish the scroll-axis view size so slotted content can size to the
+    // actually-available area (handles embedded / nested scroll parents that
+    // are smaller than the document viewport — pure CSS vh/vw would overflow).
+    this.style.setProperty("--tosi-view-size", `${view}px`);
 
     const items: Item[] = [];
     let cumOffset = 0;

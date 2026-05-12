@@ -2250,7 +2250,7 @@ class TosiProduct extends u {
       top: "0",
       left: "0",
       width: "100%",
-      height: "100vh",
+      height: "var(--tosi-view-size, 100vh)",
       overflow: "hidden"
     },
     ":host([direction=horizontal])": {
@@ -2258,7 +2258,7 @@ class TosiProduct extends u {
       width: "max-content"
     },
     ":host([direction=horizontal]) .window": {
-      width: "100vw",
+      width: "var(--tosi-view-size, 100vw)",
       height: "100%"
     },
     ".stack": {
@@ -2402,6 +2402,7 @@ class TosiProduct extends u {
       return;
     const horizontal = this._isHorizontal();
     const view = this._viewSize();
+    this.style.setProperty("--tosi-view-size", `${view}px`);
     const items = [];
     let cumOffset = 0;
     let cumRunway = 0;
@@ -2784,6 +2785,134 @@ var tosiInterpolator = TosiInterpolator.elementCreator({
 });
 var tosiWaypoint = TosiWaypoint.elementCreator({
   tag: "tosi-waypoint"
+});
+
+// src/tosi-filmstrip.ts
+var { canvas } = I;
+
+class TosiFilmstrip extends u {
+  static initAttributes = {
+    src: "",
+    cols: 0,
+    rows: 0,
+    total: 0
+  };
+  _img = null;
+  _ctx = null;
+  _lastProgress = 0;
+  _canvas = null;
+  _loadedSrc = "";
+  _loadId = 0;
+  static styleSpec = {
+    ":host": {
+      display: "block",
+      position: "relative",
+      width: "100%",
+      height: "100%"
+    },
+    canvas: {
+      width: "100%",
+      height: "100%",
+      objectFit: "contain",
+      display: "block"
+    }
+  };
+  content = () => {
+    this._canvas = canvas({ part: "canvas" });
+    return this._canvas;
+  };
+  _parseGrid() {
+    const src = this.getAttribute("src") || "";
+    let cols = Number(this.getAttribute("cols")) || 0;
+    let rows = Number(this.getAttribute("rows")) || 0;
+    let total = Number(this.getAttribute("total")) || 0;
+    if (!cols || !rows || !total) {
+      const match = src.match(/(\d+)x(\d+)_(\d+)\.(webp|jpg|png|data)/i);
+      if (match) {
+        if (!cols)
+          cols = parseInt(match[1]);
+        if (!rows)
+          rows = parseInt(match[2]);
+        if (!total)
+          total = parseInt(match[3]);
+      }
+    }
+    if (!total || !cols || !rows)
+      return null;
+    return { cols, rows, total };
+  }
+  load() {
+    const src = this.getAttribute("src") || "";
+    if (!src)
+      return;
+    const grid = this._parseGrid();
+    if (!grid)
+      return;
+    const loadId = ++this._loadId;
+    this._loadedSrc = src;
+    const img = new Image;
+    img.onload = () => {
+      if (loadId !== this._loadId)
+        return;
+      this._img = img;
+      this.setScrollProgress(this._lastProgress);
+    };
+    img.onerror = () => {
+      if (loadId !== this._loadId)
+        return;
+      console.warn(`[tosi-filmstrip] Failed to load: ${src}`);
+      this._img = null;
+    };
+    img.src = src;
+  }
+  setScrollProgress(progress) {
+    this._lastProgress = progress;
+    if (!this._img)
+      return;
+    const grid = this._parseGrid();
+    if (!grid)
+      return;
+    const { cols, rows, total } = grid;
+    const cvs = this._canvas || this.parts && this.parts.canvas;
+    if (!cvs)
+      return;
+    if (!this._ctx)
+      this._ctx = cvs.getContext("2d");
+    if (!this._ctx)
+      return;
+    const frameIndex = Math.max(0, Math.min(total - 1, Math.floor(progress * total)));
+    const col = frameIndex % cols;
+    const row = Math.floor(frameIndex / cols);
+    const fw = this._img.width / cols;
+    const fh = this._img.height / rows;
+    if (cvs.width !== fw || cvs.height !== fh) {
+      cvs.width = fw;
+      cvs.height = fh;
+    }
+    this._ctx.clearRect(0, 0, fw, fh);
+    this._ctx.drawImage(this._img, col * fw, row * fh, fw, fh, 0, 0, fw, fh);
+  }
+  connectedCallback() {
+    super.connectedCallback();
+    this.load();
+  }
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this._loadId++;
+    this._img = null;
+  }
+  render() {
+    super.render();
+    const currentSrc = this.getAttribute("src") || "";
+    if (!this._img || this._loadedSrc !== currentSrc) {
+      this.load();
+    } else {
+      this.setScrollProgress(this._lastProgress);
+    }
+  }
+}
+var tosiFilmstrip = TosiFilmstrip.elementCreator({
+  tag: "tosi-filmstrip"
 });
 
 // src/tosi-code.ts
@@ -7615,7 +7744,11 @@ var us = Il($4);
 var ul = { "--xin-icon-size": fM.tosiIconSize, "--xin-icon-fill": fM.tosiIconFill, "--xin-icon-stroke": fM.tosiIconStroke, "--xin-tabs-bar-color": fM.tosiTabsBarColor, "--xin-tabs-bar-height": fM.tosiTabsBarHeight, "--xin-tabs-selected-color": fM.tosiTabsSelectedColor, "--spacing": fM.tosiSpacing, "--gap": fM.tosiSpacingSm, "--touch-size": fM.tosiTouchSize, "--background": fM.tosiBg, "--text-color": fM.tosiText, "--brand-color": fM.tosiAccent, "--brand-text-color": fM.tosiAccentText };
 
 // demo/index.ts
-var { div: div2, header, footer, nav, h1: h12, h2: h22, p: p3, span, a: a5 } = I;
+var { div: div2, header, footer, nav, h1: h12, h2: h22, p: p3, span, a: a5, video } = I;
+var HMB = { lat: 37.4636, lng: -122.4286 };
+var OULU = { lat: 65.0121, lng: 25.4651 };
+var MAPBOX_TOKEN = "pk.eyJ1IjoicG9kcGVyc29uIiwiYSI6ImNqc2JlbWU0bjA1ZmY0YW5ycHZod3VhbWcifQ.arvqfpOqMgFYkKgQ35UScA";
+var ease = (t5) => t5 < 0.5 ? 2 * t5 * t5 : -1 + (4 - 2 * t5) * t5;
 var themes = {
   midnight: {
     "--bg": "#08081a",
@@ -7793,7 +7926,10 @@ style.textContent = `
     background: var(--border); border-radius: 4px;
   }
   .inner-scene {
-    height: 100%; display: flex; flex-direction: column;
+    /* Use the engine's view size so each inner section pins to a full card,
+       independent of the document viewport. */
+    height: var(--tosi-view-size, 100%);
+    display: flex; flex-direction: column;
     align-items: center; justify-content: center;
     padding: 2rem; text-align: center;
     color: var(--fg);
@@ -7808,7 +7944,9 @@ style.textContent = `
     opacity: 0.85; font-size: 1rem;
   }
   .h-card {
-    width: 100%; height: 100%; flex-shrink: 0;
+    /* Size to the engine's view size (engine writes --tosi-view-size).
+       Avoids the 100vw / flex-max-content collapse problem when nested. */
+    width: var(--tosi-view-size, 100%); height: 100%; flex-shrink: 0;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     padding: 2rem; text-align: center; color: #fff;
     white-space: normal;
@@ -7822,6 +7960,50 @@ style.textContent = `
     color: var(--muted); font-size: 0.7rem;
     letter-spacing: 0.25em; text-transform: uppercase;
   }
+
+  /* === Full-bleed media scene === */
+  .media-scene {
+    position: relative;
+    height: var(--tosi-view-size, 100vh);
+    overflow: hidden;
+    background: #000;
+  }
+  .media-scene > video,
+  .media-scene > tosi-filmstrip,
+  .media-scene > tosi-map {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover; display: block;
+  }
+  /* Lottie SVGs don't object-fit — center it at a contained size and let
+     the scene background show through. */
+  .media-scene.lottie {
+    background: radial-gradient(ellipse at center, #0a0a18 0%, #000 100%);
+  }
+  .media-scene > tosi-lottie {
+    position: absolute;
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    width: min(70vh, 60vw);
+    height: min(70vh, 60vw);
+  }
+  .media-overlay {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    pointer-events: none; text-align: center;
+    color: #fff; padding: 2rem;
+  }
+  .media-overlay h2 {
+    font-size: clamp(2rem, 6vw, 4rem); margin: 0 0 0.3em; font-weight: 800;
+    filter: drop-shadow(0 2px 12px rgba(0,0,0,0.85))
+            drop-shadow(0 0 40px rgba(0,0,0,0.6));
+  }
+  .media-overlay p {
+    color: #ddd; max-width: 560px; margin: 0;
+    font-size: clamp(1rem, 1.6vw, 1.2rem);
+    filter: drop-shadow(0 1px 6px rgba(0,0,0,0.9));
+  }
 `;
 document.head.appendChild(style);
 var pageHeader = header({ class: "page-header" }, div2({ class: "brand" }, "tosijs-product"), nav(a5({ href: "https://github.com/tonioloewald/tosijs-product" }, "GitHub"), a5({ href: "https://tosijs.net" }, "tosijs"), a5({ href: "#" }, "Examples")));
@@ -7829,6 +8011,16 @@ var stickyProgressLabel = span({ class: "progress" }, "0%");
 var stickyHeader = tosiProductHeader({ threshold: 80 }, div2({ class: "sticky-bar" }, div2({ class: "brand" }, "tosijs-product"), stickyProgressLabel));
 var pageFooter = footer({ class: "page-footer" }, p3("Built with ", a5({ href: "https://tosijs.net" }, "tosijs"), ". Source on ", a5({ href: "https://github.com/tonioloewald/tosijs-product" }, "GitHub"), "."));
 var md = (markdown) => div2({ class: "intro" }, I9(markdown));
+var mediaOverlay = (range, title, subtitle) => tosiInterpolator({ "data-scroll-animate": true, "data-scroll-range": range, easing: "ease-in-out" }, tosiWaypoint({
+  progress: 0,
+  style: { opacity: 0, transform: "translateY(20px)" }
+}), tosiWaypoint({
+  progress: 0.5,
+  style: { opacity: 1, transform: "translateY(0px)" }
+}), tosiWaypoint({
+  progress: 1,
+  style: { opacity: 0, transform: "translateY(-20px)" }
+}), div2({ class: "media-overlay" }, h22(title), ...subtitle ? [p3(subtitle)] : []));
 var stagedRow = (label, start, end) => tosiInterpolator({
   "data-scroll-animate": true,
   "data-scroll-range": `${start},${end}`,
@@ -7874,7 +8066,81 @@ This whole page is one engine. Read on to see what each piece does.`), tosiProdu
   <tosi-waypoint progress="1" style="opacity: 1"></tosi-waypoint>
   <div>I fade in.</div>
 </tosi-interpolator>
-\`\`\``), tosiProductSection({ scroll: 300, theme: "midnight" }, div2({ class: "scene" }, div2({ class: "feature-list" }, h22("Staged reveal"), p3("Multiple interpolators in one section, each scoped to a slice of progress with data-scroll-range:"), stagedRow("Sticky window pins the engine", 0.05, 0.2), stagedRow("Stack translates as you scroll", 0.2, 0.35), stagedRow("Sections pin then exit", 0.35, 0.5), stagedRow("Sub-range staging schedules the rest", 0.5, 0.65)))), tosiProductSection({
+\`\`\``), tosiProductSection({ scroll: 300, theme: "midnight" }, div2({ class: "scene" }, div2({ class: "feature-list" }, h22("Staged reveal"), p3("Multiple interpolators in one section, each scoped to a slice of progress with data-scroll-range:"), stagedRow("Sticky window pins the engine", 0.05, 0.2), stagedRow("Stack translates as you scroll", 0.2, 0.35), stagedRow("Sections pin then exit", 0.35, 0.5), stagedRow("Sub-range staging schedules the rest", 0.5, 0.65)))), md(`## Drive media with scroll
+
+Interpolators handle CSS. For richer media — videos, vector animations, 3D scenes, maps — the engine forwards each section's progress to any descendant tagged with \`data-scroll-animate\`. The next few scenes show the built-in dispatchers in action.`), tosiProductSection({ scroll: 300, theme: "midnight" }, div2({ class: "media-scene" }, video({
+  src: "assets/agent-owl.mp4",
+  "data-scroll-animate": "currentTime",
+  muted: true,
+  playsinline: true,
+  preload: "auto"
+}), mediaOverlay("0,0.4", "Scrub video", 'data-scroll-animate="currentTime" maps progress to video.currentTime — frame-perfect scrubbing.'), mediaOverlay("0.5,1", "Native <video>, no plugin"))), md(`## Filmstrip mosaics
+
+Video decoders aren't built for random seeking — scrubbing real video stutters. \`<tosi-filmstrip>\` solves this by packing every frame into a single WebP mosaic that the engine renders on a canvas. Use the bundled \`bunx tosi-mosaic\` CLI to encode a clip.
+
+\`\`\`html
+<tosi-filmstrip
+  src="agent-owl_10x10_100.webp"
+  data-scroll-animate>
+</tosi-filmstrip>
+\`\`\`
+
+Grid dimensions and frame count are auto-detected from the filename suffix (\`_COLSxROWS_TOTAL\`).`), tosiProductSection({ scroll: 300, theme: "midnight" }, div2({ class: "media-scene" }, tosiFilmstrip({
+  src: "assets/agent-owl_10x10_100.jpg",
+  cols: 10,
+  rows: 10,
+  total: 100,
+  "data-scroll-animate": "true"
+}), mediaOverlay("0,0.4", "100 frames. One image.", "Zero video decode. Instant seeking. Works everywhere."), mediaOverlay("0.5,1", "Hardware-accelerated canvas blits"))), md(`## Lottie / Bodymovin
+
+Scrub Bodymovin (Lottie) animations the same way as video. Tag a \`<tosi-lottie>\` with \`data-scroll-animate="lottie"\` and the engine drives it via \`animation.goToAndStop()\`. Pure SVG, vector-perfect at any zoom.
+
+\`\`\`html
+<tosi-lottie
+  src="animation.json"
+  data-scroll-animate="lottie">
+</tosi-lottie>
+\`\`\``), tosiProductSection({ scroll: 250, theme: "midnight" }, div2({ class: "media-scene lottie" }, M3({
+  src: "assets/tosi-platform.json",
+  "data-scroll-animate": "lottie",
+  config: { renderer: "svg", autoplay: false, loop: false }
+}), mediaOverlay("0,0.5", "Vector animation", "Bodymovin / Lottie JSON, scrubbed by scroll."), mediaOverlay("0.5,1", "Frame-perfect at every zoom"))), md(`## Mapbox fly-around
+
+For more bespoke scroll-driven behavior, every section exposes a \`scrollCallback(progress, el)\` property. Below, the section drives a \`<tosi-map>\` — interpolating lat/lng + zoom across the section's pin to fly between two points on Earth.
+
+\`\`\`ts
+tosiProductSection({
+  scroll: 400,
+  apply(section) {
+    section.scrollCallback = (p, el) => {
+      const map = el.querySelector('tosi-map')
+      map.coords = interpolateCoords(p)
+    }
+  }
+}, mapBox({ token, coords, mapStyle }))
+\`\`\``), tosiProductSection({
+  scroll: 400,
+  theme: "midnight",
+  apply(el) {
+    const section = el;
+    section.scrollCallback = (progress, el2) => {
+      const map = el2.querySelector("tosi-map");
+      if (!map)
+        return;
+      const move = progress <= 0.1 ? 0 : progress >= 0.9 ? 1 : ease((progress - 0.1) / 0.8);
+      const zoomT = Math.abs(progress - 0.5) * 2;
+      const zoom = 2 + zoomT * zoomT * 10;
+      const lat = HMB.lat + (OULU.lat - HMB.lat) * move;
+      const lng = HMB.lng + (OULU.lng - HMB.lng) * move;
+      map.coords = `${lat.toFixed(6)},${lng.toFixed(6)},${zoom.toFixed(4)}`;
+    };
+  }
+}, div2({ class: "media-scene" }, O8({
+  token: MAPBOX_TOKEN,
+  coords: `${HMB.lat},${HMB.lng},12`,
+  mapStyle: "mapbox://styles/mapbox/dark-v11",
+  style: { pointerEvents: "none" }
+}), mediaOverlay("0,0.2", "Half Moon Bay"), mediaOverlay("0.45,0.55", "↑ zoom out, fly ↑"), mediaOverlay("0.8,1", "Oulu, Finland"))), tosiProductSection({
   scroll: 250,
   "theme-from": "midnight",
   "theme-to": "paper"

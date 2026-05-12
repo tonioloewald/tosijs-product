@@ -3,13 +3,22 @@ import {
   tosiProductSection,
   tosiProductHeader,
   TosiProduct,
+  TosiProductSection,
 } from "../src/tosi-product";
 import { tosiInterpolator, tosiWaypoint } from "../src/tosi-interpolator";
+import { tosiFilmstrip } from "../src/tosi-filmstrip";
 import { tosiCode } from "../src/tosi-code";
-import { markdownViewer } from "tosijs-ui";
+import { markdownViewer, bodymovinPlayer, mapBox } from "tosijs-ui";
 import { elements } from "tosijs";
 
-const { div, header, footer, nav, h1, h2, p, span, a } = elements;
+const { div, header, footer, nav, h1, h2, p, span, a, video } = elements;
+
+// Coordinates for the mapbox fly-around scene.
+const HMB = { lat: 37.4636, lng: -122.4286 };
+const OULU = { lat: 65.0121, lng: 25.4651 };
+const MAPBOX_TOKEN =
+  "pk.eyJ1IjoicG9kcGVyc29uIiwiYSI6ImNqc2JlbWU0bjA1ZmY0YW5ycHZod3VhbWcifQ.arvqfpOqMgFYkKgQ35UScA";
+const ease = (t: number) => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t);
 
 // === Themes =================================================================
 const themes = {
@@ -191,7 +200,10 @@ style.textContent = `
     background: var(--border); border-radius: 4px;
   }
   .inner-scene {
-    height: 100%; display: flex; flex-direction: column;
+    /* Use the engine's view size so each inner section pins to a full card,
+       independent of the document viewport. */
+    height: var(--tosi-view-size, 100%);
+    display: flex; flex-direction: column;
     align-items: center; justify-content: center;
     padding: 2rem; text-align: center;
     color: var(--fg);
@@ -206,7 +218,9 @@ style.textContent = `
     opacity: 0.85; font-size: 1rem;
   }
   .h-card {
-    width: 100%; height: 100%; flex-shrink: 0;
+    /* Size to the engine's view size (engine writes --tosi-view-size).
+       Avoids the 100vw / flex-max-content collapse problem when nested. */
+    width: var(--tosi-view-size, 100%); height: 100%; flex-shrink: 0;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     padding: 2rem; text-align: center; color: #fff;
     white-space: normal;
@@ -219,6 +233,50 @@ style.textContent = `
     position: absolute; left: 50%; bottom: 6vh; transform: translateX(-50%);
     color: var(--muted); font-size: 0.7rem;
     letter-spacing: 0.25em; text-transform: uppercase;
+  }
+
+  /* === Full-bleed media scene === */
+  .media-scene {
+    position: relative;
+    height: var(--tosi-view-size, 100vh);
+    overflow: hidden;
+    background: #000;
+  }
+  .media-scene > video,
+  .media-scene > tosi-filmstrip,
+  .media-scene > tosi-map {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover; display: block;
+  }
+  /* Lottie SVGs don't object-fit — center it at a contained size and let
+     the scene background show through. */
+  .media-scene.lottie {
+    background: radial-gradient(ellipse at center, #0a0a18 0%, #000 100%);
+  }
+  .media-scene > tosi-lottie {
+    position: absolute;
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    width: min(70vh, 60vw);
+    height: min(70vh, 60vw);
+  }
+  .media-overlay {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    pointer-events: none; text-align: center;
+    color: #fff; padding: 2rem;
+  }
+  .media-overlay h2 {
+    font-size: clamp(2rem, 6vw, 4rem); margin: 0 0 0.3em; font-weight: 800;
+    filter: drop-shadow(0 2px 12px rgba(0,0,0,0.85))
+            drop-shadow(0 0 40px rgba(0,0,0,0.6));
+  }
+  .media-overlay p {
+    color: #ddd; max-width: 560px; margin: 0;
+    font-size: clamp(1rem, 1.6vw, 1.2rem);
+    filter: drop-shadow(0 1px 6px rgba(0,0,0,0.9));
   }
 `;
 document.head.appendChild(style);
@@ -258,6 +316,33 @@ const pageFooter = footer(
 // === Helpers ================================================================
 const md = (markdown: string) =>
   div({ class: "intro" }, markdownViewer(markdown));
+
+// Fades the overlay text in then out over a sub-range of section progress.
+const mediaOverlay = (
+  range: string,
+  title: string,
+  subtitle?: string
+) =>
+  tosiInterpolator(
+    { "data-scroll-animate": true, "data-scroll-range": range, easing: "ease-in-out" },
+    tosiWaypoint({
+      progress: 0,
+      style: { opacity: 0, transform: "translateY(20px)" },
+    }),
+    tosiWaypoint({
+      progress: 0.5,
+      style: { opacity: 1, transform: "translateY(0px)" },
+    }),
+    tosiWaypoint({
+      progress: 1,
+      style: { opacity: 0, transform: "translateY(-20px)" },
+    }),
+    div(
+      { class: "media-overlay" },
+      h2(title),
+      ...(subtitle ? [p(subtitle)] : [])
+    )
+  );
 
 const stagedRow = (label: string, start: number, end: number) =>
   tosiInterpolator(
@@ -370,6 +455,160 @@ This whole page is one engine. Read on to see what each piece does.`
         stagedRow("Sections pin then exit", 0.35, 0.5),
         stagedRow("Sub-range staging schedules the rest", 0.5, 0.65)
       )
+    )
+  ),
+
+  // ===== MEDIA INTRO =====
+  md(
+    `## Drive media with scroll
+
+Interpolators handle CSS. For richer media — videos, vector animations, 3D scenes, maps — the engine forwards each section's progress to any descendant tagged with \`data-scroll-animate\`. The next few scenes show the built-in dispatchers in action.`
+  ),
+
+  // ===== VIDEO SCRUBBING =====
+  tosiProductSection(
+    { scroll: 300, theme: "midnight" },
+    div(
+      { class: "media-scene" },
+      video({
+        src: "assets/agent-owl.mp4",
+        "data-scroll-animate": "currentTime",
+        muted: true,
+        playsinline: true,
+        preload: "auto",
+      }),
+      mediaOverlay(
+        "0,0.4",
+        "Scrub video",
+        "data-scroll-animate=\"currentTime\" maps progress to video.currentTime — frame-perfect scrubbing."
+      ),
+      mediaOverlay("0.5,1", "Native <video>, no plugin")
+    )
+  ),
+
+  md(
+    `## Filmstrip mosaics
+
+Video decoders aren't built for random seeking — scrubbing real video stutters. \`<tosi-filmstrip>\` solves this by packing every frame into a single WebP mosaic that the engine renders on a canvas. Use the bundled \`bunx tosi-mosaic\` CLI to encode a clip.
+
+\`\`\`html
+<tosi-filmstrip
+  src="agent-owl_10x10_100.webp"
+  data-scroll-animate>
+</tosi-filmstrip>
+\`\`\`
+
+Grid dimensions and frame count are auto-detected from the filename suffix (\`_COLSxROWS_TOTAL\`).`
+  ),
+
+  // ===== FILMSTRIP MOSAIC =====
+  tosiProductSection(
+    { scroll: 300, theme: "midnight" },
+    div(
+      { class: "media-scene" },
+      tosiFilmstrip({
+        src: "assets/agent-owl_10x10_100.jpg",
+        cols: 10,
+        rows: 10,
+        total: 100,
+        "data-scroll-animate": "true",
+      }),
+      mediaOverlay(
+        "0,0.4",
+        "100 frames. One image.",
+        "Zero video decode. Instant seeking. Works everywhere."
+      ),
+      mediaOverlay("0.5,1", "Hardware-accelerated canvas blits")
+    )
+  ),
+
+  // ===== LOTTIE =====
+  md(
+    `## Lottie / Bodymovin
+
+Scrub Bodymovin (Lottie) animations the same way as video. Tag a \`<tosi-lottie>\` with \`data-scroll-animate="lottie"\` and the engine drives it via \`animation.goToAndStop()\`. Pure SVG, vector-perfect at any zoom.
+
+\`\`\`html
+<tosi-lottie
+  src="animation.json"
+  data-scroll-animate="lottie">
+</tosi-lottie>
+\`\`\``
+  ),
+
+  tosiProductSection(
+    { scroll: 250, theme: "midnight" },
+    div(
+      { class: "media-scene lottie" },
+      bodymovinPlayer({
+        src: "assets/tosi-platform.json",
+        "data-scroll-animate": "lottie",
+        config: { renderer: "svg", autoplay: false, loop: false },
+      }),
+      mediaOverlay(
+        "0,0.5",
+        "Vector animation",
+        "Bodymovin / Lottie JSON, scrubbed by scroll."
+      ),
+      mediaOverlay("0.5,1", "Frame-perfect at every zoom")
+    )
+  ),
+
+  // ===== MAPBOX =====
+  md(
+    `## Mapbox fly-around
+
+For more bespoke scroll-driven behavior, every section exposes a \`scrollCallback(progress, el)\` property. Below, the section drives a \`<tosi-map>\` — interpolating lat/lng + zoom across the section's pin to fly between two points on Earth.
+
+\`\`\`ts
+tosiProductSection({
+  scroll: 400,
+  apply(section) {
+    section.scrollCallback = (p, el) => {
+      const map = el.querySelector('tosi-map')
+      map.coords = interpolateCoords(p)
+    }
+  }
+}, mapBox({ token, coords, mapStyle }))
+\`\`\``
+  ),
+
+  tosiProductSection(
+    {
+      scroll: 400,
+      theme: "midnight",
+      apply(el: Element) {
+        const section = el as TosiProductSection;
+        section.scrollCallback = (progress: number, el: HTMLElement) => {
+          const map = el.querySelector("tosi-map") as any;
+          if (!map) return;
+          // Travel from coast to coast in the middle 80% of the pin, with a
+          // dramatic zoom-out at the midpoint.
+          const move =
+            progress <= 0.1
+              ? 0
+              : progress >= 0.9
+                ? 1
+                : ease((progress - 0.1) / 0.8);
+          const zoomT = Math.abs(progress - 0.5) * 2;
+          const zoom = 2 + zoomT * zoomT * 10;
+          const lat = HMB.lat + (OULU.lat - HMB.lat) * move;
+          const lng = HMB.lng + (OULU.lng - HMB.lng) * move;
+          map.coords = `${lat.toFixed(6)},${lng.toFixed(6)},${zoom.toFixed(4)}`;
+        };
+      },
+    },
+    div(
+      { class: "media-scene" },
+      mapBox({
+        token: MAPBOX_TOKEN,
+        coords: `${HMB.lat},${HMB.lng},12`,
+        mapStyle: "mapbox://styles/mapbox/dark-v11",
+        style: { pointerEvents: "none" },
+      }),
+      mediaOverlay("0,0.2", "Half Moon Bay"),
+      mediaOverlay("0.45,0.55", "↑ zoom out, fly ↑"),
+      mediaOverlay("0.8,1", "Oulu, Finland")
     )
   ),
 

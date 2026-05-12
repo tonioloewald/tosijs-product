@@ -58,9 +58,10 @@ style.textContent = `
     border: 1px dashed #888;
     margin: 0 1rem 1rem;
   }
-  /* Inner horizontal sub-panels */
+  /* Inner horizontal sub-panels — size to engine's published view size,
+     not 100vw (which would overflow the embedded host's container). */
   .h-panel {
-    width: 100vw; height: 100%;
+    width: var(--tosi-view-size, 100vw); height: 100%;
     display: flex; align-items: center; justify-content: center;
     text-align: center; font-size: 2rem; font-weight: 600;
     flex-shrink: 0;

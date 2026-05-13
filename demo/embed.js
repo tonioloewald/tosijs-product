@@ -2647,7 +2647,7 @@ var tosiProductHeader = TosiProductHeader.elementCreator({
 });
 
 // demo/embed.ts
-var { div: div2, header, footer, section, h1, h2, h3, p: p2, span } = I;
+var { div: div2, header, footer, h1, h2, p: p2, span } = I;
 var style = document.createElement("style");
 style.textContent = `
   *, *::before, *::after { box-sizing: border-box; }

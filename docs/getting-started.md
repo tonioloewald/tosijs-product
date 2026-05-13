@@ -42,10 +42,22 @@ Every tosijs-product page follows the same pattern:
 <tosi-product>
   <tosi-product-section scroll="200">
     <tosi-interpolator data-scroll-animate easing="ease-in-out">
-      <tosi-waypoint progress="0.0" style="opacity: 0; transform: scale(0.9)"></tosi-waypoint>
-      <tosi-waypoint progress="0.3" style="opacity: 1; transform: scale(1)"></tosi-waypoint>
-      <tosi-waypoint progress="0.7" style="opacity: 1; transform: scale(1)"></tosi-waypoint>
-      <tosi-waypoint progress="1.0" style="opacity: 0; transform: scale(0.9)"></tosi-waypoint>
+      <tosi-waypoint
+        progress="0.0"
+        style="opacity: 0; transform: scale(0.9)"
+      ></tosi-waypoint>
+      <tosi-waypoint
+        progress="0.3"
+        style="opacity: 1; transform: scale(1)"
+      ></tosi-waypoint>
+      <tosi-waypoint
+        progress="0.7"
+        style="opacity: 1; transform: scale(1)"
+      ></tosi-waypoint>
+      <tosi-waypoint
+        progress="1.0"
+        style="opacity: 0; transform: scale(0.9)"
+      ></tosi-waypoint>
       <h1>Hello, World</h1>
     </tosi-interpolator>
   </tosi-product-section>
@@ -92,7 +104,13 @@ Add `data-scroll-animate="currentTime"` to any `<video>` element:
 
 ```html
 <tosi-product-section scroll="300">
-  <video src="clip.mp4" data-scroll-animate="currentTime" muted playsinline preload="auto"></video>
+  <video
+    src="clip.mp4"
+    data-scroll-animate="currentTime"
+    muted
+    playsinline
+    preload="auto"
+  ></video>
 </tosi-product-section>
 ```
 
@@ -123,7 +141,11 @@ For horizontal scrolling, set `direction="horizontal"` and use the appropriate l
 ```html
 <div style="overflow-x: auto; white-space: nowrap;">
   <tosi-product style="display: inline-flex; width: max-content; height: 100%">
-    <tosi-product-section direction="horizontal" scroll="200" style="flex-shrink: 0">
+    <tosi-product-section
+      direction="horizontal"
+      scroll="200"
+      style="flex-shrink: 0"
+    >
       ...
     </tosi-product-section>
   </tosi-product>

@@ -2647,7 +2647,7 @@ var tosiProductHeader = TosiProductHeader.elementCreator({
 });
 
 // demo/theme.ts
-var { div: div2, header, footer, nav, h1, h2, h3, p: p2, span, a: a2 } = I;
+var { div: div2, header, footer, nav, h2, h3, p: p2, span, a: a2 } = I;
 var themes = {
   midnight: {
     "--bg": "#08081a",

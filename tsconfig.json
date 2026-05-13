@@ -13,9 +13,7 @@
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
     "allowJs": true,
-    "types": [
-      "bun-types"
-    ]
+    "types": ["bun-types"]
   },
   "include": ["src/**/*", "demo/**/*", "dev.ts"],
   "exclude": ["node_modules", "src/**/*.test.ts"]

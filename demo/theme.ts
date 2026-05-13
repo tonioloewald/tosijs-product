@@ -6,7 +6,7 @@ import {
 } from "../src/tosi-product";
 import { elements } from "tosijs";
 
-const { div, header, footer, nav, h1, h2, h3, p, span, a } = elements;
+const { div, header, footer, nav, h2, h3, p, span, a } = elements;
 
 // === Theme registry ============================================================
 // Themes are dictionaries of CSS custom properties. tosi-product sets these
@@ -170,7 +170,9 @@ const app = tosiProduct(
     div(
       { class: "scene" },
       h2("Midnight"),
-      p("First section pinned with a constant midnight theme. Scroll to enter the next scene."),
+      p(
+        "First section pinned with a constant midnight theme. Scroll to enter the next scene."
+      ),
       span({ class: "pill" }, "theme=midnight")
     )
   ),
@@ -191,7 +193,9 @@ const app = tosiProduct(
     div(
       { class: "scene" },
       h2("Forest"),
-      p("Different theme, same layout. Notice the page header and sticky header both follow."),
+      p(
+        "Different theme, same layout. Notice the page header and sticky header both follow."
+      ),
       span({ class: "pill" }, "theme=forest")
     )
   ),
@@ -206,7 +210,9 @@ const app = tosiProduct(
     div(
       { class: "scene" },
       h2("Dawn"),
-      p("This section's pin progress interpolates the theme from forest into paper. By the time pinning ends, you're in light mode — and so is the page above and below."),
+      p(
+        "This section's pin progress interpolates the theme from forest into paper. By the time pinning ends, you're in light mode — and so is the page above and below."
+      ),
       span({ class: "pill" }, 'theme-from="forest" theme-to="paper"')
     )
   ),

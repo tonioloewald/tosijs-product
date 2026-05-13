@@ -8072,11 +8072,27 @@ style.textContent = `
   .intro tosi-md p { color: var(--muted); margin: 0 0 1em; }
   .intro tosi-md p:last-child { margin: 0; }
   .intro tosi-md strong { color: var(--fg); }
-  .intro tosi-md code {
+  .intro tosi-md :not(pre) > code {
     background: var(--code-bg); padding: 0.12em 0.4em;
     border-radius: 4px; font-size: 0.9em;
     font-family: Consolas, Monaco, "Courier New", monospace;
   }
+  .intro tosi-md pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.9em 1.1em;
+    overflow-x: auto;
+    font-size: 0.85em;
+    line-height: 1.55;
+  }
+  .intro tosi-md pre code {
+    background: transparent; padding: 0;
+    font-family: Consolas, Monaco, "Courier New", monospace;
+  }
+  .intro tosi-md ul { padding-left: 1.2em; margin: 0 0 1em; }
+  .intro tosi-md li { color: var(--muted); margin-bottom: 0.3em; }
+  .intro tosi-md li code { color: var(--fg); }
 
   /* === Staged reveal feature list === */
   .feature-list {
@@ -8253,65 +8269,98 @@ This whole page is one engine. Read on to see what each piece does.`), tosiProdu
 }), tosiWaypoint({
   progress: 1,
   style: { opacity: 1, transform: "translateY(0px) scale(1)" }
-}), h22("Interpolator")), p3("A waypoint timeline for any CSS property. Set keyframes by progress and let the engine drive the rest."), span({ class: "pill" }, "<tosi-interpolator>"))), md(`## Declarative interpolation
+}), h22("Interpolator")), p3("A waypoint timeline for any CSS property. Set keyframes by progress and let the engine drive the rest."), span({ class: "pill" }, "<tosi-interpolator>"))), md(`## \`<tosi-interpolator>\`
 
-\`<tosi-interpolator>\` interpolates inline styles between \`<tosi-waypoint>\` keyframes as the section's progress moves from 0 to 1. Numbers in transforms, opacity, colors — anything CSS understands.
+Drop an interpolator inside a section and tag it \`data-scroll-animate\`. Each \`<tosi-waypoint>\` child sets the styles to apply at a given progress; the engine writes interpolated values onto the target element as you scroll.
 
 \`\`\`html
-<tosi-interpolator data-scroll-animate>
-  <tosi-waypoint progress="0" style="opacity: 0"></tosi-waypoint>
-  <tosi-waypoint progress="1" style="opacity: 1"></tosi-waypoint>
-  <div>I fade in.</div>
-</tosi-interpolator>
-\`\`\``), tosiProductSection({ scroll: 300, theme: "midnight" }, div2({ class: "scene" }, div2({ class: "feature-list" }, h22("Staged reveal"), p3("Multiple interpolators in one section, each scoped to a slice of progress with data-scroll-range:"), stagedRow("Sticky window pins the engine", 0.05, 0.2), stagedRow("Stack translates as you scroll", 0.2, 0.35), stagedRow("Sections pin then exit", 0.35, 0.5), stagedRow("Sub-range staging schedules the rest", 0.5, 0.65)))), md(`## Drive media with scroll
+<tosi-product-section scroll="200">
+  <tosi-interpolator data-scroll-animate easing="ease-in-out">
+    <tosi-waypoint progress="0"   style="opacity: 0; transform: translateY(60px)"></tosi-waypoint>
+    <tosi-waypoint progress="0.4" style="opacity: 1; transform: translateY(0)"></tosi-waypoint>
+    <tosi-waypoint progress="1"   style="opacity: 1; transform: translateY(0)"></tosi-waypoint>
+    <h2>Interpolator</h2>
+  </tosi-interpolator>
+</tosi-product-section>
+\`\`\`
 
-Interpolators handle CSS. For richer media — videos, vector animations, 3D scenes, maps — the engine forwards each section's progress to any descendant tagged with \`data-scroll-animate\`. The next few scenes show the built-in dispatchers in action.`), tosiProductSection({ scroll: 300, theme: "midnight" }, div2({ class: "media-scene" }, video({
+**Attributes**
+
+- \`data-scroll-animate\` — required for the section to drive it.
+- \`easing\` — \`"ease-in-out"\` applies easeInOutQuad between waypoints. Default is linear.
+- \`data-scroll-range="start,end"\` — constrain the interpolator to a sub-range of section progress (see below).
+
+The interpolator handles numbers inside any property — transforms, opacity, colors. Non-numeric properties step at the midpoint.`), tosiProductSection({ scroll: 300, theme: "midnight" }, div2({ class: "scene" }, div2({ class: "feature-list" }, h22("Staged reveal"), p3("Multiple interpolators in one section, each scoped to a slice of progress with data-scroll-range:"), stagedRow("Sticky window pins the engine", 0.05, 0.2), stagedRow("Stack translates as you scroll", 0.2, 0.35), stagedRow("Sections pin then exit", 0.35, 0.5), stagedRow("Sub-range staging schedules the rest", 0.5, 0.65)))), md(`## \`data-scroll-range\`
+
+A section's progress runs 0 → 1 across its pin. \`data-scroll-range="start,end"\` rescales that to a sub-range, so multiple interpolators can each own their own slice of the section.
+
+\`\`\`html
+<tosi-product-section scroll="300">
+  <tosi-interpolator data-scroll-animate data-scroll-range="0.05,0.2">…</tosi-interpolator>
+  <tosi-interpolator data-scroll-animate data-scroll-range="0.2,0.35">…</tosi-interpolator>
+  <tosi-interpolator data-scroll-animate data-scroll-range="0.35,0.5">…</tosi-interpolator>
+</tosi-product-section>
+\`\`\`
+
+Outside its range each interpolator clamps to 0 or 1 — animations are at rest before they start and after they finish. Sub-ranges work on any \`data-scroll-animate\` element, not just interpolators.`), tosiProductSection({ scroll: 300, theme: "midnight" }, div2({ class: "media-scene" }, video({
   src: "assets/agent-owl.mp4",
   "data-scroll-animate": "currentTime",
   muted: true,
   playsinline: true,
   preload: "auto"
-}), mediaOverlay("0,0.4", "Scrub video", 'data-scroll-animate="currentTime" maps progress to video.currentTime — frame-perfect scrubbing.'), mediaOverlay("0.5,1", "Native <video>, no plugin"))), md(`## Filmstrip mosaics
+}), mediaOverlay("0,0.4", "Scrub video", 'data-scroll-animate="currentTime" maps progress to video.currentTime — frame-perfect scrubbing.'), mediaOverlay("0.5,1", "Native <video>, no plugin"))), md(`## Video scrubbing
 
-Video decoders aren't built for random seeking — scrubbing real video stutters. \`<tosi-filmstrip>\` solves this by packing every frame into a single WebP mosaic that the engine renders on a canvas. Use the bundled \`bunx tosi-mosaic\` CLI to encode a clip.
+\`data-scroll-animate="currentTime"\` on a \`<video>\` makes the section set \`video.currentTime = progress * video.duration\` on every scroll tick.
 
 \`\`\`html
-<tosi-filmstrip
-  src="agent-owl_10x10_100.webp"
-  data-scroll-animate>
-</tosi-filmstrip>
+<tosi-product-section scroll="300">
+  <video src="clip.mp4"
+         data-scroll-animate="currentTime"
+         muted playsinline preload="auto"></video>
+</tosi-product-section>
 \`\`\`
 
-Grid dimensions and frame count are auto-detected from the filename suffix (\`_COLSxROWS_TOTAL\`).`), tosiProductSection({ scroll: 300, theme: "midnight" }, div2({ class: "media-scene" }, tosiFilmstrip({
+**Caveats.** Browser video decoders aren't built for random-access seeking — long clips, large frames, or non-keyframe-dense codecs all stutter. Keep clips short and dense in keyframes, or use the filmstrip mosaic approach below for buttery scrubbing.
+
+\`muted\` and \`playsinline\` are required for the video to be considered "auto-playable", which is what unlocks programmatic \`currentTime\` updates without user interaction.`), tosiProductSection({ scroll: 300, theme: "midnight" }, div2({ class: "media-scene" }, tosiFilmstrip({
   src: "assets/agent-owl_10x10_100.jpg",
   cols: 10,
   rows: 10,
   total: 100,
   "data-scroll-animate": "true"
-}), mediaOverlay("0,0.4", "100 frames. One image.", "Zero video decode. Instant seeking. Works everywhere."), mediaOverlay("0.5,1", "Hardware-accelerated canvas blits"))), md(`## Lottie / Bodymovin
+}), mediaOverlay("0,0.4", "100 frames. One image.", "Zero video decode. Instant seeking. Works everywhere."), mediaOverlay("0.5,1", "Hardware-accelerated canvas blits"))), md(`## \`<tosi-filmstrip>\`
 
-Scrub Bodymovin (Lottie) animations the same way as video. Tag a \`<tosi-lottie>\` with \`data-scroll-animate="lottie"\` and the engine drives it via \`animation.goToAndStop()\`. Pure SVG, vector-perfect at any zoom.
+Packs every frame of a clip into one image mosaic (WebP or JPG) and blits the right cell to a canvas on every scroll tick. No decode pipeline, no keyframe lookups — just \`drawImage\`.
+
+Generate the mosaic with the bundled CLI:
+
+\`\`\`bash
+bunx tosi-mosaic clip.mp4 --frames 100 --width 1280
+# emits clip_10x10_100.webp
+\`\`\`
 
 \`\`\`html
-<tosi-lottie
-  src="animation.json"
-  data-scroll-animate="lottie">
-</tosi-lottie>
-\`\`\``), tosiProductSection({ scroll: 250, theme: "midnight" }, div2({ class: "media-scene lottie" }, M3({
+<tosi-product-section scroll="300">
+  <tosi-filmstrip src="clip_10x10_100.webp" data-scroll-animate></tosi-filmstrip>
+</tosi-product-section>
+\`\`\`
+
+The filename suffix \`_COLSxROWS_TOTAL\` is parsed automatically, so you don't need to spell out grid attributes. A grid is used instead of a single long strip because browsers cap image dimensions around 16,384 px — a 10×10 mosaic keeps you well inside GPU limits and fits 100 frames in one request.`), tosiProductSection({ scroll: 250, theme: "midnight" }, div2({ class: "media-scene lottie" }, M3({
   src: "assets/tosi-platform.json",
   "data-scroll-animate": "lottie",
   config: { renderer: "svg", autoplay: false, loop: false }
-}), mediaOverlay("0,0.5", "Vector animation", "Bodymovin / Lottie JSON, scrubbed by scroll."), mediaOverlay("0.5,1", "Frame-perfect at every zoom"))), md(`## BabylonJS scenes
+}), mediaOverlay("0,0.5", "Vector animation", "Bodymovin / Lottie JSON, scrubbed by scroll."), mediaOverlay("0.5,1", "Frame-perfect at every zoom"))), md(`## \`<tosi-lottie>\`
 
-\`<tosi-3d>\` from tosijs-ui loads a GLB/glTF model into a Babylon scene. Pair it with \`<tosi-scroll-camera>\` to drive an ArcRotateCamera's \`alpha\` / \`beta\` / \`radius\` from waypoint-interpolated scroll progress.
+\`<tosi-lottie>\` (from tosijs-ui) wraps the Bodymovin runtime. With \`data-scroll-animate="lottie"\` the engine calls \`animation.goToAndStop(progress * totalFrames, true)\` on every scroll tick — frame-accurate SVG playback.
 
 \`\`\`html
-<tosi-3d data-scroll-animate="babylon"></tosi-3d>
-<tosi-scroll-camera data-scroll-animate easing="ease-in-out">
-  <tosi-waypoint progress="0" alpha="-1.57" radius="110"></tosi-waypoint>
-  <tosi-waypoint progress="1" alpha="1.57" radius="76"></tosi-waypoint>
-</tosi-scroll-camera>
-\`\`\``), tosiProductSection({ scroll: 350, theme: "midnight" }, div2({ class: "media-scene b3d" }, a3({
+<tosi-product-section scroll="250">
+  <tosi-lottie src="animation.json"
+               data-scroll-animate="lottie"></tosi-lottie>
+</tosi-product-section>
+\`\`\`
+
+Pass \`config\` via JS to pick the renderer (\`svg\` / \`canvas\` / \`html\`) and disable autoplay/loop so the scroll position owns playback. Lottie SVGs don't \`object-fit\` like \`<video>\` does — center them at a contained size or rely on the player's intrinsic viewBox.`), tosiProductSection({ scroll: 350, theme: "midnight" }, div2({ class: "media-scene b3d" }, a3({
   "data-scroll-animate": "babylon",
   async sceneCreated(element, BABYLON) {
     const { scene } = element;
@@ -8325,21 +8374,24 @@ Scrub Bodymovin (Lottie) animations the same way as video. Tag a \`<tosi-lottie>
     dir.intensity = 0.8;
     element.loadScene("assets/", "macbook_neo.glb");
   }
-}), tosiScrollCamera({ "data-scroll-animate": true, easing: "ease-in-out" }, tosiWaypoint({ progress: 0, alpha: -1.57, beta: 1.2, radius: 110 }), tosiWaypoint({ progress: 0.5, alpha: 0, beta: 1, radius: 70 }), tosiWaypoint({ progress: 1, alpha: 1.57, beta: 1.55, radius: 76 })), mediaOverlay("0,0.4", "MacBook Neo."), mediaOverlay("0.5,1", "Every angle, scroll-driven."))), md(`## Mapbox fly-around
+}), tosiScrollCamera({ "data-scroll-animate": true, easing: "ease-in-out" }, tosiWaypoint({ progress: 0, alpha: -1.57, beta: 1.2, radius: 110 }), tosiWaypoint({ progress: 0.5, alpha: 0, beta: 1, radius: 70 }), tosiWaypoint({ progress: 1, alpha: 1.57, beta: 1.55, radius: 76 })), mediaOverlay("0,0.4", "MacBook Neo."), mediaOverlay("0.5,1", "Every angle, scroll-driven."))), md(`## \`<tosi-3d>\` + \`<tosi-scroll-camera>\`
 
-For more bespoke scroll-driven behavior, every section exposes a \`scrollCallback(progress, el)\` property. Below, the section drives a \`<tosi-map>\` — interpolating lat/lng + zoom across the section's pin to fly between two points on Earth.
+\`<tosi-3d>\` (from tosijs-ui) hosts a BabylonJS scene. \`sceneCreated\` runs once with the live \`element\` and the \`BABYLON\` namespace — set up the camera, lights, and call \`element.loadScene(path, file)\` for your GLB/glTF.
 
-\`\`\`ts
-tosiProductSection({
-  scroll: 400,
-  apply(section) {
-    section.scrollCallback = (p, el) => {
-      const map = el.querySelector('tosi-map')
-      map.coords = interpolateCoords(p)
-    }
-  }
-}, mapBox({ token, coords, mapStyle }))
-\`\`\``), tosiProductSection({
+\`<tosi-scroll-camera>\` is a sibling that drives the scene's active \`ArcRotateCamera\` via waypoint-interpolated \`alpha\`, \`beta\`, \`radius\`, plus optional \`position\` and \`fov\`.
+
+\`\`\`html
+<tosi-product-section scroll="350">
+  <tosi-3d data-scroll-animate="babylon"></tosi-3d>
+  <tosi-scroll-camera data-scroll-animate easing="ease-in-out">
+    <tosi-waypoint progress="0"   alpha="-1.57" beta="1.2"  radius="110"></tosi-waypoint>
+    <tosi-waypoint progress="0.5" alpha="0"     beta="1.0"  radius="70"></tosi-waypoint>
+    <tosi-waypoint progress="1"   alpha="1.57"  beta="1.55" radius="76"></tosi-waypoint>
+  </tosi-scroll-camera>
+</tosi-product-section>
+\`\`\`
+
+Companion components \`<tosi-scroll-time>\` (skybox time-of-day) and \`<tosi-scroll-animation>\` (named AnimationGroups) plug into the same scene.`), tosiProductSection({
   scroll: 400,
   theme: "midnight",
   apply(el) {
@@ -8361,7 +8413,24 @@ tosiProductSection({
   coords: `${HMB.lat},${HMB.lng},12`,
   mapStyle: "mapbox://styles/mapbox/dark-v11",
   style: { pointerEvents: "none" }
-}), mediaOverlay("0,0.2", "Half Moon Bay"), mediaOverlay("0.45,0.55", "↑ zoom out, fly ↑"), mediaOverlay("0.8,1", "Oulu, Finland"))), tosiProductSection({
+}), mediaOverlay("0,0.2", "Half Moon Bay"), mediaOverlay("0.45,0.55", "↑ zoom out, fly ↑"), mediaOverlay("0.8,1", "Oulu, Finland"))), md(`## \`section.scrollCallback\` — custom integrations
+
+When the built-in dispatchers don't fit, every section exposes a \`scrollCallback(progress, sectionEl)\` property. The engine calls it on every scroll tick with progress 0 → 1 across the section's pin.
+
+\`\`\`ts
+tosiProductSection({
+  scroll: 400,
+  apply(el) {
+    const section = el as TosiProductSection
+    section.scrollCallback = (progress, sectionEl) => {
+      const map = sectionEl.querySelector('tosi-map')
+      map.coords = interpolateCoords(progress)
+    }
+  }
+}, mapBox({ token, coords, mapStyle }))
+\`\`\`
+
+The \`apply(el)\` key on the factory's props gets the live element handed to it once — that's the right spot to wire up JS-only configuration like callbacks. \`scrollCallback\` runs after the built-in dispatch loop, so it pairs cleanly with declarative animations in the same section.`), tosiProductSection({
   scroll: 250,
   "theme-from": "midnight",
   "theme-to": "paper"
@@ -8374,19 +8443,27 @@ tosiProductSection({
 }), tosiWaypoint({
   progress: 1,
   style: { transform: "translateY(0px)", opacity: 1 }
-}), h22("Theme transition")), p3("This section interpolates the theme from midnight to paper as you scroll through it. Page header, sticky bar, and footer all follow."), span({ class: "pill" }, 'theme-from="midnight" theme-to="paper"'))), tosiProductSection({ scroll: 100, theme: "paper" }, div2({ class: "scene" }, h22("Paper"), p3("Light theme settled. The chrome above and below switched too."), span({ class: "pill" }, "theme=paper"))), md(`## Theming via CSS variables
+}), h22("Theme transition")), p3("This section interpolates the theme from midnight to paper as you scroll through it. Page header, sticky bar, and footer all follow."), span({ class: "pill" }, 'theme-from="midnight" theme-to="paper"'))), md(`## Themes
 
-Themes are dictionaries of CSS custom properties. The engine writes the active section's resolved values to \`document.documentElement\`, so anything cascading from \`:root\` — including the page header, the sticky overlay, and the footer — re-themes in unison.
+A theme is a dictionary of CSS custom properties. Register a few on the engine instance, then point each section at one:
 
-For interpolated sections, color values blend through \`color-mix(in srgb, ...)\`; numeric strings interpolate per-number; everything else steps at the midpoint.
+\`\`\`ts
+app.themes = {
+  midnight: { '--bg': '#08081a', '--fg': '#f0f0f5', '--accent': '#9be7ff' },
+  paper:    { '--bg': '#f5f1e8', '--fg': '#1a1815', '--accent': '#7c3aed' },
+}
+app.defaultTheme = 'midnight'
+\`\`\`
 
 \`\`\`html
-<tosi-product-section
-  theme-from="midnight"
-  theme-to="paper">
-  ...
-</tosi-product-section>
-\`\`\``), tosiProductSection({
+<tosi-product-section theme="midnight">…</tosi-product-section>
+<tosi-product-section theme-from="midnight" theme-to="paper">…</tosi-product-section>
+<tosi-product-section theme="paper">…</tosi-product-section>
+\`\`\`
+
+The engine writes the active section's resolved values to \`document.documentElement\` so anything cascading from \`:root\` re-themes in unison — page header, sticky bar, footer, all of it. Interpolated transitions blend colors through \`color-mix(in srgb, …)\`, numeric strings interpolate per-number, anything else steps at the midpoint.
+
+Override \`app.themeTarget\` if you'd rather scope theme vars to a different element (e.g. the engine itself when nested).`), tosiProductSection({ scroll: 100, theme: "paper" }, div2({ class: "scene" }, h22("Paper"), p3("Light theme settled. The chrome above and below switched too."), span({ class: "pill" }, "theme=paper"))), tosiProductSection({
   scroll: 200,
   "theme-from": "paper",
   "theme-to": "rose"
@@ -8408,7 +8485,7 @@ For interpolated sections, color values blend through \`color-mix(in srgb, ...)\
     opacity: i3 === arr.length - 1 ? 1 : 0.85,
     transform: "translateY(0)"
   }
-}), I.h3(label)), p3(`Inner section ${i3 + 1} of ${arr.length}. Note: this engine has its own theme set per section, but it doesn't write to :root — it would override the outer engine.`))))))), tosiProductSection({ scroll: 250, theme: "rose" }, div2({
+}), I.h3(label)), p3(`Inner section ${i3 + 1} of ${arr.length}. The inner engine drives its own scroll inside the card.`))))))), tosiProductSection({ scroll: 250, theme: "rose" }, div2({
   class: "embed-host",
   style: { padding: "2rem 1rem", background: "transparent" }
 }, h22("Horizontal nested engine"), p3("This section pins. Inside the pin, a horizontal tosi-product in follower mode — its panels slide as the outer's pin progress advances."), div2({ class: "embed-frame", style: { height: "55vh" } }, tosiProduct({ direction: "horizontal" }, ...[
@@ -8428,7 +8505,26 @@ For interpolated sections, color values blend through \`color-mix(in srgb, ...)\
     bg: "#3a1a3a"
   },
   { name: "tosijs-product", desc: "You are here.", bg: "#1a1a3a" }
-].map((card) => tosiProductSection({ scroll: 100 }, div2({ class: "h-card", style: { background: card.bg } }, I.h3(card.name), p3(card.desc)))))))), md(`## Get started
+].map((card) => tosiProductSection({ scroll: 100 }, div2({ class: "h-card", style: { background: card.bg } }, I.h3(card.name), p3(card.desc)))))))), md(`## Nested engines
+
+A \`<tosi-product>\` inside any scrollable parent auto-detects the parent on connect and listens to it instead of the window. That covers the vertical card above — it just works.
+
+A \`<tosi-product>\` placed inside a \`<tosi-product-section>\` is different: the parent section is already pinned and owns the scroll for its slot of runway, so the inner engine runs in **follower mode**. It tags itself \`data-scroll-animate\` and exposes \`setScrollProgress(progress)\` — the parent's pin progress drives the inner's stack translation. This is what makes the horizontal panels above slide.
+
+\`\`\`html
+<tosi-product-section scroll="250">
+  <tosi-product direction="horizontal">
+    <tosi-product-section scroll="100">Panel 1</tosi-product-section>
+    <tosi-product-section scroll="100">Panel 2</tosi-product-section>
+  </tosi-product>
+</tosi-product-section>
+\`\`\`
+
+Use \`--tosi-view-size\` to size panels to the inner host (not the document viewport):
+
+\`\`\`css
+.h-card { width: var(--tosi-view-size, 100vw); }
+\`\`\``), md(`## Get started
 
 \`\`\`html
 <script src="https://cdn.jsdelivr.net/npm/tosijs-product/dist/index.js"></script>

@@ -1,7 +1,7 @@
 import { tosiProduct, tosiProductSection } from "../src/tosi-product";
 import { elements } from "tosijs";
 
-const { div, header, footer, section, h1, h2, h3, p, span } = elements;
+const { div, header, footer, h1, h2, p, span } = elements;
 
 const style = document.createElement("style");
 style.textContent = `

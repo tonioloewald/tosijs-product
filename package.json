@@ -26,7 +26,7 @@
   },
   "scripts": {
     "start": "bun --watch dev.ts",
-    "format": "bun eslint src demo --fix && bun prettier --write .",
+    "format": "bun eslint src demo --ext .ts --fix && bun prettier --write .",
     "test": "bun test",
     "build": "bun dev.ts --build"
   },

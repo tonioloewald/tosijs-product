@@ -28,24 +28,37 @@ The IIFE build is self-contained — a single script tag gives you `tosijs`, `to
 ```html
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="utf-8">
-  <title>My Product</title>
-  <style>body { margin: 0; }</style>
-  <script src="https://cdn.jsdelivr.net/npm/tosijs-product/dist/index.js"></script>
-</head>
-<body>
-  <tosi-product>
-    <tosi-product-section scroll="200">
-      <tosi-interpolator data-scroll-animate easing="ease-in-out">
-        <tosi-waypoint progress="0" style="opacity: 0; transform: translateY(50px)"></tosi-waypoint>
-        <tosi-waypoint progress="0.5" style="opacity: 1; transform: translateY(0px)"></tosi-waypoint>
-        <tosi-waypoint progress="1" style="opacity: 1; transform: scale(1.2)"></tosi-waypoint>
-        <h1 style="text-align: center;">Pinned for 2× viewport.</h1>
-      </tosi-interpolator>
-    </tosi-product-section>
-  </tosi-product>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <title>My Product</title>
+    <style>
+      body {
+        margin: 0;
+      }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/tosijs-product/dist/index.js"></script>
+  </head>
+  <body>
+    <tosi-product>
+      <tosi-product-section scroll="200">
+        <tosi-interpolator data-scroll-animate easing="ease-in-out">
+          <tosi-waypoint
+            progress="0"
+            style="opacity: 0; transform: translateY(50px)"
+          ></tosi-waypoint>
+          <tosi-waypoint
+            progress="0.5"
+            style="opacity: 1; transform: translateY(0px)"
+          ></tosi-waypoint>
+          <tosi-waypoint
+            progress="1"
+            style="opacity: 1; transform: scale(1.2)"
+          ></tosi-waypoint>
+          <h1 style="text-align: center;">Pinned for 2× viewport.</h1>
+        </tosi-interpolator>
+      </tosi-product-section>
+    </tosi-product>
+  </body>
 </html>
 ```
 
@@ -56,20 +69,33 @@ bun install tosijs tosijs-ui tosijs-product
 ```
 
 ```typescript
-import { tosiProduct, tosiProductSection, tosiInterpolator, tosiWaypoint } from 'tosijs-product'
+import {
+  tosiProduct,
+  tosiProductSection,
+  tosiInterpolator,
+  tosiWaypoint,
+} from "tosijs-product";
 
 const app = tosiProduct(
-  tosiProductSection({ scroll: 200 },
-    tosiInterpolator({ 'data-scroll-animate': true, easing: 'ease-in-out' },
-      tosiWaypoint({ progress: 0, style: 'opacity: 0; transform: translateY(50px)' }),
-      tosiWaypoint({ progress: 0.5, style: 'opacity: 1; transform: translateY(0px)' }),
-      tosiWaypoint({ progress: 1, style: 'opacity: 1; transform: scale(1.2)' }),
-      document.createElement('h1')
+  tosiProductSection(
+    { scroll: 200 },
+    tosiInterpolator(
+      { "data-scroll-animate": true, easing: "ease-in-out" },
+      tosiWaypoint({
+        progress: 0,
+        style: "opacity: 0; transform: translateY(50px)",
+      }),
+      tosiWaypoint({
+        progress: 0.5,
+        style: "opacity: 1; transform: translateY(0px)",
+      }),
+      tosiWaypoint({ progress: 1, style: "opacity: 1; transform: scale(1.2)" }),
+      document.createElement("h1")
     )
   )
-)
+);
 
-document.body.append(app)
+document.body.append(app);
 ```
 
 ## The `scroll` attribute
@@ -82,16 +108,18 @@ Register themes (each is a dictionary of CSS custom properties) and reference th
 
 ```ts
 const app = tosiProduct(
-  tosiProductSection({ scroll: 100, theme: 'midnight' }, /* ... */),
-  tosiProductSection({ scroll: 200, 'theme-from': 'midnight', 'theme-to': 'paper' }, /* ... */),
-  tosiProductSection({ scroll: 100, theme: 'paper' }, /* ... */),
-)
+  tosiProductSection({ scroll: 100, theme: "midnight" } /* ... */),
+  tosiProductSection(
+    { scroll: 200, "theme-from": "midnight", "theme-to": "paper" } /* ... */
+  ),
+  tosiProductSection({ scroll: 100, theme: "paper" } /* ... */)
+);
 
 app.themes = {
-  midnight: { '--bg': '#08081a', '--fg': '#f0f0f5', '--accent': '#9be7ff' },
-  paper: { '--bg': '#f5f1e8', '--fg': '#1a1815', '--accent': '#7c3aed' },
-}
-app.defaultTheme = 'midnight'
+  midnight: { "--bg": "#08081a", "--fg": "#f0f0f5", "--accent": "#9be7ff" },
+  paper: { "--bg": "#f5f1e8", "--fg": "#1a1815", "--accent": "#7c3aed" },
+};
+app.defaultTheme = "midnight";
 ```
 
 The transition section interpolates its CSS variables (color values use `color-mix(in srgb, …)`) over its pin progress, and writes them to `document.documentElement`. Anything cascading from `:root` — including a `<tosi-product-header>` overlay outside the engine — re-themes in unison.
@@ -107,7 +135,10 @@ bunx tosi-mosaic my-video.mp4 --frames 100 --width 1280
 Produces `my-video_10x10_100.webp` (the filename encodes grid + total frames):
 
 ```html
-<tosi-filmstrip src="my-video_10x10_100.webp" data-scroll-animate></tosi-filmstrip>
+<tosi-filmstrip
+  src="my-video_10x10_100.webp"
+  data-scroll-animate
+></tosi-filmstrip>
 ```
 
 A grid (rather than a single long strip) keeps dimensions inside the browser's max image size (commonly 16,384px) while delivering all frames in one request.

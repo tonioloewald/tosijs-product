@@ -1,11 +1,13 @@
 # tosijs-product
 
 ## Project Overview
+
 `tosijs-product` is a cinematic product page component library built for `tosijs`. It provides high-performance, scroll-linked animation components to create immersive, "Apple-style" product stories using minimal code. It supports multiple media types including Lottie, Video (via WebP mosaics), and SVG Pan & Zoom, unifying them under a declarative scrolling model.
 
 The project is written in TypeScript and utilizes `bun` as its primary runtime, package manager, and build tool.
 
 ### Architecture & Key Components
+
 - **`src/`**: Contains the core library source code.
   - `tosi-product.ts`: The main orchestrator managing application state and coordinate space.
   - `tosi-filmstrip.ts`: A high-performance frame-based animator that uses WebP/PNG mosaics instead of standard video.
@@ -19,31 +21,41 @@ The project is written in TypeScript and utilizes `bun` as its primary runtime, 
 This project uses `bun` for all development workflows. Ensure `bun` is installed on your system.
 
 ### Setup
+
 Install dependencies:
+
 ```bash
 bun install
 ```
 
 ### Development Server
+
 Start the development server with watch mode (runs `dev.ts` on port 8788):
+
 ```bash
 bun run start
 ```
 
 ### Build
+
 Build the library (ESM and IIFE outputs) and the demo to the `dist/` and `demo/` directories respectively:
+
 ```bash
 bun run build
 ```
 
 ### Formatting & Linting
+
 Run ESLint and Prettier to format the codebase:
+
 ```bash
 bun run format
 ```
 
 ### Testing
+
 Run tests using Bun's built-in test runner:
+
 ```bash
 bun run test
 ```

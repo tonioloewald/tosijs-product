@@ -7,8 +7,9 @@ import {
 } from "../src/tosi-product";
 import { tosiInterpolator, tosiWaypoint } from "../src/tosi-interpolator";
 import { tosiFilmstrip } from "../src/tosi-filmstrip";
+import { tosiScrollCamera } from "../src/tosi-b3d-scroll";
 import { tosiCode } from "../src/tosi-code";
-import { markdownViewer, bodymovinPlayer, mapBox } from "tosijs-ui";
+import { markdownViewer, bodymovinPlayer, mapBox, b3d } from "tosijs-ui";
 import { elements } from "tosijs";
 
 const { div, header, footer, nav, h1, h2, p, span, a, video } = elements;
@@ -244,10 +245,14 @@ style.textContent = `
   }
   .media-scene > video,
   .media-scene > tosi-filmstrip,
+  .media-scene > tosi-3d,
   .media-scene > tosi-map {
     position: absolute; inset: 0;
     width: 100%; height: 100%;
     object-fit: cover; display: block;
+  }
+  .media-scene.b3d {
+    background: radial-gradient(ellipse at center, #1a1a2e 0%, #000 100%);
   }
   /* Lottie SVGs don't object-fit — center it at a contained size and let
      the scene background show through. */
@@ -287,8 +292,11 @@ const pageHeader = header(
   div({ class: "brand" }, "tosijs-product"),
   nav(
     a({ href: "https://github.com/tonioloewald/tosijs-product" }, "GitHub"),
+    a({ href: "https://product.tosijs.net" }, "Docs"),
+    a({ href: "https://www.npmjs.com/package/tosijs-product" }, "npm"),
     a({ href: "https://tosijs.net" }, "tosijs"),
-    a({ href: "#" }, "Examples")
+    a({ href: "https://ui.tosijs.net" }, "tosijs-ui"),
+    a({ href: "https://3d.tosijs.net" }, "tosijs-3d")
   )
 );
 
@@ -318,13 +326,13 @@ const md = (markdown: string) =>
   div({ class: "intro" }, markdownViewer(markdown));
 
 // Fades the overlay text in then out over a sub-range of section progress.
-const mediaOverlay = (
-  range: string,
-  title: string,
-  subtitle?: string
-) =>
+const mediaOverlay = (range: string, title: string, subtitle?: string) =>
   tosiInterpolator(
-    { "data-scroll-animate": true, "data-scroll-range": range, easing: "ease-in-out" },
+    {
+      "data-scroll-animate": true,
+      "data-scroll-range": range,
+      easing: "ease-in-out",
+    },
     tosiWaypoint({
       progress: 0,
       style: { opacity: 0, transform: "translateY(20px)" },
@@ -422,7 +430,9 @@ This whole page is one engine. Read on to see what each piece does.`
         }),
         h2("Interpolator")
       ),
-      p("A waypoint timeline for any CSS property. Set keyframes by progress and let the engine drive the rest."),
+      p(
+        "A waypoint timeline for any CSS property. Set keyframes by progress and let the engine drive the rest."
+      ),
       span({ class: "pill" }, "<tosi-interpolator>")
     )
   ),
@@ -449,7 +459,9 @@ This whole page is one engine. Read on to see what each piece does.`
       div(
         { class: "feature-list" },
         h2("Staged reveal"),
-        p("Multiple interpolators in one section, each scoped to a slice of progress with data-scroll-range:"),
+        p(
+          "Multiple interpolators in one section, each scoped to a slice of progress with data-scroll-range:"
+        ),
         stagedRow("Sticky window pins the engine", 0.05, 0.2),
         stagedRow("Stack translates as you scroll", 0.2, 0.35),
         stagedRow("Sections pin then exit", 0.35, 0.5),
@@ -480,7 +492,7 @@ Interpolators handle CSS. For richer media — videos, vector animations, 3D sce
       mediaOverlay(
         "0,0.4",
         "Scrub video",
-        "data-scroll-animate=\"currentTime\" maps progress to video.currentTime — frame-perfect scrubbing."
+        'data-scroll-animate="currentTime" maps progress to video.currentTime — frame-perfect scrubbing.'
       ),
       mediaOverlay("0.5,1", "Native <video>, no plugin")
     )
@@ -554,6 +566,66 @@ Scrub Bodymovin (Lottie) animations the same way as video. Tag a \`<tosi-lottie>
     )
   ),
 
+  // ===== BABYLONJS 3D =====
+  md(
+    `## BabylonJS scenes
+
+\`<tosi-3d>\` from tosijs-ui loads a GLB/glTF model into a Babylon scene. Pair it with \`<tosi-scroll-camera>\` to drive an ArcRotateCamera's \`alpha\` / \`beta\` / \`radius\` from waypoint-interpolated scroll progress.
+
+\`\`\`html
+<tosi-3d data-scroll-animate="babylon"></tosi-3d>
+<tosi-scroll-camera data-scroll-animate easing="ease-in-out">
+  <tosi-waypoint progress="0" alpha="-1.57" radius="110"></tosi-waypoint>
+  <tosi-waypoint progress="1" alpha="1.57" radius="76"></tosi-waypoint>
+</tosi-scroll-camera>
+\`\`\``
+  ),
+
+  tosiProductSection(
+    { scroll: 350, theme: "midnight" },
+    div(
+      { class: "media-scene b3d" },
+      b3d({
+        "data-scroll-animate": "babylon",
+        async sceneCreated(element: any, BABYLON: any) {
+          const { scene } = element;
+          const camera = new BABYLON.ArcRotateCamera(
+            "camera",
+            -Math.PI / 2,
+            Math.PI / 3,
+            80,
+            new BABYLON.Vector3(0, 10, 0),
+            scene
+          );
+          scene.activeCamera = camera;
+          camera.minZ = 0.1;
+          camera.fov = camera.fov * 0.6;
+          scene.clearColor = new BABYLON.Color4(0, 0, 0, 0);
+          new BABYLON.HemisphericLight(
+            "hemi",
+            new BABYLON.Vector3(0, 1, 0),
+            scene
+          ).intensity = 0.6;
+          const dir = new BABYLON.DirectionalLight(
+            "dir",
+            new BABYLON.Vector3(-1, -2, 1),
+            scene
+          );
+          dir.intensity = 0.8;
+          element.loadScene("assets/", "macbook_neo.glb");
+        },
+      }),
+      tosiScrollCamera(
+        { "data-scroll-animate": true, easing: "ease-in-out" },
+        tosiWaypoint({ progress: 0, alpha: -1.57, beta: 1.2, radius: 110 }),
+        tosiWaypoint({ progress: 0.5, alpha: 0, beta: 1.0, radius: 70 }),
+        tosiWaypoint({ progress: 1, alpha: 1.57, beta: 1.55, radius: 76 })
+      ),
+      mediaOverlay("0,0.4", "MacBook Neo."),
+      mediaOverlay("0.5,1", "Every angle, scroll-driven.")
+    )
+  ),
+
   // ===== MAPBOX =====
   md(
     `## Mapbox fly-around
@@ -588,8 +660,8 @@ tosiProductSection({
             progress <= 0.1
               ? 0
               : progress >= 0.9
-                ? 1
-                : ease((progress - 0.1) / 0.8);
+              ? 1
+              : ease((progress - 0.1) / 0.8);
           const zoomT = Math.abs(progress - 0.5) * 2;
           const zoom = 2 + zoomT * zoomT * 10;
           const lat = HMB.lat + (OULU.lat - HMB.lat) * move;
@@ -637,7 +709,9 @@ tosiProductSection({
         }),
         h2("Theme transition")
       ),
-      p("This section interpolates the theme from midnight to paper as you scroll through it. Page header, sticky bar, and footer all follow."),
+      p(
+        "This section interpolates the theme from midnight to paper as you scroll through it. Page header, sticky bar, and footer all follow."
+      ),
       span({ class: "pill" }, 'theme-from="midnight" theme-to="paper"')
     )
   ),
@@ -677,7 +751,9 @@ For interpolated sections, color values blend through \`color-mix(in srgb, ...)\
     div(
       { class: "scene" },
       h2("Dusk"),
-      p("And back the other way. The transition is just a section with two themes."),
+      p(
+        "And back the other way. The transition is just a section with two themes."
+      ),
       span({ class: "pill" }, 'theme-from="paper" theme-to="rose"')
     )
   ),
@@ -686,7 +762,9 @@ For interpolated sections, color values blend through \`color-mix(in srgb, ...)\
   div(
     { class: "embed-host" },
     h2("Nested scroll engines"),
-    p("A tosi-product inside any scrollable container detects its scroll parent automatically. It works the same in a 60vh card as on the whole page."),
+    p(
+      "A tosi-product inside any scrollable container detects its scroll parent automatically. It works the same in a 60vh card as on the whole page."
+    ),
     div(
       { class: "embed-frame scroll-y" },
       tosiProduct(
@@ -702,7 +780,10 @@ For interpolated sections, color values blend through \`color-mix(in srgb, ...)\
                 { "data-scroll-animate": true, easing: "ease-in-out" },
                 tosiWaypoint({
                   progress: 0,
-                  style: { opacity: i === 0 ? 1 : 0, transform: "translateY(20px)" },
+                  style: {
+                    opacity: i === 0 ? 1 : 0,
+                    transform: "translateY(20px)",
+                  },
                 }),
                 tosiWaypoint({
                   progress: 0.4,
@@ -710,11 +791,18 @@ For interpolated sections, color values blend through \`color-mix(in srgb, ...)\
                 }),
                 tosiWaypoint({
                   progress: 1,
-                  style: { opacity: i === arr.length - 1 ? 1 : 0.85, transform: "translateY(0)" },
+                  style: {
+                    opacity: i === arr.length - 1 ? 1 : 0.85,
+                    transform: "translateY(0)",
+                  },
                 }),
                 elements.h3(label)
               ),
-              p(`Inner section ${i + 1} of ${arr.length}. Note: this engine has its own theme set per section, but it doesn't write to :root — it would override the outer engine.`)
+              p(
+                `Inner section ${i + 1} of ${
+                  arr.length
+                }. Note: this engine has its own theme set per section, but it doesn't write to :root — it would override the outer engine.`
+              )
             )
           )
         )
@@ -726,17 +814,34 @@ For interpolated sections, color values blend through \`color-mix(in srgb, ...)\
   tosiProductSection(
     { scroll: 250, theme: "rose" },
     div(
-      { class: "embed-host", style: { padding: "2rem 1rem", background: "transparent" } },
+      {
+        class: "embed-host",
+        style: { padding: "2rem 1rem", background: "transparent" },
+      },
       h2("Horizontal nested engine"),
-      p("This section pins. Inside the pin, a horizontal tosi-product in follower mode — its panels slide as the outer's pin progress advances."),
+      p(
+        "This section pins. Inside the pin, a horizontal tosi-product in follower mode — its panels slide as the outer's pin progress advances."
+      ),
       div(
         { class: "embed-frame", style: { height: "55vh" } },
         tosiProduct(
           { direction: "horizontal" },
           ...[
-            { name: "tosijs", desc: "Web components + proxy state.", bg: "#1a3a4a" },
-            { name: "tosijs-ui", desc: "UI components that respect the DOM.", bg: "#3a3a1a" },
-            { name: "tosijs-3d", desc: "BabylonJS, declaratively.", bg: "#3a1a3a" },
+            {
+              name: "tosijs",
+              desc: "Web components + proxy state.",
+              bg: "#1a3a4a",
+            },
+            {
+              name: "tosijs-ui",
+              desc: "UI components that respect the DOM.",
+              bg: "#3a3a1a",
+            },
+            {
+              name: "tosijs-3d",
+              desc: "BabylonJS, declaratively.",
+              bg: "#3a1a3a",
+            },
             { name: "tosijs-product", desc: "You are here.", bg: "#1a1a3a" },
           ].map((card) =>
             tosiProductSection(

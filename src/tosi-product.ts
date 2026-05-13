@@ -12,7 +12,15 @@ function isColor(s: string): boolean {
     t.startsWith("rgb") ||
     t.startsWith("hsl") ||
     t.startsWith("color(") ||
-    ["red", "blue", "green", "white", "black", "transparent", "currentColor"].includes(t)
+    [
+      "red",
+      "blue",
+      "green",
+      "white",
+      "black",
+      "transparent",
+      "currentColor",
+    ].includes(t)
   );
 }
 

@@ -2170,7 +2170,15 @@ var gf = wL.elementCreator();
 var { div, slot } = I;
 function isColor(s2) {
   const t2 = s2.trim();
-  return t2.startsWith("#") || t2.startsWith("rgb") || t2.startsWith("hsl") || t2.startsWith("color(") || ["red", "blue", "green", "white", "black", "transparent", "currentColor"].includes(t2);
+  return t2.startsWith("#") || t2.startsWith("rgb") || t2.startsWith("hsl") || t2.startsWith("color(") || [
+    "red",
+    "blue",
+    "green",
+    "white",
+    "black",
+    "transparent",
+    "currentColor"
+  ].includes(t2);
 }
 function interpolateThemeValue(from, to, t2) {
   if (from === to || t2 <= 0)
@@ -2913,6 +2921,187 @@ class TosiFilmstrip extends u {
 }
 var tosiFilmstrip = TosiFilmstrip.elementCreator({
   tag: "tosi-filmstrip"
+});
+
+// src/tosi-b3d-scroll.ts
+var { slot: slot2 } = I;
+function findScene(el) {
+  let node = el.parentElement;
+  while (node) {
+    if ("scene" in node)
+      return node;
+    for (const child of Array.from(node.children)) {
+      if (child !== el && "scene" in child)
+        return child;
+    }
+    node = node.parentElement;
+  }
+  return null;
+}
+function easeInOutQuad(t2) {
+  return t2 < 0.5 ? 2 * t2 * t2 : -1 + (4 - 2 * t2) * t2;
+}
+function interpolateWaypoints(progress, waypoints, easing) {
+  if (waypoints.length === 0)
+    return {};
+  if (waypoints.length === 1)
+    return waypoints[0];
+  if (progress <= waypoints[0].progress)
+    return waypoints[0];
+  if (progress >= waypoints[waypoints.length - 1].progress) {
+    return waypoints[waypoints.length - 1];
+  }
+  for (let i2 = 0;i2 < waypoints.length - 1; i2++) {
+    const wp1 = waypoints[i2];
+    const wp2 = waypoints[i2 + 1];
+    if (progress >= wp1.progress && progress <= wp2.progress) {
+      const rawT = (progress - wp1.progress) / (wp2.progress - wp1.progress);
+      const t2 = easing ? easeInOutQuad(rawT) : rawT;
+      const result = {};
+      for (const key in wp1) {
+        if (key === "progress")
+          continue;
+        const v1 = wp1[key] ?? 0;
+        const v2 = wp2[key] ?? v1;
+        result[key] = v1 + (v2 - v1) * t2;
+      }
+      return result;
+    }
+  }
+  return waypoints[0];
+}
+function readWaypoints(host) {
+  return Array.from(host.querySelectorAll("tosi-waypoint")).map((wp) => {
+    const result = {
+      progress: Number(wp.getAttribute("progress") || 0)
+    };
+    for (const attr of Array.from(wp.attributes)) {
+      if (attr.name === "progress")
+        continue;
+      const val = Number(attr.value);
+      if (Number.isFinite(val)) {
+        const key = attr.name.replace(/-([a-z])/g, (_, c2) => c2.toUpperCase());
+        result[key] = val;
+      }
+    }
+    return result;
+  }).sort((a2, b2) => a2.progress - b2.progress);
+}
+
+class TosiScrollCamera extends u {
+  static initAttributes = {
+    easing: ""
+  };
+  static styleSpec = {
+    ":host": { display: "none" }
+  };
+  content = () => slot2();
+  setScrollProgress(progress) {
+    const owner = findScene(this);
+    if (!owner?.scene?.activeCamera)
+      return;
+    const camera = owner.scene.activeCamera;
+    const waypoints = readWaypoints(this);
+    if (waypoints.length === 0)
+      return;
+    const easing = this.getAttribute("easing") === "ease-in-out";
+    const v2 = interpolateWaypoints(progress, waypoints, easing);
+    if ("alpha" in v2 && camera.alpha !== undefined)
+      camera.alpha = v2.alpha;
+    if ("beta" in v2 && camera.beta !== undefined)
+      camera.beta = v2.beta;
+    if ("radius" in v2 && camera.radius !== undefined)
+      camera.radius = v2.radius;
+    if (camera.target && typeof camera.target.copyFromFloats === "function") {
+      if ("targetX" in v2 || "targetY" in v2 || "targetZ" in v2) {
+        camera.target.copyFromFloats(v2.targetX ?? camera.target.x, v2.targetY ?? camera.target.y, v2.targetZ ?? camera.target.z);
+      }
+    }
+    if (camera.position) {
+      if ("x" in v2)
+        camera.position.x = v2.x;
+      if ("y" in v2)
+        camera.position.y = v2.y;
+      if ("z" in v2)
+        camera.position.z = v2.z;
+    }
+    if ("fov" in v2 && camera.fov !== undefined)
+      camera.fov = v2.fov;
+  }
+}
+
+class TosiScrollTime extends u {
+  static initAttributes = {
+    from: 0,
+    to: 24
+  };
+  static styleSpec = {
+    ":host": { display: "none" }
+  };
+  content = null;
+  setScrollProgress(progress) {
+    const owner = findScene(this);
+    if (!owner)
+      return;
+    const from = Number(this.getAttribute("from")) || 0;
+    const to = Number(this.getAttribute("to")) || 24;
+    const time = from + (to - from) * progress;
+    const skybox = owner.querySelector("tosi-b3d-skybox");
+    if (skybox) {
+      skybox.timeOfDay = time;
+    }
+  }
+}
+
+class TosiScrollAnimation extends u {
+  static initAttributes = {
+    name: ""
+  };
+  static styleSpec = {
+    ":host": { display: "none" }
+  };
+  content = null;
+  _animGroup = null;
+  _started = false;
+  setScrollProgress(progress) {
+    const owner = findScene(this);
+    if (!owner?.scene)
+      return;
+    const name = this.getAttribute("name") || "";
+    if (!name)
+      return;
+    if (!this._animGroup || this._animGroup.name !== name) {
+      this._animGroup = owner.scene.animationGroups?.find((g) => g.name === name);
+      this._started = false;
+    }
+    if (!this._animGroup)
+      return;
+    if (!this._started) {
+      this._animGroup.start(false, 0);
+      this._started = true;
+    }
+    const from = this._animGroup.from ?? 0;
+    const to = this._animGroup.to ?? 1;
+    const frame = from + (to - from) * progress;
+    this._animGroup.goToFrame(frame);
+  }
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    if (this._animGroup && this._started) {
+      this._animGroup.stop();
+    }
+    this._animGroup = null;
+    this._started = false;
+  }
+}
+var tosiScrollCamera = TosiScrollCamera.elementCreator({
+  tag: "tosi-scroll-camera"
+});
+var tosiScrollTime = TosiScrollTime.elementCreator({
+  tag: "tosi-scroll-time"
+});
+var tosiScrollAnimation = TosiScrollAnimation.elementCreator({
+  tag: "tosi-scroll-animation"
 });
 
 // src/tosi-code.ts
@@ -7970,10 +8159,14 @@ style.textContent = `
   }
   .media-scene > video,
   .media-scene > tosi-filmstrip,
+  .media-scene > tosi-3d,
   .media-scene > tosi-map {
     position: absolute; inset: 0;
     width: 100%; height: 100%;
     object-fit: cover; display: block;
+  }
+  .media-scene.b3d {
+    background: radial-gradient(ellipse at center, #1a1a2e 0%, #000 100%);
   }
   /* Lottie SVGs don't object-fit — center it at a contained size and let
      the scene background show through. */
@@ -8006,12 +8199,16 @@ style.textContent = `
   }
 `;
 document.head.appendChild(style);
-var pageHeader = header({ class: "page-header" }, div2({ class: "brand" }, "tosijs-product"), nav(a5({ href: "https://github.com/tonioloewald/tosijs-product" }, "GitHub"), a5({ href: "https://tosijs.net" }, "tosijs"), a5({ href: "#" }, "Examples")));
+var pageHeader = header({ class: "page-header" }, div2({ class: "brand" }, "tosijs-product"), nav(a5({ href: "https://github.com/tonioloewald/tosijs-product" }, "GitHub"), a5({ href: "https://product.tosijs.net" }, "Docs"), a5({ href: "https://www.npmjs.com/package/tosijs-product" }, "npm"), a5({ href: "https://tosijs.net" }, "tosijs"), a5({ href: "https://ui.tosijs.net" }, "tosijs-ui"), a5({ href: "https://3d.tosijs.net" }, "tosijs-3d")));
 var stickyProgressLabel = span({ class: "progress" }, "0%");
 var stickyHeader = tosiProductHeader({ threshold: 80 }, div2({ class: "sticky-bar" }, div2({ class: "brand" }, "tosijs-product"), stickyProgressLabel));
 var pageFooter = footer({ class: "page-footer" }, p3("Built with ", a5({ href: "https://tosijs.net" }, "tosijs"), ". Source on ", a5({ href: "https://github.com/tonioloewald/tosijs-product" }, "GitHub"), "."));
 var md = (markdown) => div2({ class: "intro" }, I9(markdown));
-var mediaOverlay = (range, title, subtitle) => tosiInterpolator({ "data-scroll-animate": true, "data-scroll-range": range, easing: "ease-in-out" }, tosiWaypoint({
+var mediaOverlay = (range, title, subtitle) => tosiInterpolator({
+  "data-scroll-animate": true,
+  "data-scroll-range": range,
+  easing: "ease-in-out"
+}, tosiWaypoint({
   progress: 0,
   style: { opacity: 0, transform: "translateY(20px)" }
 }), tosiWaypoint({
@@ -8104,7 +8301,31 @@ Scrub Bodymovin (Lottie) animations the same way as video. Tag a \`<tosi-lottie>
   src: "assets/tosi-platform.json",
   "data-scroll-animate": "lottie",
   config: { renderer: "svg", autoplay: false, loop: false }
-}), mediaOverlay("0,0.5", "Vector animation", "Bodymovin / Lottie JSON, scrubbed by scroll."), mediaOverlay("0.5,1", "Frame-perfect at every zoom"))), md(`## Mapbox fly-around
+}), mediaOverlay("0,0.5", "Vector animation", "Bodymovin / Lottie JSON, scrubbed by scroll."), mediaOverlay("0.5,1", "Frame-perfect at every zoom"))), md(`## BabylonJS scenes
+
+\`<tosi-3d>\` from tosijs-ui loads a GLB/glTF model into a Babylon scene. Pair it with \`<tosi-scroll-camera>\` to drive an ArcRotateCamera's \`alpha\` / \`beta\` / \`radius\` from waypoint-interpolated scroll progress.
+
+\`\`\`html
+<tosi-3d data-scroll-animate="babylon"></tosi-3d>
+<tosi-scroll-camera data-scroll-animate easing="ease-in-out">
+  <tosi-waypoint progress="0" alpha="-1.57" radius="110"></tosi-waypoint>
+  <tosi-waypoint progress="1" alpha="1.57" radius="76"></tosi-waypoint>
+</tosi-scroll-camera>
+\`\`\``), tosiProductSection({ scroll: 350, theme: "midnight" }, div2({ class: "media-scene b3d" }, a3({
+  "data-scroll-animate": "babylon",
+  async sceneCreated(element, BABYLON) {
+    const { scene } = element;
+    const camera = new BABYLON.ArcRotateCamera("camera", -Math.PI / 2, Math.PI / 3, 80, new BABYLON.Vector3(0, 10, 0), scene);
+    scene.activeCamera = camera;
+    camera.minZ = 0.1;
+    camera.fov = camera.fov * 0.6;
+    scene.clearColor = new BABYLON.Color4(0, 0, 0, 0);
+    new BABYLON.HemisphericLight("hemi", new BABYLON.Vector3(0, 1, 0), scene).intensity = 0.6;
+    const dir = new BABYLON.DirectionalLight("dir", new BABYLON.Vector3(-1, -2, 1), scene);
+    dir.intensity = 0.8;
+    element.loadScene("assets/", "macbook_neo.glb");
+  }
+}), tosiScrollCamera({ "data-scroll-animate": true, easing: "ease-in-out" }, tosiWaypoint({ progress: 0, alpha: -1.57, beta: 1.2, radius: 110 }), tosiWaypoint({ progress: 0.5, alpha: 0, beta: 1, radius: 70 }), tosiWaypoint({ progress: 1, alpha: 1.57, beta: 1.55, radius: 76 })), mediaOverlay("0,0.4", "MacBook Neo."), mediaOverlay("0.5,1", "Every angle, scroll-driven."))), md(`## Mapbox fly-around
 
 For more bespoke scroll-driven behavior, every section exposes a \`scrollCallback(progress, el)\` property. Below, the section drives a \`<tosi-map>\` — interpolating lat/lng + zoom across the section's pin to fly between two points on Earth.
 
@@ -8174,17 +8395,38 @@ For interpolated sections, color values blend through \`color-mix(in srgb, ...)\
   theme: ["midnight", "forest", "paper", "rose", "midnight"][i3]
 }, div2({ class: "inner-scene" }, tosiInterpolator({ "data-scroll-animate": true, easing: "ease-in-out" }, tosiWaypoint({
   progress: 0,
-  style: { opacity: i3 === 0 ? 1 : 0, transform: "translateY(20px)" }
+  style: {
+    opacity: i3 === 0 ? 1 : 0,
+    transform: "translateY(20px)"
+  }
 }), tosiWaypoint({
   progress: 0.4,
   style: { opacity: 1, transform: "translateY(0)" }
 }), tosiWaypoint({
   progress: 1,
-  style: { opacity: i3 === arr.length - 1 ? 1 : 0.85, transform: "translateY(0)" }
-}), I.h3(label)), p3(`Inner section ${i3 + 1} of ${arr.length}. Note: this engine has its own theme set per section, but it doesn't write to :root — it would override the outer engine.`))))))), tosiProductSection({ scroll: 250, theme: "rose" }, div2({ class: "embed-host", style: { padding: "2rem 1rem", background: "transparent" } }, h22("Horizontal nested engine"), p3("This section pins. Inside the pin, a horizontal tosi-product in follower mode — its panels slide as the outer's pin progress advances."), div2({ class: "embed-frame", style: { height: "55vh" } }, tosiProduct({ direction: "horizontal" }, ...[
-  { name: "tosijs", desc: "Web components + proxy state.", bg: "#1a3a4a" },
-  { name: "tosijs-ui", desc: "UI components that respect the DOM.", bg: "#3a3a1a" },
-  { name: "tosijs-3d", desc: "BabylonJS, declaratively.", bg: "#3a1a3a" },
+  style: {
+    opacity: i3 === arr.length - 1 ? 1 : 0.85,
+    transform: "translateY(0)"
+  }
+}), I.h3(label)), p3(`Inner section ${i3 + 1} of ${arr.length}. Note: this engine has its own theme set per section, but it doesn't write to :root — it would override the outer engine.`))))))), tosiProductSection({ scroll: 250, theme: "rose" }, div2({
+  class: "embed-host",
+  style: { padding: "2rem 1rem", background: "transparent" }
+}, h22("Horizontal nested engine"), p3("This section pins. Inside the pin, a horizontal tosi-product in follower mode — its panels slide as the outer's pin progress advances."), div2({ class: "embed-frame", style: { height: "55vh" } }, tosiProduct({ direction: "horizontal" }, ...[
+  {
+    name: "tosijs",
+    desc: "Web components + proxy state.",
+    bg: "#1a3a4a"
+  },
+  {
+    name: "tosijs-ui",
+    desc: "UI components that respect the DOM.",
+    bg: "#3a3a1a"
+  },
+  {
+    name: "tosijs-3d",
+    desc: "BabylonJS, declaratively.",
+    bg: "#3a1a3a"
+  },
   { name: "tosijs-product", desc: "You are here.", bg: "#1a1a3a" }
 ].map((card) => tosiProductSection({ scroll: 100 }, div2({ class: "h-card", style: { background: card.bg } }, I.h3(card.name), p3(card.desc)))))))), md(`## Get started
 

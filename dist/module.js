@@ -3,7 +3,15 @@ import { Component, elements } from "tosijs";
 var { div, slot } = elements;
 function isColor(s) {
   const t = s.trim();
-  return t.startsWith("#") || t.startsWith("rgb") || t.startsWith("hsl") || t.startsWith("color(") || ["red", "blue", "green", "white", "black", "transparent", "currentColor"].includes(t);
+  return t.startsWith("#") || t.startsWith("rgb") || t.startsWith("hsl") || t.startsWith("color(") || [
+    "red",
+    "blue",
+    "green",
+    "white",
+    "black",
+    "transparent",
+    "currentColor"
+  ].includes(t);
 }
 function interpolateThemeValue(from, to, t) {
   if (from === to || t <= 0)

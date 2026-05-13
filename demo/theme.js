@@ -2134,7 +2134,15 @@ var gf = wL.elementCreator();
 var { div, slot } = I;
 function isColor(s2) {
   const t2 = s2.trim();
-  return t2.startsWith("#") || t2.startsWith("rgb") || t2.startsWith("hsl") || t2.startsWith("color(") || ["red", "blue", "green", "white", "black", "transparent", "currentColor"].includes(t2);
+  return t2.startsWith("#") || t2.startsWith("rgb") || t2.startsWith("hsl") || t2.startsWith("color(") || [
+    "red",
+    "blue",
+    "green",
+    "white",
+    "black",
+    "transparent",
+    "currentColor"
+  ].includes(t2);
 }
 function interpolateThemeValue(from, to, t2) {
   if (from === to || t2 <= 0)

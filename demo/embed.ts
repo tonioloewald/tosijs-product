@@ -1,7 +1,4 @@
-import {
-  tosiProduct,
-  tosiProductSection,
-} from "../src/tosi-product";
+import { tosiProduct, tosiProductSection } from "../src/tosi-product";
 import { elements } from "tosijs";
 
 const { div, header, footer, section, h1, h2, h3, p, span } = elements;
@@ -84,7 +81,9 @@ document.head.appendChild(style);
 const pageHeader = header(
   { class: "page-header" },
   h1("v2 embeddability test"),
-  p("Page header above. tosi-product below. Footer below that. Inside the middle vertical section: a nested horizontal tosi-product.")
+  p(
+    "Page header above. tosi-product below. Footer below that. Inside the middle vertical section: a nested horizontal tosi-product."
+  )
 );
 
 // === Inner horizontal tosi-product (lives inside a section of the outer) ===
@@ -92,15 +91,27 @@ const innerHorizontal = tosiProduct(
   { direction: "horizontal" },
   tosiProductSection(
     { scroll: 100 },
-    div({ class: "h-panel h-a" }, "Inner H-1", span({ class: "marker" }, "horizontal section"))
+    div(
+      { class: "h-panel h-a" },
+      "Inner H-1",
+      span({ class: "marker" }, "horizontal section")
+    )
   ),
   tosiProductSection(
     { scroll: 100 },
-    div({ class: "h-panel h-b" }, "Inner H-2", span({ class: "marker" }, "horizontal section"))
+    div(
+      { class: "h-panel h-b" },
+      "Inner H-2",
+      span({ class: "marker" }, "horizontal section")
+    )
   ),
   tosiProductSection(
     { scroll: 100 },
-    div({ class: "h-panel h-c" }, "Inner H-3", span({ class: "marker" }, "horizontal section"))
+    div(
+      { class: "h-panel h-c" },
+      "Inner H-3",
+      span({ class: "marker" }, "horizontal section")
+    )
   )
 );
 
@@ -112,7 +123,9 @@ const outerEngine = tosiProduct(
     div(
       { class: "outer-panel outer-a" },
       h2("Outer Section A"),
-      p("Vertical tosi-product. Page header above me, footer below the engine."),
+      p(
+        "Vertical tosi-product. Page header above me, footer below the engine."
+      ),
       span({ class: "marker" }, "outer / vertical")
     )
   ),
@@ -140,7 +153,9 @@ const outerEngine = tosiProduct(
 // === Page footer (sibling below the engine) ===
 const pageFooter = footer(
   { class: "page-footer" },
-  p("Page footer below. If you can see this after scrolling past the engine, embeddability works.")
+  p(
+    "Page footer below. If you can see this after scrolling past the engine, embeddability works."
+  )
 );
 
 document.body.appendChild(pageHeader);

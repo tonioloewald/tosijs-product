@@ -17,7 +17,7 @@ A cinematic product page component library for `tosijs`.
 - **`tosi-product-header`** — a sticky overlay header that slides in once `window.scrollY > threshold`. Inherits theme via the CSS cascade.
 - **`tosi-interpolator`** + **`tosi-waypoint`** — declarative CSS interpolation between progress keyframes.
 - **`tosi-filmstrip`** — frame-based animator using a WebP/PNG mosaic grid for buttery-smooth video-style scrubbing.
-- **`tosi-code`** — Prism-highlighted code block (lazy-loads PrismJS from CDN).
+- **`tosi-prism`** — Prism-highlighted code block (lazy-loads PrismJS from CDN). Also exports `loadPrism` and `highlightCodeBlocks` helpers for re-highlighting other rendered HTML (e.g. markdown viewer output).
 
 ## Getting started
 

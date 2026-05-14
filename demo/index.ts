@@ -8,7 +8,7 @@ import {
 import { tosiInterpolator, tosiWaypoint } from "../src/tosi-interpolator";
 import { tosiFilmstrip } from "../src/tosi-filmstrip";
 import { tosiScrollCamera } from "../src/tosi-b3d-scroll";
-import { tosiCode } from "../src/tosi-code";
+import { highlightCodeBlocks } from "../src/tosi-prism";
 import { markdownViewer, bodymovinPlayer, mapBox, b3d } from "tosijs-ui";
 import { elements } from "tosijs";
 
@@ -338,8 +338,23 @@ const pageFooter = footer(
 );
 
 // === Helpers ================================================================
+// markdownViewer renders the markdown to <pre><code class="language-…"> blocks;
+// didRender runs after each render so we re-highlight in place (idempotent).
 const md = (markdown: string) =>
-  div({ class: "intro" }, markdownViewer(markdown));
+  div(
+    { class: "intro" },
+    markdownViewer(
+      {
+        apply(el: Element) {
+          const mv = el as any;
+          mv.didRender = () => {
+            void highlightCodeBlocks(mv);
+          };
+        },
+      },
+      markdown
+    )
+  );
 
 // Fades the overlay text in then out over a sub-range of section progress.
 const mediaOverlay = (range: string, title: string, subtitle?: string) =>
@@ -1001,7 +1016,3 @@ window.addEventListener(
   },
   { passive: true }
 );
-
-// Touch tosiCode so the import isn't tree-shaken; we'll use it later for
-// inline highlighted snippets in scene scenes.
-void tosiCode;

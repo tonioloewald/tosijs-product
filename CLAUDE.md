@@ -28,18 +28,18 @@ The build is a custom script (`dev.ts`) using `Bun.build` — it produces `dist/
 
 All components extend `tosijs`'s `Component` class (Custom Elements with shadow DOM). Each class has a corresponding camelCase factory function created via `.elementCreator({ tag })`:
 
-| Class                 | Tag                       | Factory               | Role                                                                                                                                           |
-| --------------------- | ------------------------- | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `TosiProduct`         | `<tosi-product>`          | `tosiProduct`         | Scroll engine. Owns runway, sticky window, and stack translation. Hosts theme registry. Detects nesting (follower mode).                       |
-| `TosiProductSection`  | `<tosi-product-section>`  | `tosiProductSection`  | Slotted container with `scroll` (pin duration), `theme`/`theme-from`/`theme-to`. Forwards pin progress to `[data-scroll-animate]` descendants. |
-| `TosiProductHeader`   | `<tosi-product-header>`   | `tosiProductHeader`   | Sticky overlay header that slides in once `window.scrollY > threshold`. Inherits theme via CSS cascade.                                        |
-| `TosiFilmstrip`       | `<tosi-filmstrip>`        | `tosiFilmstrip`       | Canvas-based frame animator using WebP/PNG mosaic grids                                                                                        |
-| `TosiInterpolator`    | `<tosi-interpolator>`     | `tosiInterpolator`    | Declarative CSS property interpolation between waypoints                                                                                       |
-| `TosiWaypoint`        | `<tosi-waypoint>`         | `tosiWaypoint`        | Keyframe definition for interpolator (hidden; defines `progress` + inline styles)                                                              |
-| `TosiScrollCamera`    | `<tosi-scroll-camera>`    | `tosiScrollCamera`    | Waypoint-driven camera controller for B3d scenes (alpha/beta/radius/position/fov)                                                              |
-| `TosiScrollTime`      | `<tosi-scroll-time>`      | `tosiScrollTime`      | Maps scroll progress to day/night cycle on B3d skybox (`from`/`to` hours)                                                                      |
-| `TosiScrollAnimation` | `<tosi-scroll-animation>` | `tosiScrollAnimation` | Scrubs a named BabylonJS AnimationGroup to scroll-driven frame                                                                                 |
-| `TosiCode`            | `<tosi-code>`             | `tosiCode`            | Lazy-loads PrismJS from CDN to syntax-highlight its text content (`language` attr, default `html`)                                             |
+| Class                 | Tag                       | Factory               | Role                                                                                                                                                                                                                                 |
+| --------------------- | ------------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `TosiProduct`         | `<tosi-product>`          | `tosiProduct`         | Scroll engine. Owns runway, sticky window, and stack translation. Hosts theme registry. Detects nesting (follower mode).                                                                                                             |
+| `TosiProductSection`  | `<tosi-product-section>`  | `tosiProductSection`  | Slotted container with `scroll` (pin duration), `theme`/`theme-from`/`theme-to`. Forwards pin progress to `[data-scroll-animate]` descendants.                                                                                       |
+| `TosiProductHeader`   | `<tosi-product-header>`   | `tosiProductHeader`   | Sticky overlay header that slides in once `window.scrollY > threshold`. Inherits theme via CSS cascade.                                                                                                                              |
+| `TosiFilmstrip`       | `<tosi-filmstrip>`        | `tosiFilmstrip`       | Canvas-based frame animator using WebP/PNG mosaic grids                                                                                                                                                                              |
+| `TosiInterpolator`    | `<tosi-interpolator>`     | `tosiInterpolator`    | Declarative CSS property interpolation between waypoints                                                                                                                                                                             |
+| `TosiWaypoint`        | `<tosi-waypoint>`         | `tosiWaypoint`        | Keyframe definition for interpolator (hidden; defines `progress` + inline styles)                                                                                                                                                    |
+| `TosiScrollCamera`    | `<tosi-scroll-camera>`    | `tosiScrollCamera`    | Waypoint-driven camera controller for B3d scenes (alpha/beta/radius/position/fov)                                                                                                                                                    |
+| `TosiScrollTime`      | `<tosi-scroll-time>`      | `tosiScrollTime`      | Maps scroll progress to day/night cycle on B3d skybox (`from`/`to` hours)                                                                                                                                                            |
+| `TosiScrollAnimation` | `<tosi-scroll-animation>` | `tosiScrollAnimation` | Scrubs a named BabylonJS AnimationGroup to scroll-driven frame                                                                                                                                                                       |
+| `TosiPrism`           | `<tosi-prism>`            | `tosiPrism`           | Lazy-loads PrismJS from CDN to syntax-highlight its text content (`language` attr, default `markup`). Also exports `loadPrism` / `highlightCodeBlocks` helpers for post-processing other rendered code (e.g. markdownViewer output). |
 
 ### Scroll engine flow
 
@@ -114,7 +114,7 @@ bunx tosi-mosaic <video-file> [-f frames] [-w width] [-q quality] [-r fps]
 - `src/tosi-interpolator.ts` — `TosiInterpolator`, `TosiWaypoint`, `interpolateStrings`
 - `src/waypoints.ts` — `interpolateWaypoints` helper (numeric interpolation with easeInOutQuad)
 - `src/tosi-b3d-scroll.ts` — `TosiScrollCamera`, `TosiScrollTime`, `TosiScrollAnimation` (B3d scroll controllers; use `<tosi-waypoint>` children for camera keyframes)
-- `src/tosi-code.ts` — `TosiCode` (Prism-highlighted code block; loads PrismJS lazily from jsDelivr CDN)
+- `src/tosi-prism.ts` — `TosiPrism` component + reusable `loadPrism(languages?)` and `highlightCodeBlocks(root)` helpers (Prism loads lazily from jsDelivr CDN). Renamed from `tosi-code` in v0.6.x to avoid clashing with tosijs-ui's `<tosi-code>` (ace-based editor).
 - `src/interpolation.test.ts` — tests for `interpolateStrings` and `interpolateWaypoints`
 - `src/index.ts` — re-exports all public API
 - `src/index-iife.ts` — IIFE entry point; assigns `tosijs`, `tosijsUi`, `tosijsProduct` to `globalThis`

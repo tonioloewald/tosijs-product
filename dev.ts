@@ -26,7 +26,7 @@ async function build() {
     target: "browser",
     format: "esm",
     naming: "module.js",
-    external: ["tosijs", "tosijs-ui", "tosijs-3d"],
+    external: ["tosijs", "tosijs-ui"],
   });
 
   await Bun.build({
@@ -43,6 +43,22 @@ async function build() {
     target: "browser",
     format: "esm",
     naming: "index.js",
+  });
+
+  await Bun.build({
+    entrypoints: ["./demo/embed.ts"],
+    outdir: PUBLIC,
+    target: "browser",
+    format: "esm",
+    naming: "embed.js",
+  });
+
+  await Bun.build({
+    entrypoints: ["./demo/theme.ts"],
+    outdir: PUBLIC,
+    target: "browser",
+    format: "esm",
+    naming: "theme.js",
   });
   console.timeEnd("build");
 }
@@ -88,7 +104,10 @@ function serveFile(filePath: string, request: any): Response {
     }
   }
   return new Response(file, {
-    headers: { "Accept-Ranges": "bytes" },
+    headers: {
+      "Accept-Ranges": "bytes",
+      "Cache-Control": "no-store, must-revalidate",
+    },
   });
 }
 

@@ -4,9 +4,9 @@ import { interpolateWaypoints } from "./waypoints";
 
 describe("interpolateStrings", () => {
   test("interpolates single numeric value", () => {
-    expect(interpolateStrings("translateY(0px)", "translateY(100px)", 0.5)).toBe(
-      "translateY(50px)"
-    );
+    expect(
+      interpolateStrings("translateY(0px)", "translateY(100px)", 0.5)
+    ).toBe("translateY(50px)");
   });
 
   test("interpolates multiple numeric values", () => {

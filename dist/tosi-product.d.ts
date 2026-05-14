@@ -1,81 +1,133 @@
 import { Component } from "tosijs";
-export declare class TosiProductSection extends Component {
-    scrollCallback: ((progress: number, el: HTMLElement) => void) | null;
+export type ThemeMap = Record<string, string>;
+export type ThemeRegistry = Record<string, ThemeMap>;
+export declare class TosiProduct extends Component {
     static initAttributes: {
-        scroll: number;
-        debug: boolean;
         direction: string;
-        overflow: boolean;
+        debug: boolean;
     };
-    private _debugInfo;
-    private _scrollTarget;
-    private _animators;
-    private _observer;
     static styleSpec: {
         ":host": {
             display: string;
             position: string;
-            backgroundColor: string;
+            width: string;
+            background: string;
             color: string;
         };
-        ":host([direction=horizontal])": {
-            display: string;
-        };
-        ".tosi-sticky": {
-            position: string;
-            overflow: string;
-            zIndex: number;
-            backgroundColor: string;
-        };
-        ".tosi-debug": {
+        ".window": {
             position: string;
             top: string;
             left: string;
+            width: string;
+            height: string;
+            overflow: string;
+        };
+        ":host([direction=horizontal])": {
+            display: string;
+            width: string;
+        };
+        ":host([direction=horizontal]) .window": {
+            width: string;
+            height: string;
+        };
+        ".stack": {
+            position: string;
+            top: string;
+            left: string;
+            width: string;
+            willChange: string;
+        };
+        ":host([direction=horizontal]) .stack": {
+            display: string;
+            flexDirection: string;
+            width: string;
+            height: string;
+        };
+        ".debug-panel": {
+            position: string;
+            top: string;
+            right: string;
             background: string;
             color: string;
             padding: string;
             fontFamily: string;
             fontSize: string;
-            zIndex: number;
             borderRadius: string;
+            zIndex: number;
             pointerEvents: string;
+            whiteSpace: string;
         };
     };
     content: () => HTMLDivElement[];
-    private _getAnimators;
-    private _invalidateAnimators;
+    themes: ThemeRegistry;
+    defaultTheme: string;
+    themeTarget: HTMLElement;
+    private _scrollTarget;
+    private _stack;
+    private _window;
+    private _debugPanel;
+    private _resizeObserver;
+    private _mutationObserver;
+    private _items;
+    private _totalRunway;
+    private _scrollHandler;
+    private _rafPending;
+    private _isNested;
+    private _injectedProgress;
+    private _appliedThemeKeys;
     connectedCallback(): void;
     disconnectedCallback(): void;
-    render(): void;
-    private _getScrollPct;
-    private _getScrollAmountPx;
-    updateProgress(): void;
+    setScrollProgress(progress: number): void;
+    private _isHorizontal;
+    private _viewSize;
+    private _scrollPos;
+    private _hostStart;
+    private _relayout;
+    private _scheduleUpdate;
+    private _update;
+    private _notify;
+    private _applyTheme;
 }
-export declare class TosiProduct extends Component {
+export declare class TosiProductSection extends Component {
+    static initAttributes: {
+        scroll: number;
+    };
     static styleSpec: {
         ":host": {
             display: string;
             position: string;
             width: string;
-            background: string;
-            color: string;
         };
     };
     content: () => HTMLSlotElement;
+    scrollCallback: ((progress: number, el: HTMLElement) => void) | null;
+    setScrollProgress(progress: number): void;
 }
-export declare class TosiScrollMapper extends Component {
-    scrollCallback: ((progress: number) => void) | null;
+export declare class TosiProductHeader extends Component {
+    static initAttributes: {
+        threshold: number;
+    };
     static styleSpec: {
         ":host": {
-            display: string;
-            width: string;
-            height: string;
+            position: string;
+            top: string;
+            left: string;
+            right: string;
+            zIndex: string;
+            transform: string;
+            transition: string;
+            pointerEvents: string;
+        };
+        ":host([data-visible=true])": {
+            transform: string;
         };
     };
     content: () => HTMLSlotElement;
+    private _scrollHandler;
     connectedCallback(): void;
-    setScrollProgress(progress: number): void;
+    disconnectedCallback(): void;
+    private _update;
 }
 export declare const tosiProduct: import("tosijs").ElementCreator<TosiProduct>;
 export declare const tosiProductSection: import("tosijs").ElementCreator<TosiProductSection>;
-export declare const tosiScrollMapper: import("tosijs").ElementCreator<TosiScrollMapper>;
+export declare const tosiProductHeader: import("tosijs").ElementCreator<TosiProductHeader>;

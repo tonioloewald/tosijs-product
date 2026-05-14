@@ -16,16 +16,16 @@ Converts scroll position into a normalized 0-1 progress value. Content is pinned
 
 ### Attributes
 
-| Attribute | Default | Description |
-|-----------|---------|-------------|
-| `scroll` | `100` | Scroll distance as a percentage of the container dimension. `100` = one viewport height (or width for horizontal). `300` = three viewports of scrolling. |
-| `direction` | `vertical` | `"vertical"` or `"horizontal"` |
-| `debug` | — | When present, shows an overlay with the current progress value |
+| Attribute   | Default    | Description                                                                                                                                              |
+| ----------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `scroll`    | `100`      | Scroll distance as a percentage of the container dimension. `100` = one viewport height (or width for horizontal). `300` = three viewports of scrolling. |
+| `direction` | `vertical` | `"vertical"` or `"horizontal"`                                                                                                                           |
+| `debug`     | —          | When present, shows an overlay with the current progress value                                                                                           |
 
 ### Properties
 
-| Property | Type | Description |
-|----------|------|-------------|
+| Property         | Type                                          | Description                                             |
+| ---------------- | --------------------------------------------- | ------------------------------------------------------- |
 | `scrollCallback` | `(progress: number, el: HTMLElement) => void` | Called on every scroll update with the current progress |
 
 ### How progress works
@@ -33,6 +33,7 @@ Converts scroll position into a normalized 0-1 progress value. Content is pinned
 Progress is calculated as `clamp(-offset / scrollAmount, 0, 1)` where offset is the section's position relative to the scroll container. The section queries children with `[data-scroll-animate]` or `[data-scroll-range]` and dispatches progress to each.
 
 Children receive progress via:
+
 1. `setScrollProgress(localProgress)` if the element implements it
 2. `data-scroll-animate="currentTime"` — sets `el.currentTime` on video elements
 3. `data-scroll-animate="lottie"` — calls `animation.goToAndStop(frame, true)` on Lottie players
@@ -53,15 +54,24 @@ Declarative CSS property interpolation between waypoints. Place `<tosi-waypoint>
 
 ### Attributes
 
-| Attribute | Default | Description |
-|-----------|---------|-------------|
-| `easing` | — | Set to `"ease-in-out"` for easeInOutQuad between waypoints. Default is linear. |
+| Attribute | Default | Description                                                                    |
+| --------- | ------- | ------------------------------------------------------------------------------ |
+| `easing`  | —       | Set to `"ease-in-out"` for easeInOutQuad between waypoints. Default is linear. |
 
 ```html
 <tosi-interpolator data-scroll-animate easing="ease-in-out">
-  <tosi-waypoint progress="0.0" style="opacity: 0; transform: translateY(50px)"></tosi-waypoint>
-  <tosi-waypoint progress="0.5" style="opacity: 1; transform: translateY(0px)"></tosi-waypoint>
-  <tosi-waypoint progress="1.0" style="opacity: 0; transform: translateY(-50px)"></tosi-waypoint>
+  <tosi-waypoint
+    progress="0.0"
+    style="opacity: 0; transform: translateY(50px)"
+  ></tosi-waypoint>
+  <tosi-waypoint
+    progress="0.5"
+    style="opacity: 1; transform: translateY(0px)"
+  ></tosi-waypoint>
+  <tosi-waypoint
+    progress="1.0"
+    style="opacity: 0; transform: translateY(-50px)"
+  ></tosi-waypoint>
   <div>Your content here</div>
 </tosi-interpolator>
 ```
@@ -78,10 +88,10 @@ Defines a keyframe for `tosi-interpolator`. Hidden element — only its attribut
 
 ### Attributes
 
-| Attribute | Description |
-|-----------|-------------|
+| Attribute  | Description                                                        |
+| ---------- | ------------------------------------------------------------------ |
 | `progress` | 0-1 value defining where this keyframe sits in the scroll timeline |
-| `style` | CSS styles at this keyframe |
+| `style`    | CSS styles at this keyframe                                        |
 
 When used inside `tosi-scroll-camera`, waypoints define camera properties instead of CSS styles (see below).
 
@@ -91,20 +101,17 @@ Canvas-based frame animator using a single mosaic image (grid of frames). Provid
 
 ### Attributes
 
-| Attribute | Description |
-|-----------|-------------|
-| `src` | URL of the mosaic image |
-| `cols` | Number of columns in the grid |
-| `rows` | Number of rows in the grid |
-| `total` | Total number of frames |
+| Attribute | Description                   |
+| --------- | ----------------------------- |
+| `src`     | URL of the mosaic image       |
+| `cols`    | Number of columns in the grid |
+| `rows`    | Number of rows in the grid    |
+| `total`   | Total number of frames        |
 
 If the filename matches the pattern `name_COLSxROWS_TOTAL.ext`, the grid dimensions are parsed automatically.
 
 ```html
-<tosi-filmstrip
-  src="clip_10x10_100.webp"
-  data-scroll-animate
-></tosi-filmstrip>
+<tosi-filmstrip src="clip_10x10_100.webp" data-scroll-animate></tosi-filmstrip>
 ```
 
 ### Creating mosaics
@@ -123,8 +130,8 @@ Generic scroll progress wrapper. Receives progress from its parent section and f
 
 ### Properties
 
-| Property | Type | Description |
-|----------|------|-------------|
+| Property         | Type                         | Description                                                                |
+| ---------------- | ---------------------------- | -------------------------------------------------------------------------- |
 | `scrollCallback` | `(progress: number) => void` | Called with progress on every scroll update. `this` is the mapper element. |
 
 ```typescript
@@ -136,7 +143,7 @@ tosiScrollMapper(
     },
   },
   mapBox({ token: "...", coords: "37.46,-122.43,12" })
-)
+);
 ```
 
 ## tosi-scroll-camera
@@ -145,33 +152,48 @@ Waypoint-driven camera controller for BabylonJS scenes. Place inside or as a sib
 
 ### Attributes
 
-| Attribute | Default | Description |
-|-----------|---------|-------------|
-| `easing` | — | Set to `"ease-in-out"` for easeInOutQuad between waypoints |
+| Attribute | Default | Description                                                |
+| --------- | ------- | ---------------------------------------------------------- |
+| `easing`  | —       | Set to `"ease-in-out"` for easeInOutQuad between waypoints |
 
 ### Waypoint attributes
 
 For `ArcRotateCamera`:
 
-| Attribute | Description |
-|-----------|-------------|
-| `alpha` | Horizontal rotation angle (radians) |
-| `beta` | Vertical rotation angle (radians). 0 = top-down, pi/2 = eye-level |
-| `radius` | Distance from target |
-| `target-x`, `target-y`, `target-z` | Camera target position |
+| Attribute                          | Description                                                       |
+| ---------------------------------- | ----------------------------------------------------------------- |
+| `alpha`                            | Horizontal rotation angle (radians)                               |
+| `beta`                             | Vertical rotation angle (radians). 0 = top-down, pi/2 = eye-level |
+| `radius`                           | Distance from target                                              |
+| `target-x`, `target-y`, `target-z` | Camera target position                                            |
 
 For positional cameras:
 
-| Attribute | Description |
-|-----------|-------------|
+| Attribute     | Description     |
+| ------------- | --------------- |
 | `x`, `y`, `z` | Camera position |
-| `fov` | Field of view |
+| `fov`         | Field of view   |
 
 ```html
 <tosi-scroll-camera data-scroll-animate easing="ease-in-out">
-  <tosi-waypoint progress="0" alpha="-1.57" beta="1.2" radius="110"></tosi-waypoint>
-  <tosi-waypoint progress="0.5" alpha="0" beta="1.0" radius="70"></tosi-waypoint>
-  <tosi-waypoint progress="1" alpha="1.57" beta="1.55" radius="76"></tosi-waypoint>
+  <tosi-waypoint
+    progress="0"
+    alpha="-1.57"
+    beta="1.2"
+    radius="110"
+  ></tosi-waypoint>
+  <tosi-waypoint
+    progress="0.5"
+    alpha="0"
+    beta="1.0"
+    radius="70"
+  ></tosi-waypoint>
+  <tosi-waypoint
+    progress="1"
+    alpha="1.57"
+    beta="1.55"
+    radius="76"
+  ></tosi-waypoint>
 </tosi-scroll-camera>
 ```
 
@@ -181,10 +203,10 @@ Maps scroll progress to a time-of-day value on a sibling `<tosi-b3d-skybox>` ele
 
 ### Attributes
 
-| Attribute | Default | Description |
-|-----------|---------|-------------|
-| `from` | `0` | Start hour (0-24) |
-| `to` | `24` | End hour (0-24) |
+| Attribute | Default | Description       |
+| --------- | ------- | ----------------- |
+| `from`    | `0`     | Start hour (0-24) |
+| `to`      | `24`    | End hour (0-24)   |
 
 ```html
 <tosi-scroll-time data-scroll-animate from="6" to="18"></tosi-scroll-time>
@@ -196,10 +218,13 @@ Scrubs a named BabylonJS AnimationGroup to the frame corresponding to scroll pro
 
 ### Attributes
 
-| Attribute | Description |
-|-----------|-------------|
-| `name` | Name of the AnimationGroup to control |
+| Attribute | Description                           |
+| --------- | ------------------------------------- |
+| `name`    | Name of the AnimationGroup to control |
 
 ```html
-<tosi-scroll-animation data-scroll-animate name="DoorOpen"></tosi-scroll-animation>
+<tosi-scroll-animation
+  data-scroll-animate
+  name="DoorOpen"
+></tosi-scroll-animation>
 ```

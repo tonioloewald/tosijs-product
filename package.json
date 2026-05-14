@@ -1,6 +1,6 @@
 {
   "name": "tosijs-product",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "description": "Scroll-linked animation components for tosijs",
   "source": "src/index.ts",
   "type": "module",
@@ -26,7 +26,7 @@
   },
   "scripts": {
     "start": "bun --watch dev.ts",
-    "format": "bun eslint src demo --fix && bun prettier --write .",
+    "format": "bun eslint src demo --ext .ts --fix && bun prettier --write .",
     "test": "bun test",
     "build": "bun dev.ts --build"
   },

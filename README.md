@@ -65,8 +65,10 @@ The IIFE build is self-contained — a single script tag gives you `tosijs`, `to
 ### Modern web app (ESM)
 
 ```bash
-bun install tosijs tosijs-ui tosijs-product
+bun add tosijs-product
 ```
+
+`tosijs` and `tosijs-ui` are peer dependencies and install along with it.
 
 ```typescript
 import {

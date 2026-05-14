@@ -985,13 +985,17 @@ Use \`--tosi-view-size\` to size panels to the inner host (not the document view
 <script src="https://cdn.jsdelivr.net/npm/tosijs-product/dist/index.js"></script>
 \`\`\`
 
-Drop the IIFE into any page — \`tosijs\`, \`tosijs-ui\`, and \`tosijs-product\` are all bundled. Or install from npm — peers come along automatically:
+Drop the IIFE into any page — \`tosijs\`, \`tosijs-ui\`, and \`tosijs-product\` are all bundled.
+
+Then compose your scenes in HTML.
+
+Or install from npm using bun, npm or whatever package manager you prefer:
 
 \`\`\`bash
-bun add tosijs-product
+bun add tosijs-product tosijs tosijs-ui
 \`\`\`
 
-Then compose your scenes in HTML.`
+And compose your pages using typescript, javascript, or HTML.`
   )
 ) as TosiProduct;
 

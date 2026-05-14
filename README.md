@@ -64,11 +64,13 @@ The IIFE build is self-contained — a single script tag gives you `tosijs`, `to
 
 ### Modern web app (ESM)
 
+Install from npm using bun, npm or whatever package manager you prefer:
+
 ```bash
-bun add tosijs-product
+bun add tosijs-product tosijs tosijs-ui
 ```
 
-`tosijs` and `tosijs-ui` are peer dependencies and install along with it.
+And compose your pages using typescript, javascript, or HTML.
 
 ```typescript
 import {

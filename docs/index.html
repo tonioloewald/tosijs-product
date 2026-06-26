@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Hide the pre-rendered body until <tosi-doc-system> hydrates, then fade it
+       in — avoids the layout shift as the static markup is swapped for the live
+       doc browser. <noscript> keeps it visible for no-JS readers/crawlers; the
+       timeout is a safety net so a failed/slow hydration can't leave it blank. -->
+  <style>body{opacity:0;transition:opacity .25s ease}</style>
+  <noscript><style>body{opacity:1!important}</style></noscript>
+  <script>setTimeout(function(){if(document.body)document.body.style.opacity='1'},4000)</script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="/doc-system.css" data-tosi-doc-system />
+  <title>tosijs-product</title>
+  <meta name="description" content="A cinematic product page component library for tosijs." />
+  <link rel="canonical" href="https://product.tosijs.net/" />
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="tosijs-product" />
+  <meta property="og:title" content="tosijs-product" />
+  <meta property="og:description" content="A cinematic product page component library for tosijs." />
+  <meta property="og:url" content="https://product.tosijs.net/" />
+  <meta name="twitter:card" content="summary" />
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"tosijs-product","description":"A cinematic product page component library for tosijs.","url":"https://product.tosijs.net/","inLanguage":"en","isPartOf":{"@type":"WebSite","name":"tosijs-product","url":"https://product.tosijs.net"}}</script>
+  <link rel="icon" href="/favicon.svg" />
+</head>
+<body>
+  <tosi-doc-system docs="/docs.json" config="{&quot;projectName&quot;:&quot;tosijs-product&quot;,&quot;projectLinks&quot;:{&quot;tosijs&quot;:&quot;https://tosijs.net&quot;,&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs-product&quot;}}">
+  <article class="doc-content">
+<h1>tosijs-product</h1>
+<p>A cinematic product page component library for <code>tosijs</code>.</p>
+<p><code>tosijs-product</code> provides high-performance, scroll-linked animation components designed to create immersive, &quot;Apple-style&quot; product stories with minimal code. It unifies Lottie, video, BabylonJS 3D, Mapbox flights, themes, and declarative CSS interpolation under a single scroll engine.</p>
+<p><a href="https://tonioloewald.github.io/tosijs-product/"><strong>View the Live Demo</strong></a></p>
+<h2>Architecture in one paragraph</h2>
+<p><code>&lt;tosi-product&gt;</code> is a <strong>scroll engine</strong>. It owns the page (or any scrollable region) it lives in: it computes a runway from its sections, hosts a sticky viewport-sized window in shadow DOM, and translates an absolute-positioned stack as you scroll. Each <code>&lt;tosi-product-section&gt;</code> declares a pin duration via <code>scroll</code>; during pin the section sits motionless at the viewport top while interpolators run, then it scrolls out at 1:1 and yields to the next. Themes are dictionaries of CSS custom properties — the engine writes the active section&#39;s resolved values to <code>:root</code>, so external siblings (page header, sticky overlay, footer) re-theme through the cascade.</p>
+<h2>Key components</h2>
+<ul>
+<li><strong><code>tosi-product</code></strong> — the scroll engine. Owns the runway, the sticky window, the stack translation, the theme registry. A <code>tosi-product</code> placed inside another <code>tosi-product</code>&#39;s section automatically runs in <strong>follower mode</strong>, driven by the parent section&#39;s pin progress (so you can nest a horizontal engine inside a vertical one).</li>
+<li><strong><code>tosi-product-section</code></strong> — a slotted container with <code>scroll</code> (pin duration in viewport %), <code>theme</code> / <code>theme-from</code> / <code>theme-to</code>, and a <code>direction</code> inherited from its engine.</li>
+<li><strong><code>tosi-product-header</code></strong> — a sticky overlay header that slides in once <code>window.scrollY &gt; threshold</code>. Inherits theme via the CSS cascade.</li>
+<li><strong><code>tosi-interpolator</code></strong> + <strong><code>tosi-waypoint</code></strong> — declarative CSS interpolation between progress keyframes.</li>
+<li><strong><code>tosi-filmstrip</code></strong> — frame-based animator using a WebP/PNG mosaic grid for buttery-smooth video-style scrubbing.</li>
+<li><strong><code>tosi-prism</code></strong> — Prism-highlighted code block (lazy-loads PrismJS from CDN). Also exports <code>loadPrism</code> and <code>highlightCodeBlocks</code> helpers for re-highlighting other rendered HTML (e.g. markdown viewer output).</li>
+</ul>
+<h2>Getting started</h2>
+<h3>Pure HTML (zero JS orchestration)</h3>
+<p>The IIFE build is self-contained — a single script tag gives you <code>tosijs</code>, <code>tosijsUi</code>, and <code>tosijsProduct</code> as globals, with all custom elements registered automatically:</p>
+<pre><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;meta charset=&quot;utf-8&quot; /&gt;
+    &lt;title&gt;My Product&lt;/title&gt;
+    &lt;style&gt;
+      body {
+        margin: 0;
+      }
+    &lt;/style&gt;
+    &lt;script src=&quot;https://cdn.jsdelivr.net/npm/tosijs-product/dist/index.js&quot;&gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;tosi-product&gt;
+      &lt;tosi-product-section scroll=&quot;200&quot;&gt;
+        &lt;tosi-interpolator data-scroll-animate easing=&quot;ease-in-out&quot;&gt;
+          &lt;tosi-waypoint
+            progress=&quot;0&quot;
+            style=&quot;opacity: 0; transform: translateY(50px)&quot;
+          &gt;&lt;/tosi-waypoint&gt;
+          &lt;tosi-waypoint
+            progress=&quot;0.5&quot;
+            style=&quot;opacity: 1; transform: translateY(0px)&quot;
+          &gt;&lt;/tosi-waypoint&gt;
+          &lt;tosi-waypoint
+            progress=&quot;1&quot;
+            style=&quot;opacity: 1; transform: scale(1.2)&quot;
+          &gt;&lt;/tosi-waypoint&gt;
+          &lt;h1 style=&quot;text-align: center;&quot;&gt;Pinned for 2× viewport.&lt;/h1&gt;
+        &lt;/tosi-interpolator&gt;
+      &lt;/tosi-product-section&gt;
+    &lt;/tosi-product&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<h3>Modern web app (ESM)</h3>
+<p>Install from npm using bun, npm or whatever package manager you prefer:</p>
+<pre><code class="language-bash">bun add tosijs-product tosijs tosijs-ui
+</code></pre>
+<p>And compose your pages using typescript, javascript, or HTML.</p>
+<pre><code class="language-typescript">import {
+  tosiProduct,
+  tosiProductSection,
+  tosiInterpolator,
+  tosiWaypoint,
+} from &quot;tosijs-product&quot;;
+
+const app = tosiProduct(
+  tosiProductSection(
+    { scroll: 200 },
+    tosiInterpolator(
+      { &quot;data-scroll-animate&quot;: true, easing: &quot;ease-in-out&quot; },
+      tosiWaypoint({
+        progress: 0,
+        style: &quot;opacity: 0; transform: translateY(50px)&quot;,
+      }),
+      tosiWaypoint({
+        progress: 0.5,
+        style: &quot;opacity: 1; transform: translateY(0px)&quot;,
+      }),
+      tosiWaypoint({ progress: 1, style: &quot;opacity: 1; transform: scale(1.2)&quot; }),
+      document.createElement(&quot;h1&quot;)
+    )
+  )
+);
+
+document.body.append(app);
+</code></pre>
+<h2>The <code>scroll</code> attribute</h2>
+<p><code>scroll</code> on a section is its <strong>pin duration</strong>, expressed as a percentage of the viewport. <code>scroll=&quot;200&quot;</code> means &quot;pin this section for 2× viewport of scroll.&quot; When pin progress reaches 1, the section enters its <strong>exit phase</strong> and scrolls out at 1:1 over its own height. So total scroll claimed = <code>(scroll / 100) * viewport + naturalSize</code>.</p>
+<h2>Themes</h2>
+<p>Register themes (each is a dictionary of CSS custom properties) and reference them from sections:</p>
+<pre><code class="language-ts">const app = tosiProduct(
+  tosiProductSection({ scroll: 100, theme: &quot;midnight&quot; } /* ... */),
+  tosiProductSection(
+    { scroll: 200, &quot;theme-from&quot;: &quot;midnight&quot;, &quot;theme-to&quot;: &quot;paper&quot; } /* ... */
+  ),
+  tosiProductSection({ scroll: 100, theme: &quot;paper&quot; } /* ... */)
+);
+
+app.themes = {
+  midnight: { &quot;--bg&quot;: &quot;#08081a&quot;, &quot;--fg&quot;: &quot;#f0f0f5&quot;, &quot;--accent&quot;: &quot;#9be7ff&quot; },
+  paper: { &quot;--bg&quot;: &quot;#f5f1e8&quot;, &quot;--fg&quot;: &quot;#1a1815&quot;, &quot;--accent&quot;: &quot;#7c3aed&quot; },
+};
+app.defaultTheme = &quot;midnight&quot;;
+</code></pre>
+<p>The transition section interpolates its CSS variables (color values use <code>color-mix(in srgb, …)</code>) over its pin progress, and writes them to <code>document.documentElement</code>. Anything cascading from <code>:root</code> — including a <code>&lt;tosi-product-header&gt;</code> overlay outside the engine — re-themes in unison.</p>
+<h2>Frame-based animation</h2>
+<p>Standard video scrubbing (<code>video.currentTime</code>) often stutters because decoders aren&#39;t designed for random-access seeking. The <code>tosi-mosaic</code> CLI converts a video to a single WebP mosaic grid, and <code>&lt;tosi-filmstrip&gt;</code> scrubs through it using a hardware-accelerated canvas.</p>
+<pre><code class="language-bash">bunx tosi-mosaic my-video.mp4 --frames 100 --width 1280
+</code></pre>
+<p>Produces <code>my-video_10x10_100.webp</code> (the filename encodes grid + total frames):</p>
+<pre><code class="language-html">&lt;tosi-filmstrip
+  src=&quot;my-video_10x10_100.webp&quot;
+  data-scroll-animate
+&gt;&lt;/tosi-filmstrip&gt;
+</code></pre>
+<p>A grid (rather than a single long strip) keeps dimensions inside the browser&#39;s max image size (commonly 16,384px) while delivering all frames in one request.</p>
+<h2>License</h2>
+<p>Licensed under the Apache License, Version 2.0. See <a href="LICENSE">LICENSE</a> for details.</p>
+
+  </article>
+  <nav class="doc-nav" aria-label="Documentation">
+  <ul>
+    <li><a href="/components/">Component Reference</a></li>
+    <li><a href="/getting-started/">Getting Started</a></li>
+    <li><a href="/" aria-current="page" class="current">tosijs-product</a></li>
+  </ul>
+  </nav>
+  <ul class="doc-navbar">
+    <li><a href="https://tosijs.net" data-icon="tosi">tosijs</a></li>
+    <li><a href="https://ui.tosijs.net" data-icon="tosi">tosijs-ui</a></li>
+    <li><a href="https://3d.tosijs.net" data-icon="tosi">tosijs-3d</a></li>
+    <li><a href="https://github.com/tonioloewald/tosijs-product" data-icon="github">github</a></li>
+    <li><a href="https://www.npmjs.com/package/tosijs-product" data-icon="npm">npmjs</a></li>
+  </ul>
+  </tosi-doc-system>
+  <script src="/iife.js"></script>
+</body>
+</html>

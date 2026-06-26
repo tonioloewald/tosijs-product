@@ -2,3 +2,11 @@ node_modules/
 .haltija/
 .DS_Store
 *.log
+
+# Locally-generated dev-server TLS certificates (mkcert). Never publish.
+tls/
+*.pem
+*.csr
+
+# Intermediate doc-corpus the build extracts to and re-reads.
+demo/docs.json

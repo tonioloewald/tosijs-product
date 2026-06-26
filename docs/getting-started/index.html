@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Hide the pre-rendered body until <tosi-doc-system> hydrates, then fade it
+       in — avoids the layout shift as the static markup is swapped for the live
+       doc browser. <noscript> keeps it visible for no-JS readers/crawlers; the
+       timeout is a safety net so a failed/slow hydration can't leave it blank. -->
+  <style>body{opacity:0;transition:opacity .25s ease}</style>
+  <noscript><style>body{opacity:1!important}</style></noscript>
+  <script>setTimeout(function(){if(document.body)document.body.style.opacity='1'},4000)</script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="/doc-system.css" data-tosi-doc-system />
+  <title>Getting Started — tosijs-product</title>
+  <meta name="description" content="A single script tag gives you everything — tosijs, tosijs-ui, and tosijs-product with all custom elements registered" />
+  <link rel="canonical" href="https://product.tosijs.net/getting-started/" />
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="tosijs-product" />
+  <meta property="og:title" content="Getting Started — tosijs-product" />
+  <meta property="og:description" content="A single script tag gives you everything — tosijs, tosijs-ui, and tosijs-product with all custom elements registered" />
+  <meta property="og:url" content="https://product.tosijs.net/getting-started/" />
+  <meta name="twitter:card" content="summary" />
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Getting Started","description":"A single script tag gives you everything — tosijs, tosijs-ui, and tosijs-product with all custom elements registered","url":"https://product.tosijs.net/getting-started/","inLanguage":"en","isPartOf":{"@type":"WebSite","name":"tosijs-product","url":"https://product.tosijs.net"}}</script>
+  <link rel="icon" href="/favicon.svg" />
+</head>
+<body>
+  <tosi-doc-system docs="/docs.json" config="{&quot;projectName&quot;:&quot;tosijs-product&quot;,&quot;projectLinks&quot;:{&quot;tosijs&quot;:&quot;https://tosijs.net&quot;,&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs-product&quot;}}">
+  <article class="doc-content">
+<h1>Getting Started</h1>
+<h2>Installation</h2>
+<h3>Pure HTML (IIFE build)</h3>
+<p>A single script tag gives you everything — tosijs, tosijs-ui, and tosijs-product with all custom elements registered:</p>
+<pre><code class="language-html">&lt;script src=&quot;https://cdn.jsdelivr.net/npm/tosijs-product/dist/index.js&quot;&gt;&lt;/script&gt;
+</code></pre>
+<h3>ESM (bundled apps)</h3>
+<pre><code class="language-bash">bun install tosijs tosijs-ui tosijs-product
+</code></pre>
+<pre><code class="language-typescript">import {
+  tosiProduct,
+  tosiProductSection,
+  tosiInterpolator,
+  tosiWaypoint,
+  tosiFilmstrip,
+  tosiScrollMapper,
+  tosiScrollCamera,
+} from &quot;tosijs-product&quot;;
+</code></pre>
+<h2>Quick Start</h2>
+<p>Every tosijs-product page follows the same pattern:</p>
+<ol>
+<li>Wrap everything in <code>&lt;tosi-product&gt;</code></li>
+<li>Create <code>&lt;tosi-product-section&gt;</code> elements — each one pins its content and converts scroll distance to 0-1 progress</li>
+<li>Inside sections, use <code>data-scroll-animate</code> on children to drive them with scroll progress</li>
+</ol>
+<h3>Minimal example</h3>
+<pre><code class="language-html">&lt;tosi-product&gt;
+  &lt;tosi-product-section scroll=&quot;200&quot;&gt;
+    &lt;tosi-interpolator data-scroll-animate easing=&quot;ease-in-out&quot;&gt;
+      &lt;tosi-waypoint
+        progress=&quot;0.0&quot;
+        style=&quot;opacity: 0; transform: scale(0.9)&quot;
+      &gt;&lt;/tosi-waypoint&gt;
+      &lt;tosi-waypoint
+        progress=&quot;0.3&quot;
+        style=&quot;opacity: 1; transform: scale(1)&quot;
+      &gt;&lt;/tosi-waypoint&gt;
+      &lt;tosi-waypoint
+        progress=&quot;0.7&quot;
+        style=&quot;opacity: 1; transform: scale(1)&quot;
+      &gt;&lt;/tosi-waypoint&gt;
+      &lt;tosi-waypoint
+        progress=&quot;1.0&quot;
+        style=&quot;opacity: 0; transform: scale(0.9)&quot;
+      &gt;&lt;/tosi-waypoint&gt;
+      &lt;h1&gt;Hello, World&lt;/h1&gt;
+    &lt;/tosi-interpolator&gt;
+  &lt;/tosi-product-section&gt;
+&lt;/tosi-product&gt;
+</code></pre>
+<p>The <code>scroll=&quot;200&quot;</code> means the section creates 2x the viewport height of scroll distance. As the user scrolls through it, progress goes from 0 to 1, and the interpolator fades the heading in and out.</p>
+<h2>The scroll attribute</h2>
+<p>The <code>scroll</code> attribute is a <strong>viewport-relative percentage</strong>, not pixels:</p>
+<ul>
+<li><code>scroll=&quot;100&quot;</code> — 1x the container dimension (default)</li>
+<li><code>scroll=&quot;300&quot;</code> — 3x, giving more scroll distance for slower animations</li>
+<li><code>scroll=&quot;500&quot;</code> — 5x, for long sequences like map flights</li>
+</ul>
+<h2>Scroll ranges</h2>
+<p>Use <code>data-scroll-range</code> to constrain a child&#39;s animation to part of the section:</p>
+<pre><code class="language-html">&lt;tosi-product-section scroll=&quot;300&quot;&gt;
+  &lt;!-- First half --&gt;
+  &lt;tosi-interpolator data-scroll-range=&quot;0,0.5&quot; easing=&quot;ease-in-out&quot;&gt;
+    &lt;tosi-waypoint progress=&quot;0&quot; style=&quot;opacity: 0&quot;&gt;&lt;/tosi-waypoint&gt;
+    &lt;tosi-waypoint progress=&quot;0.5&quot; style=&quot;opacity: 1&quot;&gt;&lt;/tosi-waypoint&gt;
+    &lt;tosi-waypoint progress=&quot;1&quot; style=&quot;opacity: 0&quot;&gt;&lt;/tosi-waypoint&gt;
+    &lt;h2&gt;Part One&lt;/h2&gt;
+  &lt;/tosi-interpolator&gt;
+
+  &lt;!-- Second half --&gt;
+  &lt;tosi-interpolator data-scroll-range=&quot;0.5,1&quot; easing=&quot;ease-in-out&quot;&gt;
+    &lt;tosi-waypoint progress=&quot;0&quot; style=&quot;opacity: 0&quot;&gt;&lt;/tosi-waypoint&gt;
+    &lt;tosi-waypoint progress=&quot;0.5&quot; style=&quot;opacity: 1&quot;&gt;&lt;/tosi-waypoint&gt;
+    &lt;tosi-waypoint progress=&quot;1&quot; style=&quot;opacity: 0&quot;&gt;&lt;/tosi-waypoint&gt;
+    &lt;h2&gt;Part Two&lt;/h2&gt;
+  &lt;/tosi-interpolator&gt;
+&lt;/tosi-product-section&gt;
+</code></pre>
+<h2>Video scrubbing</h2>
+<p>Add <code>data-scroll-animate=&quot;currentTime&quot;</code> to any <code>&lt;video&gt;</code> element:</p>
+<pre><code class="language-html">&lt;tosi-product-section scroll=&quot;300&quot;&gt;
+  &lt;video
+    src=&quot;clip.mp4&quot;
+    data-scroll-animate=&quot;currentTime&quot;
+    muted
+    playsinline
+    preload=&quot;auto&quot;
+  &gt;&lt;/video&gt;
+&lt;/tosi-product-section&gt;
+</code></pre>
+<p>For smoother results, convert the video to a filmstrip mosaic (see <a href="components.md#tosi-filmstrip">Components</a>).</p>
+<h2>Lottie animations</h2>
+<pre><code class="language-html">&lt;tosi-product-section scroll=&quot;200&quot;&gt;
+  &lt;tosi-lottie src=&quot;animation.json&quot; data-scroll-animate=&quot;lottie&quot;&gt;&lt;/tosi-lottie&gt;
+&lt;/tosi-product-section&gt;
+</code></pre>
+<h2>Nested and horizontal scrolling</h2>
+<p>Sections auto-detect their scroll parent. Place a <code>&lt;tosi-product&gt;</code> inside any scrollable container and it works:</p>
+<pre><code class="language-html">&lt;div style=&quot;height: 60vh; overflow-y: auto;&quot;&gt;
+  &lt;tosi-product&gt;
+    &lt;tosi-product-section scroll=&quot;200&quot;&gt;...&lt;/tosi-product-section&gt;
+  &lt;/tosi-product&gt;
+&lt;/div&gt;
+</code></pre>
+<p>For horizontal scrolling, set <code>direction=&quot;horizontal&quot;</code> and use the appropriate layout on the parent:</p>
+<pre><code class="language-html">&lt;div style=&quot;overflow-x: auto; white-space: nowrap;&quot;&gt;
+  &lt;tosi-product style=&quot;display: inline-flex; width: max-content; height: 100%&quot;&gt;
+    &lt;tosi-product-section
+      direction=&quot;horizontal&quot;
+      scroll=&quot;200&quot;
+      style=&quot;flex-shrink: 0&quot;
+    &gt;
+      ...
+    &lt;/tosi-product-section&gt;
+  &lt;/tosi-product&gt;
+&lt;/div&gt;
+</code></pre>
+<h2>Accessibility</h2>
+<p>When <code>prefers-reduced-motion: reduce</code> is active, all scroll-driven child animations are skipped. Only <code>scrollCallback</code> continues to fire, allowing you to provide alternative experiences.</p>
+
+  </article>
+  <nav class="doc-nav" aria-label="Documentation">
+  <ul>
+    <li><a href="/components/">Component Reference</a></li>
+    <li><a href="/getting-started/" aria-current="page" class="current">Getting Started</a></li>
+    <li><a href="/">tosijs-product</a></li>
+  </ul>
+  </nav>
+  <ul class="doc-navbar">
+    <li><a href="https://tosijs.net" data-icon="tosi">tosijs</a></li>
+    <li><a href="https://ui.tosijs.net" data-icon="tosi">tosijs-ui</a></li>
+    <li><a href="https://3d.tosijs.net" data-icon="tosi">tosijs-3d</a></li>
+    <li><a href="https://github.com/tonioloewald/tosijs-product" data-icon="github">github</a></li>
+    <li><a href="https://www.npmjs.com/package/tosijs-product" data-icon="npm">npmjs</a></li>
+  </ul>
+  </tosi-doc-system>
+  <script src="/iife.js"></script>
+</body>
+</html>

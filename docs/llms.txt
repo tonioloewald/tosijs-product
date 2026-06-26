@@ -1,0 +1,16 @@
+# tosijs-product v0.6.0
+
+Scroll-linked animation components for tosijs.
+
+- Docs: https://product.tosijs.net
+- Source: https://github.com/tonioloewald/tosijs-product
+- npm: https://www.npmjs.com/package/tosijs-product
+
+## Documentation
+
+Each component's full documentation (with live code examples) is
+embedded in its distributed JS file as inline comments. Read the
+relevant dist/*.js file for complete docs, usage examples, and API.
+
+## Components and Utilities
+

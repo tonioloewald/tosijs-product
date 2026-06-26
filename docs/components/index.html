@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Hide the pre-rendered body until <tosi-doc-system> hydrates, then fade it
+       in — avoids the layout shift as the static markup is swapped for the live
+       doc browser. <noscript> keeps it visible for no-JS readers/crawlers; the
+       timeout is a safety net so a failed/slow hydration can't leave it blank. -->
+  <style>body{opacity:0;transition:opacity .25s ease}</style>
+  <noscript><style>body{opacity:1!important}</style></noscript>
+  <script>setTimeout(function(){if(document.body)document.body.style.opacity='1'},4000)</script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="/doc-system.css" data-tosi-doc-system />
+  <title>Component Reference — tosijs-product</title>
+  <meta name="description" content="Top-level container that wraps your scroll story. No required attributes." />
+  <link rel="canonical" href="https://product.tosijs.net/components/" />
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="tosijs-product" />
+  <meta property="og:title" content="Component Reference — tosijs-product" />
+  <meta property="og:description" content="Top-level container that wraps your scroll story. No required attributes." />
+  <meta property="og:url" content="https://product.tosijs.net/components/" />
+  <meta name="twitter:card" content="summary" />
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Component Reference","description":"Top-level container that wraps your scroll story. No required attributes.","url":"https://product.tosijs.net/components/","inLanguage":"en","isPartOf":{"@type":"WebSite","name":"tosijs-product","url":"https://product.tosijs.net"}}</script>
+  <link rel="icon" href="/favicon.svg" />
+</head>
+<body>
+  <tosi-doc-system docs="/docs.json" config="{&quot;projectName&quot;:&quot;tosijs-product&quot;,&quot;projectLinks&quot;:{&quot;tosijs&quot;:&quot;https://tosijs.net&quot;,&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs-product&quot;}}">
+  <article class="doc-content">
+<h1>Component Reference</h1>
+<h2>tosi-product</h2>
+<p>Top-level container that wraps your scroll story. No required attributes.</p>
+<pre><code class="language-html">&lt;tosi-product&gt;
+  &lt;!-- sections go here --&gt;
+&lt;/tosi-product&gt;
+</code></pre>
+<h2>tosi-product-section</h2>
+<p>Converts scroll position into a normalized 0-1 progress value. Content is pinned to the viewport via <code>position: sticky</code> while the user scrolls through extra height created by the <code>scroll</code> attribute.</p>
+<h3>Attributes</h3>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>scroll</code></td>
+<td><code>100</code></td>
+<td>Scroll distance as a percentage of the container dimension. <code>100</code> = one viewport height (or width for horizontal). <code>300</code> = three viewports of scrolling.</td>
+</tr>
+<tr>
+<td><code>direction</code></td>
+<td><code>vertical</code></td>
+<td><code>&quot;vertical&quot;</code> or <code>&quot;horizontal&quot;</code></td>
+</tr>
+<tr>
+<td><code>debug</code></td>
+<td>—</td>
+<td>When present, shows an overlay with the current progress value</td>
+</tr>
+</tbody></table>
+<h3>Properties</h3>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>scrollCallback</code></td>
+<td><code>(progress: number, el: HTMLElement) =&gt; void</code></td>
+<td>Called on every scroll update with the current progress</td>
+</tr>
+</tbody></table>
+<h3>How progress works</h3>
+<p>Progress is calculated as <code>clamp(-offset / scrollAmount, 0, 1)</code> where offset is the section&#39;s position relative to the scroll container. The section queries children with <code>[data-scroll-animate]</code> or <code>[data-scroll-range]</code> and dispatches progress to each.</p>
+<p>Children receive progress via:</p>
+<ol>
+<li><code>setScrollProgress(localProgress)</code> if the element implements it</li>
+<li><code>data-scroll-animate=&quot;currentTime&quot;</code> — sets <code>el.currentTime</code> on video elements</li>
+<li><code>data-scroll-animate=&quot;lottie&quot;</code> — calls <code>animation.goToAndStop(frame, true)</code> on Lottie players</li>
+</ol>
+<h3>Scroll ranges</h3>
+<p>Use <code>data-scroll-range=&quot;start,end&quot;</code> on any child to constrain its animation to a sub-range. For example, <code>data-scroll-range=&quot;0.5,1&quot;</code> means the child only animates during the second half of the section&#39;s scroll.</p>
+<p>The CSS custom property <code>--local-progress</code> is set on every animated child and can be used in <code>calc()</code> expressions.</p>
+<h3>Reduced motion</h3>
+<p>When <code>prefers-reduced-motion: reduce</code> is active, child animations are skipped. Only <code>scrollCallback</code> still fires.</p>
+<h2>tosi-interpolator</h2>
+<p>Declarative CSS property interpolation between waypoints. Place <code>&lt;tosi-waypoint&gt;</code> children to define keyframes, and one or more content elements that receive the interpolated styles.</p>
+<h3>Attributes</h3>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>easing</code></td>
+<td>—</td>
+<td>Set to <code>&quot;ease-in-out&quot;</code> for easeInOutQuad between waypoints. Default is linear.</td>
+</tr>
+</tbody></table>
+<pre><code class="language-html">&lt;tosi-interpolator data-scroll-animate easing=&quot;ease-in-out&quot;&gt;
+  &lt;tosi-waypoint
+    progress=&quot;0.0&quot;
+    style=&quot;opacity: 0; transform: translateY(50px)&quot;
+  &gt;&lt;/tosi-waypoint&gt;
+  &lt;tosi-waypoint
+    progress=&quot;0.5&quot;
+    style=&quot;opacity: 1; transform: translateY(0px)&quot;
+  &gt;&lt;/tosi-waypoint&gt;
+  &lt;tosi-waypoint
+    progress=&quot;1.0&quot;
+    style=&quot;opacity: 0; transform: translateY(-50px)&quot;
+  &gt;&lt;/tosi-waypoint&gt;
+  &lt;div&gt;Your content here&lt;/div&gt;
+&lt;/tosi-interpolator&gt;
+</code></pre>
+<h3>Interpolation details</h3>
+<ul>
+<li>Numeric values within CSS strings are interpolated individually (e.g. <code>translateY(0px)</code> to <code>translateY(100px)</code>)</li>
+<li>Colors (<code>#hex</code>, <code>rgb()</code>, <code>hsl()</code>, named colors) use <code>color-mix(in srgb, ...)</code></li>
+<li>Non-numeric, non-color values snap at the 50% mark</li>
+</ul>
+<h2>tosi-waypoint</h2>
+<p>Defines a keyframe for <code>tosi-interpolator</code>. Hidden element — only its attributes matter.</p>
+<h3>Attributes</h3>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>progress</code></td>
+<td>0-1 value defining where this keyframe sits in the scroll timeline</td>
+</tr>
+<tr>
+<td><code>style</code></td>
+<td>CSS styles at this keyframe</td>
+</tr>
+</tbody></table>
+<p>When used inside <code>tosi-scroll-camera</code>, waypoints define camera properties instead of CSS styles (see below).</p>
+<h2>tosi-filmstrip</h2>
+<p>Canvas-based frame animator using a single mosaic image (grid of frames). Provides stutter-free scrubbing without video decode overhead.</p>
+<h3>Attributes</h3>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>src</code></td>
+<td>URL of the mosaic image</td>
+</tr>
+<tr>
+<td><code>cols</code></td>
+<td>Number of columns in the grid</td>
+</tr>
+<tr>
+<td><code>rows</code></td>
+<td>Number of rows in the grid</td>
+</tr>
+<tr>
+<td><code>total</code></td>
+<td>Total number of frames</td>
+</tr>
+</tbody></table>
+<p>If the filename matches the pattern <code>name_COLSxROWS_TOTAL.ext</code>, the grid dimensions are parsed automatically.</p>
+<pre><code class="language-html">&lt;tosi-filmstrip src=&quot;clip_10x10_100.webp&quot; data-scroll-animate&gt;&lt;/tosi-filmstrip&gt;
+</code></pre>
+<h3>Creating mosaics</h3>
+<p>Use the included CLI tool:</p>
+<pre><code class="language-bash">bunx tosi-mosaic video.mp4 -f 100 -w 640 -q 75
+</code></pre>
+<p>Options: <code>-f</code> frames, <code>-w</code> frame width, <code>-q</code> WebP quality, <code>-r</code> input FPS.</p>
+<h2>tosi-scroll-mapper</h2>
+<p>Generic scroll progress wrapper. Receives progress from its parent section and forwards it to a callback. Useful for driving third-party components (maps, charts, etc.) that don&#39;t implement <code>setScrollProgress</code>.</p>
+<h3>Properties</h3>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>scrollCallback</code></td>
+<td><code>(progress: number) =&gt; void</code></td>
+<td>Called with progress on every scroll update. <code>this</code> is the mapper element.</td>
+</tr>
+</tbody></table>
+<pre><code class="language-typescript">tosiScrollMapper(
+  {
+    scrollCallback(progress) {
+      const map = this.querySelector(&quot;tosi-map&quot;);
+      map.coords = `${lat},${lng},${zoom}`;
+    },
+  },
+  mapBox({ token: &quot;...&quot;, coords: &quot;37.46,-122.43,12&quot; })
+);
+</code></pre>
+<h2>tosi-scroll-camera</h2>
+<p>Waypoint-driven camera controller for BabylonJS scenes. Place inside or as a sibling of a <code>&lt;tosi-3d&gt;</code> element. Uses <code>&lt;tosi-waypoint&gt;</code> children to define camera keyframes.</p>
+<h3>Attributes</h3>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>easing</code></td>
+<td>—</td>
+<td>Set to <code>&quot;ease-in-out&quot;</code> for easeInOutQuad between waypoints</td>
+</tr>
+</tbody></table>
+<h3>Waypoint attributes</h3>
+<p>For <code>ArcRotateCamera</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>alpha</code></td>
+<td>Horizontal rotation angle (radians)</td>
+</tr>
+<tr>
+<td><code>beta</code></td>
+<td>Vertical rotation angle (radians). 0 = top-down, pi/2 = eye-level</td>
+</tr>
+<tr>
+<td><code>radius</code></td>
+<td>Distance from target</td>
+</tr>
+<tr>
+<td><code>target-x</code>, <code>target-y</code>, <code>target-z</code></td>
+<td>Camera target position</td>
+</tr>
+</tbody></table>
+<p>For positional cameras:</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>x</code>, <code>y</code>, <code>z</code></td>
+<td>Camera position</td>
+</tr>
+<tr>
+<td><code>fov</code></td>
+<td>Field of view</td>
+</tr>
+</tbody></table>
+<pre><code class="language-html">&lt;tosi-scroll-camera data-scroll-animate easing=&quot;ease-in-out&quot;&gt;
+  &lt;tosi-waypoint
+    progress=&quot;0&quot;
+    alpha=&quot;-1.57&quot;
+    beta=&quot;1.2&quot;
+    radius=&quot;110&quot;
+  &gt;&lt;/tosi-waypoint&gt;
+  &lt;tosi-waypoint
+    progress=&quot;0.5&quot;
+    alpha=&quot;0&quot;
+    beta=&quot;1.0&quot;
+    radius=&quot;70&quot;
+  &gt;&lt;/tosi-waypoint&gt;
+  &lt;tosi-waypoint
+    progress=&quot;1&quot;
+    alpha=&quot;1.57&quot;
+    beta=&quot;1.55&quot;
+    radius=&quot;76&quot;
+  &gt;&lt;/tosi-waypoint&gt;
+&lt;/tosi-scroll-camera&gt;
+</code></pre>
+<h2>tosi-scroll-time</h2>
+<p>Maps scroll progress to a time-of-day value on a sibling <code>&lt;tosi-b3d-skybox&gt;</code> element. Set <code>realtimeScale=&quot;0&quot;</code> on the skybox to disable auto-advancement.</p>
+<h3>Attributes</h3>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>from</code></td>
+<td><code>0</code></td>
+<td>Start hour (0-24)</td>
+</tr>
+<tr>
+<td><code>to</code></td>
+<td><code>24</code></td>
+<td>End hour (0-24)</td>
+</tr>
+</tbody></table>
+<pre><code class="language-html">&lt;tosi-scroll-time data-scroll-animate from=&quot;6&quot; to=&quot;18&quot;&gt;&lt;/tosi-scroll-time&gt;
+</code></pre>
+<h2>tosi-scroll-animation</h2>
+<p>Scrubs a named BabylonJS AnimationGroup to the frame corresponding to scroll progress.</p>
+<h3>Attributes</h3>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>name</code></td>
+<td>Name of the AnimationGroup to control</td>
+</tr>
+</tbody></table>
+<pre><code class="language-html">&lt;tosi-scroll-animation
+  data-scroll-animate
+  name=&quot;DoorOpen&quot;
+&gt;&lt;/tosi-scroll-animation&gt;
+</code></pre>
+
+  </article>
+  <nav class="doc-nav" aria-label="Documentation">
+  <ul>
+    <li><a href="/components/" aria-current="page" class="current">Component Reference</a></li>
+    <li><a href="/getting-started/">Getting Started</a></li>
+    <li><a href="/">tosijs-product</a></li>
+  </ul>
+  </nav>
+  <ul class="doc-navbar">
+    <li><a href="https://tosijs.net" data-icon="tosi">tosijs</a></li>
+    <li><a href="https://ui.tosijs.net" data-icon="tosi">tosijs-ui</a></li>
+    <li><a href="https://3d.tosijs.net" data-icon="tosi">tosijs-3d</a></li>
+    <li><a href="https://github.com/tonioloewald/tosijs-product" data-icon="github">github</a></li>
+    <li><a href="https://www.npmjs.com/package/tosijs-product" data-icon="npm">npmjs</a></li>
+  </ul>
+  </tosi-doc-system>
+  <script src="/iife.js"></script>
+</body>
+</html>

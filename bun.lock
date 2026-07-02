@@ -13,8 +13,8 @@
         "typescript": "^5.9.3",
       },
       "peerDependencies": {
-        "tosijs": "^1.6.1",
-        "tosijs-ui": "^1.6.9",
+        "tosijs": "^1.6.4",
+        "tosijs-ui": "^1.6.11",
       },
     },
   },
@@ -43,11 +43,11 @@
 
     "tjs-lang": ["tjs-lang@0.8.2", "", { "dependencies": { "acorn": "^8.15.0", "acorn-walk": "^8.3.4", "tosijs-schema": "^1.3.0" }, "bin": { "tjs": "src/cli/tjs.ts", "tjsx": "src/cli/tjsx.ts", "tjs-playground": "src/cli/playground.ts", "create-tjs-app": "src/cli/create-app.ts", "ajs-install-vscode": "bin/install-vscode.sh", "ajs-install-cursor": "bin/install-cursor.sh" } }, "sha512-f8NulZ/eeCdWETD6WmKnvfecWkLMzMhz3V88WFLmbCgRRibUY60y40Ojk36PNQImo2dGkR1yJXg2FFtlaUs2Qw=="],
 
-    "tosijs": ["tosijs@1.6.3", "", {}, "sha512-QvI+8K/3VlM2hZLv3v1Yr2ifT34kIBKi1q++PNeaXlOHRCAcmRS1LTj25DhXkF3U3d2DAmiOkh86OaPU3170mQ=="],
+    "tosijs": ["tosijs@1.6.4", "", {}, "sha512-nUwqtjeVUWE06t7b5+VobF83k2Wc4OVKvsH2MbzBm1ESWc1bWLvdcNhDFQ519suvQVo2FEBmoT2p71fLWmDYxg=="],
 
     "tosijs-schema": ["tosijs-schema@1.3.0", "", {}, "sha512-ocCu3dcRw9ANsIyMYkEKP0lC0EVtwMPStFs5KbXFhoXDyixplsNWvUH1umtrx3XkbsBE1jdr37yyjDTqwCV3dA=="],
 
-    "tosijs-ui": ["tosijs-ui@1.6.9", "", { "peerDependencies": { "happy-dom": "^20.7.0", "marked": "^16.4.2", "tjs-lang": "^0.8.2", "tosijs": "^1.6.0" }, "optionalPeers": ["happy-dom", "tjs-lang"], "bin": { "tosijs-make-icons": "bin/make-icon-data.js", "tosijs-dev-certs": "tls/create-dev-certs.sh" } }, "sha512-RrSeIMlA6V6FCNMeojYvHLzVy8SAMHx6P48XszL3XJLwaRGLVHBFEzmO3fQMr5TFIonqmExHHihxM/QDna48Yw=="],
+    "tosijs-ui": ["tosijs-ui@1.6.11", "", { "peerDependencies": { "happy-dom": "^20.7.0", "marked": "^16.4.2", "tjs-lang": "^0.8.2", "tosijs": "^1.6.4" }, "optionalPeers": ["happy-dom", "tjs-lang"], "bin": { "tosijs-make-icons": "bin/make-icon-data.js", "tosijs-dev-certs": "tls/create-dev-certs.sh" } }, "sha512-Qc8dEBKVCMTVhforOMHxmqmHiQv/Jh/ENxJP1tJyx72hZgmcG1LrBniegGakgowDu6dqsWUNaXsbIVJRKcsEQg=="],
 
     "typescript": ["typescript@5.9.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw=="],
 

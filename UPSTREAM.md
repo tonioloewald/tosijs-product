@@ -32,6 +32,40 @@ narrative-landing capability.
 
 -->
 
+## `<tosi-3d>` has no declarative model source
+
+**Context.** Every other media element in a scroll narrative self-loads from a
+`src` attribute (`<video src>`, `<tosi-filmstrip src>`, `<tosi-lottie src>`), so
+it works dropped straight into markdown HTML. `<tosi-3d>` (`babylon-3d.js`) has
+no `static initAttributes` and reads no `src`/`url`/`model` attribute — loading a
+model is the `loadScene(path, file)` **method** (babylon-3d.js:245), callable
+only from JS (`sceneCreated`, or externally). A bare `<tosi-3d>` hydrates to an
+empty scene. This is the ONE thing that stops a cinematic product narrative from
+being 100% declarative HTML. (A default `ArcRotateCamera` IS created when no
+`sceneCreated` is given — babylon-3d.js:289 — and `<tosi-scroll-camera>`
+waypoints already drive it declaratively, so only the model load is the gap.)
+
+**Suggestion (any of):** (A) add a declarative `src` attr to `tosi-3d` that
+calls `loadScene` on connect (+ optional default `HemisphericLight`); or (C) ship
+a tiny nested loader child, e.g. `<tosi-3d-model src="/x.glb">`, that calls the
+parent's `loadScene` on connect — keeps markup declarative without changing the
+core element. Then `<tosi-3d>` narratives are pure HTML like the rest.
+
+## Doc-browser resets the tab `<title>` client-side, ignoring `headTitle`
+
+**Context.** The static generator writes the right `<title>` (respects the doc's
+`headTitle` metadata — verified: our home page's static `<title>` is
+"tosijs-product — cinematic, scroll-driven product pages in HTML"). But after
+hydration the doc-browser overwrites `document.title` with `doc.title —
+projectName`, which for a home doc titled "tosijs-product" on a project named
+"tosijs-product" yields the doubled "tosijs-product — tosijs-product". Crawlers
+that use the served HTML get the good title; live visitors (and JS-rendering
+crawlers) see the doubled one.
+
+**Suggestion.** In the doc-browser's client-side title logic, honor `headTitle`
+when present (same precedence the static generator uses in `generate-site.js`),
+and de-dupe when `doc.title` already equals/contains `projectName`.
+
 ## `docPaths` silently shadowed by `outputDir`
 
 **Context.** Our pre-adoption setup kept source `.md` docs in `docs/`. After

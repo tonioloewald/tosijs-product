@@ -12,13 +12,33 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```bash
 bun install              # Install dependencies
-bun run start            # Dev server with watch mode (port 8788)
-bun run build            # Build library (ESM + IIFE) and demo
+bun run start            # Build, then start the doc-site dev server (bin/site.ts)
+bun run build            # Build the doc site + library, then exit (bin/site.ts --build)
+bun run build:legacy     # Old standalone demo build (dev.ts) — kept for reference
 bun run format           # ESLint + Prettier
 bun run test             # Bun test runner (currently covers interpolation helpers)
+bun test src/interpolation.test.ts   # Run a single test file
 ```
 
-The build is a custom script (`dev.ts`) using `Bun.build` — it produces `dist/module.js` (ESM), `dist/index.js` (IIFE), `demo/index.js`, `demo/embed.js`, and `demo/theme.js`.
+**Build pipeline** (`bin/site.ts`): a thin wrapper over `tosijs-ui/site`'s reusable doc-system. Two stages:
+
+1. `buildSite(siteConfig)` (from `tosijs-ui/site`) renders the static doc site into `docs/` — scans `docPaths` (`src/` doc-comment blocks + `README.md` as the home page + `src/docs/*.md`), bundles the `demo/site.ts` hydration entry to IIFE, copies `staticDirs`, and emits `llms.txt`. Config lives in `tosijs-product-site.config.ts`.
+2. `buildLibrary()` produces the npm artefacts in `dist/`: `dist/module.js` (ESM, tosijs/tosijs-ui external), `dist/index.js` (self-contained IIFE for CDN), and flattened `dist/*.d.ts` (via `tsc --emitDeclarationOnly`, then moved up out of `dist/src/`).
+
+`docs/` is **generated output** — `buildSite` runs `rm -rf docs/` first, so never hand-edit it or put source `.md` there (source docs live in `src/docs/`). Tests preload `happydom.ts` (see `bunfig.toml`) for a DOM in Bun. Dev server runs on **8788** (`port` in the site config; 8787 is tosijs-ui's).
+
+### README is the cinematic landing page
+
+The doc-system renders `README.md` as the home page. `marked` runs with **no sanitizer**, so raw (non-fenced) HTML in the README — e.g. a literal `<tosi-product>…</tosi-product>` — is pre-rendered into the static `<article class="doc-content">` and then hydrated by `/iife.js` (our `bundleEntry: demo/site.ts`). This is how the README hosts the full cinematic narrative as **plain declarative HTML**, no JS orchestration. Conventions:
+
+- **Contiguity:** a raw-HTML block ends at the first blank line (CommonMark), so the whole `<style>`+`<tosi-product>` block must contain **no blank lines**. Scope its CSS under a wrapper class (we use `.tp-hero`).
+- **No `<script>` execution** and **no `app.themes`** in raw markdown HTML — style with a `<style>` block (CSS vars), and use only declarative scenes. Scenes needing JS (currently just `<tosi-3d>` model loading, which has no `src` attr — loads via the `loadScene()` method) belong in a `<tosi-example>` (its ```js block runs, and it can be maximized), or wait on the upstream fix (see `UPSTREAM.md`).
+- **Assets at web root:** `staticDirs: ["demo/assets"]` flattens files to `/` — reference `/agent-owl.mp4`, `/macbook_neo.glb`, etc., not `assets/…`.
+- **Scene height:** use `var(--tosi-view-size, 100vh)` (the engine's measured viewport in the doc scroll container), not `100vh`.
+- **Per-page SEO** via a single-line JSON HTML comment after the H1: `<!--{ "headTitle": "…", "description": "…", "keywords": [ … ] }-->`.
+- **`editableSources: true`** enables the dev "Edit page source → Save/Download" flow.
+
+Plan (in progress): README = full declarative narrative demo; `src/docs/*` = per-component pages with small maximizable live-example demos.
 
 ## Architecture
 
@@ -97,7 +117,7 @@ Color values blend through `color-mix(in srgb, ...)`. Numeric strings interpolat
 - **Progress is always 0→1**: pin progress maps to this range; exit phase pins at 1.
 - **Mosaic filenames encode grid info**: `name_COLSxROWS_TOTAL.webp` — `TosiFilmstrip` auto-parses this.
 - **IIFE build** (`dist/index.js`) is self-contained (bundles tosijs + tosijs-ui) and exposes `globalThis.tosijs`, `globalThis.tosijsUi`, and `globalThis.tosijsProduct`. Entry point: `src/index-iife.ts`.
-- **Peer dependencies**: `tosijs` (^1.5.7) and `tosijs-ui` (^1.3.0) are required. Dev uses local `file:` links to sibling directories `../tosijs` and `../tosijs-ui`.
+- **Peer dependencies**: `tosijs` (^1.6.4) and `tosijs-ui` (^1.6.11) are required. `tosijs-ui` also supplies the doc-site build system (`tosijs-ui/site`). Dev uses local `file:` links to sibling directories `../tosijs` and `../tosijs-ui`.
 
 ### CLI tool
 
@@ -118,11 +138,17 @@ bunx tosi-mosaic <video-file> [-f frames] [-w width] [-q quality] [-r fps]
 - `src/interpolation.test.ts` — tests for `interpolateStrings` and `interpolateWaypoints`
 - `src/index.ts` — re-exports all public API
 - `src/index-iife.ts` — IIFE entry point; assigns `tosijs`, `tosijsUi`, `tosijsProduct` to `globalThis`
-- `dev.ts` — build script + dev server. ESM build marks tosijs/tosijs-ui as external; IIFE bundles everything. Also produces `demo/index.js`, `demo/embed.js`, `demo/theme.js`.
+- `src/docs/*.md` — extra doc-site pages (`getting-started.md`, `components.md`) scanned by `buildSite`
+- `bin/site.ts` — build entry (doc site via tosijs-ui/site + library via `Bun.build`/`tsc`)
+- `tosijs-product-site.config.ts` — doc-site config (`docPaths`, `staticDirs`, `bundleEntry`, etc.)
+- `demo/site.ts` — doc-site hydration bundle (`bundleEntry`); registers custom elements + wires the doc-system's live-example `context` to `tosijs-product` exports
+- `dev.ts` — **legacy** standalone build/dev server (`build:legacy`); the old per-demo build, superseded by `bin/site.ts`
 - `demo/index.html` + `demo/index.ts` — main demo (page chrome, theme transitions, embedded engines)
 - `demo/embed.html` + `demo/embed.ts` — focused embeddability test (siblings + nested horizontal)
 - `demo/theme.html` + `demo/theme.ts` — focused theme transition test
 - `demo/example.html` — pure HTML demo using only the IIFE build
+- `docs/` — **generated** static site output (wiped and rebuilt by `buildSite`; do not edit)
+- `UPSTREAM.md` — notes on rough edges found while adopting `tosijs-ui/site`, to raise upstream
 
 ## tosijs framework essentials
 

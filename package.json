@@ -34,8 +34,8 @@
   "author": "Tonio Loewald",
   "license": "Apache-2.0",
   "peerDependencies": {
-    "tosijs": "^1.6.1",
-    "tosijs-ui": "^1.6.9"
+    "tosijs": "^1.6.4",
+    "tosijs-ui": "^1.6.11"
   },
   "devDependencies": {
     "@happy-dom/global-registrator": "^20.8.9",

@@ -8,9 +8,13 @@ Scroll-linked animation components for tosijs.
 
 ## Documentation
 
-Each component's full documentation (with live code examples) is
-embedded in its distributed JS file as inline comments. Read the
-relevant dist/*.js file for complete docs, usage examples, and API.
+Full documentation, with live code examples, is at the links below.
 
-## Components and Utilities
+## Pages
 
+- https://product.tosijs.net/components/ — Component Reference
+  Top-level container that wraps your scroll story. No required attributes.
+- https://product.tosijs.net/getting-started/ — Getting Started
+  A single script tag gives you everything — tosijs, tosijs-ui, and tosijs-product with all custom elements registered:
+- https://product.tosijs.net/ — tosijs-product
+  Build Apple-style, scroll-linked product stories with declarative web components. tosijs-product pins sections and drives Lottie, video (WebP mosaics), BabylonJS 3D, and CSS interpolation from scroll position — authored in plain HTML.

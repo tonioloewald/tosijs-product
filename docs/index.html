@@ -181,7 +181,7 @@
 <h2>Getting started</h2>
 <h3>Pure HTML (zero JS orchestration)</h3>
 <p>The IIFE build is self-contained — a single script tag gives you <code>tosijs</code>, <code>tosijsUi</code>, and <code>tosijsProduct</code> as globals, with all custom elements registered automatically:</p>
-<pre><code class="language-html">&lt;!DOCTYPE html&gt;
+<pre><code class="language-xml">&lt;!DOCTYPE html&gt;
 &lt;html&gt;
   &lt;head&gt;
     &lt;meta charset=&quot;utf-8&quot; /&gt;
@@ -253,7 +253,7 @@ document.body.append(app);
 <p><code>scroll</code> on a section is its <strong>pin duration</strong>, expressed as a percentage of the viewport. <code>scroll=&quot;200&quot;</code> means &quot;pin this section for 2× viewport of scroll.&quot; When pin progress reaches 1, the section enters its <strong>exit phase</strong> and scrolls out at 1:1 over its own height. So total scroll claimed = <code>(scroll / 100) * viewport + naturalSize</code>.</p>
 <h2>Themes</h2>
 <p>Register themes (each is a dictionary of CSS custom properties) and reference them from sections:</p>
-<pre><code class="language-ts">const app = tosiProduct(
+<pre><code class="language-typescript">const app = tosiProduct(
   tosiProductSection({ scroll: 100, theme: &quot;midnight&quot; } /* ... */),
   tosiProductSection(
     { scroll: 200, &quot;theme-from&quot;: &quot;midnight&quot;, &quot;theme-to&quot;: &quot;paper&quot; } /* ... */
@@ -273,7 +273,7 @@ app.defaultTheme = &quot;midnight&quot;;
 <pre><code class="language-bash">bunx tosi-mosaic my-video.mp4 --frames 100 --width 1280
 </code></pre>
 <p>Produces <code>my-video_10x10_100.webp</code> (the filename encodes grid + total frames):</p>
-<pre><code class="language-html">&lt;tosi-filmstrip
+<pre><code class="language-xml">&lt;tosi-filmstrip
   src=&quot;my-video_10x10_100.webp&quot;
   data-scroll-animate
 &gt;&lt;/tosi-filmstrip&gt;

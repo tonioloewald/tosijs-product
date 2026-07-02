@@ -22753,12 +22753,12 @@ return ${extracted.testRunner}`;
       if (this.persistToDom) {
         this.updateSources();
       }
-      if ((this.test || executionError) && preview && testManager.enabled.value) {
+      if ((this.test || executionError) && testManager.enabled.value) {
         await new Promise((resolve) => requestAnimationFrame(resolve));
         this.classList.add("-has-tests", "-test-running");
         this.classList.remove("-test-passed", "-test-failed");
         const testTransform = this.dialect === "js" ? transform : await loadTransform("js");
-        this.testResults = this.test ? await runTests(this.test, preview, this.context, testTransform) : { passed: 0, failed: 0, tests: [] };
+        this.testResults = this.test && preview ? await runTests(this.test, preview, this.context, testTransform) : { passed: 0, failed: 0, tests: [] };
         if (executionError) {
           this.testResults.failed += 1;
           this.testResults.tests.unshift({
@@ -28280,7 +28280,7 @@ ${parts.join(`
   var tosiTagList = TosiTagList.elementCreator();
   var xinTagList = gE((...args) => tosiTagList(...args), "xinTagList is deprecated, use tosiTagList instead (tag is now <tosi-tag-list>)");
   // node_modules/tosijs-ui/dist/version.js
-  var version = "1.6.16";
+  var version = "1.6.19";
   // node_modules/tosijs-ui/dist/tooltip.js
   var { span: span18 } = I;
   var tooltipFloat = null;

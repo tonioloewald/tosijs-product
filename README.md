@@ -159,7 +159,7 @@ _This page is the demo._ Scroll — the hero below is a live `<tosi-product>` en
 
 The IIFE build is self-contained — a single script tag gives you `tosijs`, `tosijsUi`, and `tosijsProduct` as globals, with all custom elements registered automatically:
 
-```html
+```xml
 <!DOCTYPE html>
 <html>
   <head>
@@ -244,7 +244,7 @@ document.body.append(app);
 
 Register themes (each is a dictionary of CSS custom properties) and reference them from sections:
 
-```ts
+```typescript
 const app = tosiProduct(
   tosiProductSection({ scroll: 100, theme: "midnight" } /* ... */),
   tosiProductSection(
@@ -272,7 +272,7 @@ bunx tosi-mosaic my-video.mp4 --frames 100 --width 1280
 
 Produces `my-video_10x10_100.webp` (the filename encodes grid + total frames):
 
-```html
+```xml
 <tosi-filmstrip
   src="my-video_10x10_100.webp"
   data-scroll-animate

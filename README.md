@@ -10,6 +10,7 @@ _This page is the demo._ Scroll — the hero below is a live `<tosi-product>` en
 
 <style>
 .doc-content:has(.tp-hero) { overflow: visible !important; max-width: none !important; padding: 0 !important; }
+.doc-content:has(.tp-hero) > :not(.tp-hero):not(style) { max-width: 44em; margin-inline: auto; padding-inline: 1.25rem; box-sizing: border-box; }
 .tp-hero h1, .tp-hero h2, .tp-hero h3 { color:var(--fg); border:none; line-height:1.08; letter-spacing:-.01em; }
 .tp-hero .media-overlay h1, .tp-hero .media-overlay h2 { color:#fff; }
 .tp-hero { --bg:var(--background,#08081a); --fg:var(--text-color,#f0f0f5); --muted:color-mix(in srgb, var(--text-color,#f0f0f5) 62%, var(--background,#08081a)); --accent:var(--brand-color,#9be7ff); --surface:color-mix(in srgb, var(--text-color,#f0f0f5) 8%, transparent); --border:color-mix(in srgb, var(--text-color,#f0f0f5) 16%, transparent); }

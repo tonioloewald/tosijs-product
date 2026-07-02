@@ -13,6 +13,7 @@ _This page is the demo._ Scroll — the hero below is a live `<tosi-product>` en
 .doc-content:has(.tp-hero) > :not(.tp-hero):not(style) { max-width: 44em; margin-inline: auto; padding-inline: 1.25rem; box-sizing: border-box; }
 .tp-hero h1, .tp-hero h2, .tp-hero h3 { color:var(--fg); border:none; line-height:1.08; letter-spacing:-.01em; }
 .tp-hero .media-overlay h1, .tp-hero .media-overlay h2 { color:#fff; }
+.doc-content:has(.tp-hero) > h1, .doc-content:has(.tp-hero) > h2, .doc-content:has(.tp-hero) > h3 { color:var(--text-color); border:none; letter-spacing:-.01em; margin:1.6em 0 .4em; }
 .tp-hero { --bg:var(--background,#08081a); --fg:var(--text-color,#f0f0f5); --muted:color-mix(in srgb, var(--text-color,#f0f0f5) 62%, var(--background,#08081a)); --accent:var(--brand-color,#9be7ff); --surface:color-mix(in srgb, var(--text-color,#f0f0f5) 8%, transparent); --border:color-mix(in srgb, var(--text-color,#f0f0f5) 16%, transparent); }
 .tp-hero .scene { height: var(--tosi-view-size, 100vh); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:2rem; text-align:center; background:var(--bg); color:var(--fg); }
 .tp-hero .scene h1 { font-size: clamp(2.5rem, 9vw, 6rem); margin:0 0 .2em; font-weight:800; letter-spacing:-.02em; }

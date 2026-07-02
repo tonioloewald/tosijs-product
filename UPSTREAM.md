@@ -32,7 +32,17 @@ narrative-landing capability.
 
 -->
 
-## `<tosi-3d>` has no declarative model source
+## ✅ RESOLVED (tosijs-ui 1.6.16) — `<tosi-3d>` has no declarative model source
+
+**Resolution.** Landed in `tosijs-ui@1.6.16`. `<tosi-3d>` now takes declarative
+attributes: `src` (a `.glb` URL, auto-loads on connect like `<img>`),
+`clear-color` (css color or `transparent` to composite over the page theme),
+`fov` (a lens multiplier — `<1` = long product-photography lens), and
+`hero-light` (adds a directional key over the always-on hemispheric fill). A
+soft hemi fill (intensity 0.6) is added whenever the scene has no lights of its
+own, so `src` models never render black. The old Neo-demo look is now pure HTML:
+`<tosi-3d src="/macbook_neo.glb" hero-light fov="0.6" clear-color="transparent">`.
+Verified on the deployed docs (ui.tosijs.net/babylon-3d). Original note below.
 
 **Context.** Every other media element in a scroll narrative self-loads from a
 `src` attribute (`<video src>`, `<tosi-filmstrip src>`, `<tosi-lottie src>`), so

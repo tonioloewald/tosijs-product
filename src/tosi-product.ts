@@ -55,12 +55,23 @@ function interpolateThemeValue(from: string, to: string, t: number): string {
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
 function getScrollParent(el: HTMLElement): EventTarget {
-  let node: HTMLElement | null = el.parentElement;
+  // Walk up the *flattened* tree, not just light-DOM parents. When our host is
+  // slotted into another component's shadow DOM — e.g. the tosijs-ui doc-system,
+  // which scrolls an inner pane in its shadow root and projects `.doc-content`
+  // into it — the real scroll container is reached via `assignedSlot`, not
+  // `parentElement`. Plain `parentElement` dead-ends at the slotted subtree's
+  // light-DOM top and we'd fall back to `window` (which never scrolls there),
+  // freezing the engine. So at each step prefer the slot we're assigned to, then
+  // the light-DOM parent, then hop the shadow→host boundary via getRootNode().
+  let node: Element | null = el;
   while (node) {
-    if (node === document.body || node === document.documentElement) break;
-    const { overflow, overflowX, overflowY } = getComputedStyle(node);
-    if (/(auto|scroll)/.test(overflow + overflowX + overflowY)) return node;
-    node = node.parentElement;
+    const root = node.getRootNode() as ShadowRoot;
+    const next: Element | null =
+      (node as HTMLElement).assignedSlot ?? node.parentElement ?? root.host ?? null;
+    if (!next || next === document.body || next === document.documentElement) break;
+    const { overflow, overflowX, overflowY } = getComputedStyle(next);
+    if (/(auto|scroll)/.test(overflow + overflowX + overflowY)) return next;
+    node = next;
   }
   return window;
 }

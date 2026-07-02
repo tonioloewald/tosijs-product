@@ -1,6 +1,6 @@
 # tosijs-product
 
-<!--{ "headTitle": "tosijs-product — cinematic, scroll-driven product pages in HTML", "description": "Build Apple-style, scroll-linked product stories with declarative web components. tosijs-product pins sections and drives Lottie, video (WebP mosaics), BabylonJS 3D, and CSS interpolation from scroll position — authored in plain HTML.", "keywords": ["scrollytelling", "scroll animation", "product page", "web components", "custom elements", "tosijs", "lottie", "webp mosaic", "babylonjs", "scroll-linked animation", "cinematic landing page", "apple-style scrolling"] }-->
+<!--{ "pin": "top", "order": 1, "headTitle": "tosijs-product — cinematic, scroll-driven product pages in HTML", "description": "Build Apple-style, scroll-linked product stories with declarative web components. tosijs-product pins sections and drives Lottie, video (WebP mosaics), BabylonJS 3D, and CSS interpolation from scroll position — authored in plain HTML.", "keywords": ["scrollytelling", "scroll animation", "product page", "web components", "custom elements", "tosijs", "lottie", "webp mosaic", "babylonjs", "scroll-linked animation", "cinematic landing page", "apple-style scrolling"] }-->
 
 A cinematic product page component library for `tosijs`.
 
@@ -9,7 +9,8 @@ A cinematic product page component library for `tosijs`.
 _This page is the demo._ Scroll — the hero below is a live `<tosi-product>` engine pinned to this doc's scroll container, authored entirely in the Markdown you're reading.
 
 <style>
-.tp-hero { --bg:#08081a; --fg:#f0f0f5; --muted:#a0a0b8; --accent:#9be7ff; --surface:rgba(255,255,255,.06); --border:rgba(255,255,255,.12); }
+.doc-content:has(.tp-hero) { overflow: visible !important; max-width: none !important; padding: 0 !important; }
+.tp-hero { --bg:var(--background,#08081a); --fg:var(--text-color,#f0f0f5); --muted:color-mix(in srgb, var(--text-color,#f0f0f5) 62%, var(--background,#08081a)); --accent:var(--brand-color,#9be7ff); --surface:color-mix(in srgb, var(--text-color,#f0f0f5) 8%, transparent); --border:color-mix(in srgb, var(--text-color,#f0f0f5) 16%, transparent); }
 .tp-hero .scene { height: var(--tosi-view-size, 100vh); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:2rem; text-align:center; background:var(--bg); color:var(--fg); }
 .tp-hero .scene h1 { font-size: clamp(2.5rem, 9vw, 6rem); margin:0 0 .2em; font-weight:800; letter-spacing:-.02em; }
 .tp-hero .scene h2 { font-size: clamp(2rem, 6vw, 4rem); margin:0 0 .4em; font-weight:800; }
@@ -18,9 +19,9 @@ _This page is the demo._ Scroll — the hero below is a live `<tosi-product>` en
 .tp-hero .feature-list { display:flex; flex-direction:column; align-items:flex-start; gap:.5em; max-width:580px; padding:0 1.5rem; }
 .tp-hero .feature-list h2, .tp-hero .feature-list p { text-align:left; }
 .tp-hero .feature-row { font-size:1.05rem; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:.7em 1.1em; margin-top:.3em; font-family:monospace; color:var(--fg); }
-.tp-hero .media-scene { position:relative; height:var(--tosi-view-size, 100vh); overflow:hidden; background:#000; }
+.tp-hero .media-scene { position:relative; height:var(--tosi-view-size, 100vh); overflow:hidden; background:var(--bg,#000); }
 .tp-hero .media-scene > video, .tp-hero .media-scene > tosi-filmstrip { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block; }
-.tp-hero .media-scene.lottie { background:radial-gradient(ellipse at center, #0a0a18 0%, #000 100%); }
+.tp-hero .media-scene.lottie { background:radial-gradient(ellipse at center, var(--background-shaded,#0a0a18) 0%, var(--bg,#000) 100%); }
 .tp-hero .media-scene > tosi-lottie { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:min(70vh,60vw); height:min(70vh,60vw); }
 .tp-hero .media-overlay { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; pointer-events:none; text-align:center; color:#fff; padding:2rem; }
 .tp-hero .media-overlay h2 { font-size:clamp(2rem, 6vw, 4rem); margin:0 0 .3em; font-weight:800; filter:drop-shadow(0 2px 12px rgba(0,0,0,.85)); }

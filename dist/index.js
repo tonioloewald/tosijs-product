@@ -13543,14 +13543,16 @@ ${$}
   }
   var reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   function getScrollParent(el) {
-    let node = el.parentElement;
+    let node = el;
     while (node) {
-      if (node === document.body || node === document.documentElement)
+      const root = node.getRootNode();
+      const next = node.assignedSlot ?? node.parentElement ?? root.host ?? null;
+      if (!next || next === document.body || next === document.documentElement)
         break;
-      const { overflow, overflowX, overflowY } = getComputedStyle(node);
+      const { overflow, overflowX, overflowY } = getComputedStyle(next);
       if (/(auto|scroll)/.test(overflow + overflowX + overflowY))
-        return node;
-      node = node.parentElement;
+        return next;
+      node = next;
     }
     return window;
   }

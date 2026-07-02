@@ -38,6 +38,8 @@
 <p><em>This page is the demo.</em> Scroll — the hero below is a live <code>&lt;tosi-product&gt;</code> engine pinned to this doc&#39;s scroll container, authored entirely in the Markdown you&#39;re reading.</p>
 <style>
 .doc-content:has(.tp-hero) { overflow: visible !important; max-width: none !important; padding: 0 !important; }
+.tp-hero h1, .tp-hero h2, .tp-hero h3 { color:var(--fg); border:none; line-height:1.08; letter-spacing:-.01em; }
+.tp-hero .media-overlay h1, .tp-hero .media-overlay h2 { color:#fff; }
 .tp-hero { --bg:var(--background,#08081a); --fg:var(--text-color,#f0f0f5); --muted:color-mix(in srgb, var(--text-color,#f0f0f5) 62%, var(--background,#08081a)); --accent:var(--brand-color,#9be7ff); --surface:color-mix(in srgb, var(--text-color,#f0f0f5) 8%, transparent); --border:color-mix(in srgb, var(--text-color,#f0f0f5) 16%, transparent); }
 .tp-hero .scene { height: var(--tosi-view-size, 100vh); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:2rem; text-align:center; background:var(--bg); color:var(--fg); }
 .tp-hero .scene h1 { font-size: clamp(2.5rem, 9vw, 6rem); margin:0 0 .2em; font-weight:800; letter-spacing:-.02em; }

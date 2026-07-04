@@ -965,8 +965,88 @@ var tosiScrollTime = TosiScrollTime.elementCreator({
 var tosiScrollAnimation = TosiScrollAnimation.elementCreator({
   tag: "tosi-scroll-animation"
 });
+// src/tosi-scroll-map.ts
+import { Component as Component5, elements as elements4 } from "tosijs";
+var { slot: slot3 } = elements4;
+function easeInOutQuad2(t) {
+  return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+}
+function lerp(a, b, t) {
+  return a + (b - a) * t;
+}
+function findMap(el) {
+  let node = el.parentElement;
+  while (node) {
+    if (node.tagName === "TOSI-MAP")
+      return node;
+    for (const child of Array.from(node.children)) {
+      if (child !== el && child.tagName === "TOSI-MAP")
+        return child;
+    }
+    node = node.parentElement;
+  }
+  return null;
+}
+function readMapWaypoints(host) {
+  return Array.from(host.querySelectorAll("tosi-waypoint")).map((wp) => {
+    const parts = (wp.getAttribute("coords") || "").split(",").map((n) => Number(n.trim()));
+    const at = (i, attr, fallback) => Number.isFinite(parts[i]) ? parts[i] : Number(wp.getAttribute(attr) ?? fallback);
+    return {
+      progress: Number(wp.getAttribute("progress") || 0),
+      lat: at(0, "lat", 0),
+      lng: at(1, "lng", 0),
+      zoom: at(2, "zoom", 1)
+    };
+  }).sort((a, b) => a.progress - b.progress);
+}
+
+class TosiScrollMap extends Component5 {
+  static initAttributes = {
+    easing: ""
+  };
+  static styleSpec = {
+    ":host": { display: "none" }
+  };
+  content = () => slot3();
+  setScrollProgress(progress) {
+    const map = findMap(this);
+    if (!map)
+      return;
+    const wps = readMapWaypoints(this);
+    if (wps.length === 0)
+      return;
+    const easing = this.getAttribute("easing") === "ease-in-out";
+    let lat, lng, zoom;
+    const first = wps[0];
+    const last = wps[wps.length - 1];
+    if (progress <= first.progress) {
+      ({ lat, lng, zoom } = first);
+    } else if (progress >= last.progress) {
+      ({ lat, lng, zoom } = last);
+    } else {
+      let a = first;
+      let b = last;
+      for (let i = 0;i < wps.length - 1; i++) {
+        if (progress >= wps[i].progress && progress <= wps[i + 1].progress) {
+          a = wps[i];
+          b = wps[i + 1];
+          break;
+        }
+      }
+      const raw = (progress - a.progress) / (b.progress - a.progress || 1);
+      const t = easing ? easeInOutQuad2(raw) : raw;
+      lat = lerp(a.lat, b.lat, t);
+      lng = lerp(a.lng, b.lng, t);
+      zoom = lerp(a.zoom, b.zoom, t);
+    }
+    map.coords = `${lat.toFixed(6)},${lng.toFixed(6)},${zoom.toFixed(4)}`;
+  }
+}
+var tosiScrollMap = TosiScrollMap.elementCreator({
+  tag: "tosi-scroll-map"
+});
 // src/tosi-prism.ts
-import { Component as Component5 } from "tosijs";
+import { Component as Component6 } from "tosijs";
 var PRISM_VERSION = "1";
 var CDN = `https://cdn.jsdelivr.net/npm/prismjs@${PRISM_VERSION}`;
 var loaded = new Map;
@@ -1067,7 +1147,7 @@ async function highlightCodeBlocks(root) {
   }
 }
 
-class TosiPrism extends Component5 {
+class TosiPrism extends Component6 {
   static initAttributes = {
     language: "markup"
   };
@@ -1123,6 +1203,7 @@ var tosiPrism = TosiPrism.elementCreator({ tag: "tosi-prism" });
 export {
   tosiWaypoint,
   tosiScrollTime,
+  tosiScrollMap,
   tosiScrollCamera,
   tosiScrollAnimation,
   tosiProductSection,
@@ -1137,6 +1218,7 @@ export {
   highlightCodeBlocks,
   TosiWaypoint,
   TosiScrollTime,
+  TosiScrollMap,
   TosiScrollCamera,
   TosiScrollAnimation,
   TosiProductSection,

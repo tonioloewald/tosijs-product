@@ -51,9 +51,10 @@
 .tp-hero .feature-list { display:flex; flex-direction:column; align-items:flex-start; gap:.5em; max-width:580px; padding:0 1.5rem; }
 .tp-hero .feature-list h2, .tp-hero .feature-list p { text-align:left; }
 .tp-hero .feature-row { font-size:1.05rem; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:.7em 1.1em; margin-top:.3em; font-family:monospace; color:var(--fg); }
-.tp-hero .media-scene { position:relative; height:var(--tosi-view-size, 100vh); overflow:hidden; background:var(--bg,#000); }
-.tp-hero .media-scene > video, .tp-hero .media-scene > tosi-filmstrip { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block; }
-.tp-hero .media-scene.lottie { background:radial-gradient(ellipse at center, var(--background-shaded,#0a0a18) 0%, var(--bg,#000) 100%); }
+.tp-hero .media-scene { position:relative; height:var(--tosi-view-size, 100vh); overflow:hidden; background:#0a0a12; }
+.tp-hero .media-scene > video, .tp-hero .media-scene > tosi-filmstrip, .tp-hero .media-scene > tosi-3d, .tp-hero .media-scene > tosi-map { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block; }
+.tp-hero .media-scene > tosi-map { pointer-events:none; }
+.tp-hero .media-scene.lottie { background:radial-gradient(ellipse at center, #14142a 0%, #0a0a12 100%); }
 .tp-hero .media-scene > tosi-lottie { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:min(70vh,60vw); height:min(70vh,60vw); }
 .tp-hero .media-overlay { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; pointer-events:none; text-align:center; color:#fff; padding:2rem; }
 .tp-hero .media-overlay h2 { font-size:clamp(2rem, 6vw, 4rem); margin:0 0 .3em; font-weight:800; filter:drop-shadow(0 2px 12px rgba(0,0,0,.85)); }
@@ -164,6 +165,58 @@
 <tosi-waypoint progress="0.5" style="opacity:1; transform:translateY(0px)"></tosi-waypoint>
 <tosi-waypoint progress="1" style="opacity:0; transform:translateY(-20px)"></tosi-waypoint>
 <div class="media-overlay"><h2>Frame-perfect at every zoom</h2></div>
+</tosi-interpolator>
+</div>
+</tosi-product-section>
+<tosi-product-section scroll="350">
+<div class="media-scene">
+<tosi-3d src="/macbook_neo.glb" hero-light fov="0.6" clear-color="transparent" data-scroll-animate>
+<tosi-scroll-camera data-scroll-animate easing="ease-in-out">
+<tosi-waypoint progress="0" alpha="-1.57" beta="1.2" radius="110" target-y="10"></tosi-waypoint>
+<tosi-waypoint progress="0.5" alpha="0" beta="1.0" radius="70" target-y="10"></tosi-waypoint>
+<tosi-waypoint progress="1" alpha="1.57" beta="1.55" radius="76" target-y="10"></tosi-waypoint>
+</tosi-scroll-camera>
+</tosi-3d>
+<tosi-interpolator data-scroll-animate data-scroll-range="0,0.4" easing="ease-in-out">
+<tosi-waypoint progress="0" style="opacity:0; transform:translateY(20px)"></tosi-waypoint>
+<tosi-waypoint progress="0.5" style="opacity:1; transform:translateY(0px)"></tosi-waypoint>
+<tosi-waypoint progress="1" style="opacity:0; transform:translateY(-20px)"></tosi-waypoint>
+<div class="media-overlay"><h2>MacBook Neo.</h2><p>A glTF model, lit and framed by scroll — <code>&lt;tosi-3d&gt;</code> driven by a <code>&lt;tosi-scroll-camera&gt;</code>.</p></div>
+</tosi-interpolator>
+<tosi-interpolator data-scroll-animate data-scroll-range="0.5,1" easing="ease-in-out">
+<tosi-waypoint progress="0" style="opacity:0; transform:translateY(20px)"></tosi-waypoint>
+<tosi-waypoint progress="0.5" style="opacity:1; transform:translateY(0px)"></tosi-waypoint>
+<tosi-waypoint progress="1" style="opacity:0; transform:translateY(-20px)"></tosi-waypoint>
+<div class="media-overlay"><h2>Every angle, scroll-driven.</h2></div>
+</tosi-interpolator>
+</div>
+</tosi-product-section>
+<tosi-product-section scroll="400">
+<div class="media-scene">
+<tosi-map token="pk.eyJ1IjoicG9kcGVyc29uIiwiYSI6ImNqc2JlbWU0bjA1ZmY0YW5ycHZod3VhbWcifQ.arvqfpOqMgFYkKgQ35UScA" coords="37.4636,-122.4286,12" map-style="mapbox://styles/mapbox/dark-v11">
+<tosi-scroll-map data-scroll-animate easing="ease-in-out">
+<tosi-waypoint progress="0" coords="37.4636,-122.4286,12"></tosi-waypoint>
+<tosi-waypoint progress="0.5" coords="51,0,2"></tosi-waypoint>
+<tosi-waypoint progress="1" coords="65.0121,25.4651,12"></tosi-waypoint>
+</tosi-scroll-map>
+</tosi-map>
+<tosi-interpolator data-scroll-animate data-scroll-range="0,0.2" easing="ease-in-out">
+<tosi-waypoint progress="0" style="opacity:0; transform:translateY(20px)"></tosi-waypoint>
+<tosi-waypoint progress="0.5" style="opacity:1; transform:translateY(0px)"></tosi-waypoint>
+<tosi-waypoint progress="1" style="opacity:0; transform:translateY(-20px)"></tosi-waypoint>
+<div class="media-overlay"><h2>Half Moon Bay</h2><p>A Mapbox fly-through, waypoint-driven by <code>&lt;tosi-scroll-map&gt;</code> — no scroll callbacks.</p></div>
+</tosi-interpolator>
+<tosi-interpolator data-scroll-animate data-scroll-range="0.4,0.6" easing="ease-in-out">
+<tosi-waypoint progress="0" style="opacity:0; transform:translateY(20px)"></tosi-waypoint>
+<tosi-waypoint progress="0.5" style="opacity:1; transform:translateY(0px)"></tosi-waypoint>
+<tosi-waypoint progress="1" style="opacity:0; transform:translateY(-20px)"></tosi-waypoint>
+<div class="media-overlay"><h2>↑ zoom out, fly ↑</h2></div>
+</tosi-interpolator>
+<tosi-interpolator data-scroll-animate data-scroll-range="0.85,1" easing="ease-in-out">
+<tosi-waypoint progress="0" style="opacity:0; transform:translateY(20px)"></tosi-waypoint>
+<tosi-waypoint progress="0.5" style="opacity:1; transform:translateY(0px)"></tosi-waypoint>
+<tosi-waypoint progress="1" style="opacity:0; transform:translateY(-20px)"></tosi-waypoint>
+<div class="media-overlay"><h2>Oulu, Finland</h2></div>
 </tosi-interpolator>
 </div>
 </tosi-product-section>

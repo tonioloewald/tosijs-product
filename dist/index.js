@@ -10859,6 +10859,7 @@ ${Tt2(T4)}
   __export(exports_src, {
     tosiWaypoint: () => tosiWaypoint,
     tosiScrollTime: () => tosiScrollTime,
+    tosiScrollMap: () => tosiScrollMap,
     tosiScrollCamera: () => tosiScrollCamera,
     tosiScrollAnimation: () => tosiScrollAnimation,
     tosiProductSection: () => tosiProductSection,
@@ -10873,6 +10874,7 @@ ${Tt2(T4)}
     highlightCodeBlocks: () => highlightCodeBlocks,
     TosiWaypoint: () => TosiWaypoint,
     TosiScrollTime: () => TosiScrollTime,
+    TosiScrollMap: () => TosiScrollMap,
     TosiScrollCamera: () => TosiScrollCamera,
     TosiScrollAnimation: () => TosiScrollAnimation,
     TosiProductSection: () => TosiProductSection,
@@ -14463,6 +14465,85 @@ ${$}
   var tosiScrollAnimation = TosiScrollAnimation.elementCreator({
     tag: "tosi-scroll-animation"
   });
+  // src/tosi-scroll-map.ts
+  var { slot: slot3 } = I;
+  function easeInOutQuad2(t2) {
+    return t2 < 0.5 ? 2 * t2 * t2 : -1 + (4 - 2 * t2) * t2;
+  }
+  function lerp(a2, b2, t2) {
+    return a2 + (b2 - a2) * t2;
+  }
+  function findMap(el) {
+    let node = el.parentElement;
+    while (node) {
+      if (node.tagName === "TOSI-MAP")
+        return node;
+      for (const child of Array.from(node.children)) {
+        if (child !== el && child.tagName === "TOSI-MAP")
+          return child;
+      }
+      node = node.parentElement;
+    }
+    return null;
+  }
+  function readMapWaypoints(host) {
+    return Array.from(host.querySelectorAll("tosi-waypoint")).map((wp) => {
+      const parts = (wp.getAttribute("coords") || "").split(",").map((n2) => Number(n2.trim()));
+      const at = (i2, attr, fallback) => Number.isFinite(parts[i2]) ? parts[i2] : Number(wp.getAttribute(attr) ?? fallback);
+      return {
+        progress: Number(wp.getAttribute("progress") || 0),
+        lat: at(0, "lat", 0),
+        lng: at(1, "lng", 0),
+        zoom: at(2, "zoom", 1)
+      };
+    }).sort((a2, b2) => a2.progress - b2.progress);
+  }
+
+  class TosiScrollMap extends u {
+    static initAttributes = {
+      easing: ""
+    };
+    static styleSpec = {
+      ":host": { display: "none" }
+    };
+    content = () => slot3();
+    setScrollProgress(progress) {
+      const map = findMap(this);
+      if (!map)
+        return;
+      const wps = readMapWaypoints(this);
+      if (wps.length === 0)
+        return;
+      const easing = this.getAttribute("easing") === "ease-in-out";
+      let lat, lng, zoom;
+      const first = wps[0];
+      const last = wps[wps.length - 1];
+      if (progress <= first.progress) {
+        ({ lat, lng, zoom } = first);
+      } else if (progress >= last.progress) {
+        ({ lat, lng, zoom } = last);
+      } else {
+        let a2 = first;
+        let b2 = last;
+        for (let i2 = 0;i2 < wps.length - 1; i2++) {
+          if (progress >= wps[i2].progress && progress <= wps[i2 + 1].progress) {
+            a2 = wps[i2];
+            b2 = wps[i2 + 1];
+            break;
+          }
+        }
+        const raw = (progress - a2.progress) / (b2.progress - a2.progress || 1);
+        const t2 = easing ? easeInOutQuad2(raw) : raw;
+        lat = lerp(a2.lat, b2.lat, t2);
+        lng = lerp(a2.lng, b2.lng, t2);
+        zoom = lerp(a2.zoom, b2.zoom, t2);
+      }
+      map.coords = `${lat.toFixed(6)},${lng.toFixed(6)},${zoom.toFixed(4)}`;
+    }
+  }
+  var tosiScrollMap = TosiScrollMap.elementCreator({
+    tag: "tosi-scroll-map"
+  });
   // src/tosi-prism.ts
   var PRISM_VERSION = "1";
   var CDN = `https://cdn.jsdelivr.net/npm/prismjs@${PRISM_VERSION}`;
@@ -15799,7 +15880,7 @@ ${$}
   }
   var bodymovinPlayer = BodymovinPlayer.elementCreator();
   // node_modules/tosijs-ui/dist/carousel.js
-  var { button, slot: slot3, div: div2 } = I;
+  var { button, slot: slot4, div: div2 } = I;
 
   class TosiCarousel extends u {
     static preferredTagName = "tosi-carousel";
@@ -15998,7 +16079,7 @@ ${$}
       }
     }
     content = () => [
-      div2({ part: "pager" }, button({ title: "previous slide", part: "back" }, icons.chevronLeft()), div2({ title: "slides", role: "group", part: "scroller" }, div2({ part: "grid" }, slot3())), button({ title: "next slide", part: "forward" }, icons.chevronRight())),
+      div2({ part: "pager" }, button({ title: "previous slide", part: "back" }, icons.chevronLeft()), div2({ title: "slides", role: "group", part: "scroller" }, div2({ part: "grid" }, slot4())), button({ title: "next slide", part: "forward" }, icons.chevronRight())),
       div2({ title: "choose slide to display", role: "group", part: "progress" })
     ];
     connectedCallback() {
@@ -16395,7 +16476,7 @@ ${$}
   };
 
   // node_modules/tosijs-ui/dist/float.js
-  var { slot: slot4 } = I;
+  var { slot: slot5 } = I;
 
   class TosiFloat extends u {
     static preferredTagName = "tosi-float";
@@ -16405,7 +16486,7 @@ ${$}
       remainOnResize: "remove",
       remainOnScroll: "remain"
     };
-    content = slot4();
+    content = slot5();
     static shadowStyleSpec = {
       ":host": {
         position: "fixed"
@@ -20784,7 +20865,7 @@ ${items}
   }
 
   // node_modules/tosijs-ui/dist/tab-selector.js
-  var { div: div7, slot: slot5, span: span6, button: button6 } = I;
+  var { div: div7, slot: slot6, span: span6, button: button6 } = I;
 
   class TosiTabs extends u {
     static preferredTagName = "tosi-tabs";
@@ -20883,8 +20964,8 @@ ${items}
     };
     onCloseTab = null;
     content = [
-      div7({ role: "tabpanel", part: "tabpanel" }, div7({ part: "tabrow" }, div7({ class: "tabs", part: "tabs" }), div7({ class: "elastic" }), slot5({ name: "after-tabs" })), div7({ class: "border" }, div7({ class: "selected", part: "selected" }))),
-      slot5()
+      div7({ role: "tabpanel", part: "tabpanel" }, div7({ part: "tabrow" }, div7({ class: "tabs", part: "tabs" }), div7({ class: "elastic" }), slot6({ name: "after-tabs" })), div7({ class: "border" }, div7({ class: "selected", part: "selected" }))),
+      slot6()
     ];
     addTabBody(body, selectTab = false) {
       if (!body.hasAttribute("name")) {
@@ -22876,7 +22957,7 @@ return ${extracted.testRunner}`;
     document.body.append(example);
   }
   // node_modules/tosijs-ui/dist/side-nav.js
-  var { slot: slot6 } = I;
+  var { slot: slot7 } = I;
 
   class TosiSidenav extends u {
     static preferredTagName = "tosi-sidenav";
@@ -22887,7 +22968,7 @@ return ${extracted.testRunner}`;
       contentVisible: false
     };
     value = "normal";
-    content = [slot6({ name: "nav", part: "nav" }), slot6({ part: "content" })];
+    content = [slot7({ name: "nav", part: "nav" }), slot7({ part: "content" })];
     static shadowStyleSpec = {
       ":host": {
         display: "grid",
@@ -24706,7 +24787,7 @@ ${opts.autoPrint ? '<script>addEventListener("load",function(){setTimeout(functi
   }
   var tosiDocSystem = TosiDocSystem.elementCreator();
   // node_modules/tosijs-ui/dist/editable-rect.js
-  var { div: div12, slot: slot7 } = I;
+  var { div: div12, slot: slot8 } = I;
 
   class EditableRect extends u {
     static preferredTagName = "tosi-editable";
@@ -25037,7 +25118,7 @@ ${opts.autoPrint ? '<script>addEventListener("load",function(){setTimeout(functi
         title: "lock bottom",
         style: { top: "100%", left: "50%", transform: "translate(-50%, 0%)" }
       }, icons.unlock(), icons.lock()),
-      slot7()
+      slot8()
     ];
     connectedCallback() {
       super.connectedCallback();
@@ -25378,7 +25459,7 @@ ${opts.autoPrint ? '<script>addEventListener("load",function(){setTimeout(functi
   }
   var filterBuilder = FilterBuilder.elementCreator();
   // node_modules/tosijs-ui/dist/form.js
-  var { form, slot: slot8, tosiSlot: tosiSlot4, label: label2, input: input6, span: span10 } = I;
+  var { form, slot: slot9, tosiSlot: tosiSlot4, label: label2, input: input6, span: span10 } = I;
   function attr(element, name, value) {
     if (value !== "" && value !== false) {
       element.setAttribute(name, value);
@@ -25588,9 +25669,9 @@ ${opts.autoPrint ? '<script>addEventListener("load",function(){setTimeout(functi
       }
     };
     content = [
-      slot8({ part: "header", name: "header" }),
-      form({ part: "form" }, slot8({ part: "content" })),
-      slot8({ part: "footer", name: "footer" })
+      slot9({ part: "header", name: "header" }),
+      form({ part: "form" }, slot9({ part: "content" })),
+      slot9({ part: "footer", name: "footer" })
     ];
     getField = (key) => {
       return this.querySelector(`tosi-field[key="${key}"]`);
@@ -25712,7 +25793,7 @@ ${opts.autoPrint ? '<script>addEventListener("load",function(){setTimeout(functi
         alignItems: "center"
       }
     };
-    content = ({ slot: slot9 }) => [slot9()];
+    content = ({ slot: slot10 }) => [slot10()];
   }
   var tosiHeader = TosiHeader.elementCreator();
   var linkIcons = {
@@ -25852,7 +25933,7 @@ ${parts.join(`
 `);
   }
   // node_modules/tosijs-ui/dist/layout.js
-  var { slot: slot9 } = I;
+  var { slot: slot10 } = I;
 
   class TosiRow extends u {
     static preferredTagName = "tosi-row";
@@ -25862,7 +25943,7 @@ ${parts.join(`
       align: "",
       justify: ""
     };
-    content = [slot9()];
+    content = [slot10()];
     static shadowStyleSpec = {
       ":host": {
         display: "flex",
@@ -25902,7 +25983,7 @@ ${parts.join(`
       align: "",
       justify: ""
     };
-    content = [slot9()];
+    content = [slot10()];
     static shadowStyleSpec = {
       ":host": {
         display: "flex",
@@ -25941,7 +26022,7 @@ ${parts.join(`
       rows: "",
       gap: ""
     };
-    content = [slot9()];
+    content = [slot10()];
     static shadowStyleSpec = {
       ":host": {
         display: "grid",
@@ -27630,7 +27711,7 @@ ${parts.join(`
   }
   var tosiRouteView = TosiRouteView.elementCreator();
   // node_modules/tosijs-ui/dist/segmented.js
-  var { div: div19, slot: slot10, label: label4, span: span16, input: input8 } = I;
+  var { div: div19, slot: slot11, label: label4, span: span16, input: input8 } = I;
 
   class TosiSegmented extends u {
     static preferredTagName = "tosi-segmented";
@@ -27673,7 +27754,7 @@ ${parts.join(`
       return (this.value || "").split(",").map((v3) => v3.trim()).filter((v3) => v3 !== "");
     }
     content = () => [
-      slot10(),
+      slot11(),
       div19({ part: "options" }, input8({ part: "custom", hidden: true }))
     ];
     static shadowStyleSpec = {
@@ -27874,7 +27955,7 @@ ${parts.join(`
   var tosiSegmented = TosiSegmented.elementCreator();
   var xinSegmented = gE((...args) => tosiSegmented(...args), "xinSegmented is deprecated, use tosiSegmented instead (tag is now <tosi-segmented>)");
   // node_modules/tosijs-ui/dist/size-break.js
-  var { slot: slot11 } = I;
+  var { slot: slot12 } = I;
 
   class SizeBreak extends u {
     static preferredTagName = "tosi-sizebreak";
@@ -27883,7 +27964,7 @@ ${parts.join(`
       minHeight: 0
     };
     value = "normal";
-    content = [slot11({ part: "normal" }), slot11({ part: "small", name: "small" })];
+    content = [slot12({ part: "normal" }), slot12({ part: "small", name: "small" })];
     static shadowStyleSpec = {
       ":host": {
         display: "inline-block",

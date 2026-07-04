@@ -12,6 +12,8 @@ Full documentation, with live code examples, is at the links below.
 
 ## Pages
 
+- https://product.tosijs.net/tosi-interpolator/ — <tosi-interpolator>
+  Declarative CSS-property interpolation between scroll **waypoints**. Wrap any element, add
 - https://product.tosijs.net/components/ — Component Reference
   Top-level container that wraps your scroll story. No required attributes.
 - https://product.tosijs.net/getting-started/ — Getting Started

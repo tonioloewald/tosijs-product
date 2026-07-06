@@ -1,3 +1,51 @@
+/*#
+# `<tosi-scroll-camera>` · `<tosi-scroll-time>` · `<tosi-scroll-animation>`
+
+Scroll controllers for a tosijs-ui [`<tosi-3d>`](https://ui.tosijs.net/babylon-3d) BabylonJS scene.
+Place them inside a `<tosi-3d>` within a section; each reads scroll progress and drives one aspect
+of the scene — camera, time-of-day, or an animation — declaratively via `<tosi-waypoint>` children.
+
+<style>.doc-content:has(.doc-demo){overflow:visible !important}.doc-demo .media{height:var(--tosi-view-size,70vh);position:relative;overflow:hidden;border-radius:12px;background:#0a0a12}.doc-demo .media>tosi-3d{position:absolute;inset:0;width:100%;height:100%}</style>
+<tosi-product class="doc-demo">
+<tosi-product-section scroll="150">
+<div class="media">
+<tosi-3d src="/macbook_neo.glb" hero-light fov="0.6" clear-color="transparent" data-scroll-animate>
+<tosi-scroll-camera data-scroll-animate easing="ease-in-out">
+<tosi-waypoint progress="0" alpha="-1.57" beta="1.2" radius="110" target-y="10"></tosi-waypoint>
+<tosi-waypoint progress="1" alpha="1.57" beta="1.4" radius="76" target-y="10"></tosi-waypoint>
+</tosi-scroll-camera>
+</tosi-3d>
+</div>
+</tosi-product-section>
+</tosi-product>
+
+## `<tosi-scroll-camera>`
+
+Interpolates an `ArcRotateCamera` (or a positional camera) across `<tosi-waypoint>` keyframes.
+- Arc-rotate: **`alpha`**, **`beta`**, **`radius`**, **`target-x`** / **`target-y`** / **`target-z`**.
+- Positional: **`x`**, **`y`**, **`z`**, **`fov`**.
+- **`easing="ease-in-out"`** eases each segment.
+
+## `<tosi-scroll-time>`
+
+Maps progress to a time-of-day on a sibling `<tosi-b3d-skybox>` — **`from`** / **`to`** hours. Set
+`realtimeScale="0"` on the skybox to stop auto-advance.
+
+```html
+<tosi-scroll-time data-scroll-animate from="6" to="18"></tosi-scroll-time>
+```
+
+## `<tosi-scroll-animation>`
+
+Scrubs a named BabylonJS `AnimationGroup` to the frame for the current progress — **`name`**.
+
+```html
+<tosi-scroll-animation data-scroll-animate name="DoorOpen"></tosi-scroll-animation>
+```
+
+See also [`<tosi-scroll-map>`](/tosi-scroll-map/) and [`<tosi-product>`](/tosi-product/).
+*/
+
 import { Component, elements } from "tosijs";
 
 const { slot } = elements;

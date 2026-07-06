@@ -47,34 +47,41 @@ function readMapWaypoints(host: HTMLElement): MapWaypoint[] {
     .sort((a, b) => a.progress - b.progress);
 }
 
-/**
- * # &lt;tosi-scroll-map&gt;
- *
- * Waypoint-driven scroll controller for a [tosijs-ui `<tosi-map>`](https://ui.tosijs.net/mapbox)
- * (Mapbox). Place it inside (or as a sibling of) a `<tosi-map>` within a
- * `<tosi-product-section>`; as the section pins, the map flies between the
- * waypoints — pure declarative HTML, no scroll callbacks.
- *
- * Each `<tosi-waypoint>` carries a `coords="lat,lng,zoom"` (the same triple
- * `<tosi-map>` itself takes), or separate `lat` / `lng` / `zoom` attributes.
- * Latitude, longitude and zoom are interpolated independently between the
- * surrounding waypoints; `easing="ease-in-out"` applies easeInOutQuad per
- * segment (default: linear).
- *
- * ```html
- * <tosi-product-section scroll="400">
- *   <div class="media-scene">
- *     <tosi-map token="pk...." coords="37.46,-122.43,12" map-style="mapbox://styles/mapbox/dark-v11">
- *       <tosi-scroll-map data-scroll-animate easing="ease-in-out">
- *         <tosi-waypoint progress="0"   coords="37.46,-122.43,12"></tosi-waypoint>
- *         <tosi-waypoint progress="0.5" coords="51,0,2"></tosi-waypoint>
- *         <tosi-waypoint progress="1"   coords="65.01,25.47,12"></tosi-waypoint>
- *       </tosi-scroll-map>
- *     </tosi-map>
- *   </div>
- * </tosi-product-section>
- * ```
- */
+/*#
+# `<tosi-scroll-map>`
+
+Waypoint-driven scroll controller for a tosijs-ui [`<tosi-map>`](https://ui.tosijs.net/mapbox)
+(Mapbox). Inside a `<tosi-map>` within a section, each `<tosi-waypoint coords="lat,lng,zoom">`
+becomes a keyframe; as the section pins, the map flies between them — pure declarative HTML, no
+scroll callbacks. Latitude, longitude and zoom interpolate independently, so a low-zoom mid-flight
+waypoint gives a dramatic zoom-out-then-in.
+
+<style>.doc-content:has(.doc-demo){overflow:visible !important}.doc-demo .media{height:var(--tosi-view-size,70vh);position:relative;overflow:hidden;border-radius:12px;background:#0a0a12}.doc-demo .media>tosi-map{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}</style>
+<tosi-product class="doc-demo">
+<tosi-product-section scroll="150">
+<div class="media">
+<tosi-map token="pk.eyJ1IjoicG9kcGVyc29uIiwiYSI6ImNqc2JlbWU0bjA1ZmY0YW5ycHZod3VhbWcifQ.arvqfpOqMgFYkKgQ35UScA" coords="37.4636,-122.4286,12" map-style="mapbox://styles/mapbox/satellite-streets-v12">
+<tosi-scroll-map data-scroll-animate easing="ease-in-out">
+<tosi-waypoint progress="0" coords="37.4636,-122.4286,12"></tosi-waypoint>
+<tosi-waypoint progress="0.5" coords="51,0,2"></tosi-waypoint>
+<tosi-waypoint progress="1" coords="65.0121,25.4651,12"></tosi-waypoint>
+</tosi-scroll-map>
+</tosi-map>
+</div>
+</tosi-product-section>
+</tosi-product>
+
+## Attributes
+
+`<tosi-scroll-map>`
+- **`easing`** — `"ease-in-out"` eases each segment (default: linear).
+
+`<tosi-waypoint>`
+- **`progress`** — 0 → 1 keyframe position.
+- **`coords`** — `"lat,lng,zoom"` (the same triple `<tosi-map>` takes), or separate **`lat`** / **`lng`** / **`zoom`** attributes.
+
+See also [`<tosi-scroll-camera>`](/tosi-b3d-scroll/) and [`<tosi-product>`](/tosi-product/).
+*/
 export class TosiScrollMap extends Component {
   static initAttributes = {
     easing: "",

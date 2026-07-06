@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Hide the pre-rendered body until <tosi-doc-system> hydrates, then fade it
+       in — avoids the layout shift as the static markup is swapped for the live
+       doc browser. <noscript> keeps it visible for no-JS readers/crawlers; the
+       timeout is a safety net so a failed/slow hydration can't leave it blank. -->
+  <style>body{opacity:0;transition:opacity .25s ease}</style>
+  <noscript><style>body{opacity:1!important}</style></noscript>
+  <script>setTimeout(function(){if(document.body)document.body.style.opacity='1'},4000)</script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="/doc-system.css" data-tosi-doc-system />
+  <title>&lt;tosi-product&gt; — tosijs-product</title>
+  <meta name="description" content="The scroll engine. A &lt;tosi-product&gt; owns the scrollable region it lives in: it measures a runway from its &lt;tosi-product-section&gt; children, hosts a sticky…" />
+  <link rel="canonical" href="https://product.tosijs.net/tosi-product/" />
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="tosijs-product" />
+  <meta property="og:title" content="&lt;tosi-product&gt; — tosijs-product" />
+  <meta property="og:description" content="The scroll engine. A &lt;tosi-product&gt; owns the scrollable region it lives in: it measures a runway from its &lt;tosi-product-section&gt; children, hosts a sticky…" />
+  <meta property="og:url" content="https://product.tosijs.net/tosi-product/" />
+  <meta name="twitter:card" content="summary" />
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"\u003ctosi-product>","description":"The scroll engine. A \u003ctosi-product> owns the scrollable region it lives in: it measures a runway from its \u003ctosi-product-section> children, hosts a sticky…","url":"https://product.tosijs.net/tosi-product/","inLanguage":"en","isPartOf":{"@type":"WebSite","name":"tosijs-product","url":"https://product.tosijs.net"}}</script>
+  <link rel="icon" href="/favicon.svg" />
+<script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
+</head>
+<body>
+  <tosi-doc-system docs="/docs.json" config="{&quot;projectName&quot;:&quot;tosijs-product&quot;,&quot;projectLinks&quot;:{&quot;tosijs&quot;:&quot;https://tosijs.net&quot;,&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs-product&quot;}}">
+  <article class="doc-content">
+<h1><code>&lt;tosi-product&gt;</code></h1>
+<p>The scroll engine. A <code>&lt;tosi-product&gt;</code> owns the scrollable region it lives in: it measures a
+<strong>runway</strong> from its <code>&lt;tosi-product-section&gt;</code> children, hosts a sticky viewport-sized window, and
+translates the stack as you scroll. Each section <strong>pins</strong> (holds still while its animators run),
+then <strong>exits</strong> (scrolls out 1:1). Drop it into HTML — no orchestration code.</p>
+<style>.doc-content:has(.doc-demo){overflow:visible !important}.doc-demo .scene{height:var(--tosi-view-size,70vh);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#f0f0f5;border-radius:12px;text-align:center;padding:2rem}.doc-demo h2{font-size:clamp(1.8rem,6vw,3rem);margin:0;font-weight:800}</style>
+<tosi-product class="doc-demo">
+<tosi-product-section scroll="70">
+<div class="scene" style="background:#08081a">
+<tosi-interpolator data-scroll-animate easing="ease-in-out">
+<tosi-waypoint progress="0" style="opacity:0; transform:translateY(30px)"></tosi-waypoint>
+<tosi-waypoint progress="1" style="opacity:1; transform:translateY(0)"></tosi-waypoint>
+<h2>Pin.</h2>
+</tosi-interpolator>
+</div>
+</tosi-product-section>
+<tosi-product-section scroll="70">
+<div class="scene" style="background:#101a3a">
+<h2>Then exit.</h2>
+</div>
+</tosi-product-section>
+</tosi-product>
+
+<p>Scroll the panel: the first section pins while its heading fades in, then scrolls away as the
+second pins. It&#39;s the HTML shown here — read it in <strong>Source</strong>.</p>
+<h2><code>&lt;tosi-product&gt;</code> attributes</h2>
+<ul>
+<li><strong><code>direction</code></strong> — <code>&quot;vertical&quot;</code> (default) or <code>&quot;horizontal&quot;</code>.</li>
+<li><strong><code>debug</code></strong> — overlay showing local position / translate / active section + progress.</li>
+</ul>
+<h2><code>&lt;tosi-product-section&gt;</code> attributes</h2>
+<ul>
+<li><strong><code>scroll</code></strong> — pin duration as a percent of the viewport. <code>100</code> (default) = 1× viewport of pinning; the exit phase (1:1 over the section&#39;s height) is added on top.</li>
+<li><strong><code>theme</code></strong> / <strong><code>theme-from</code></strong> / <strong><code>theme-to</code></strong> — apply or interpolate a registered theme over the pin.</li>
+</ul>
+<h2><code>&lt;tosi-product-header&gt;</code></h2>
+<p>A sticky overlay header that slides in once <code>scrollY</code> passes its <strong><code>threshold</code></strong> (default <code>50</code>), inheriting the active theme through the CSS cascade.</p>
+<h2>Nesting (follower mode)</h2>
+<p>A <code>&lt;tosi-product&gt;</code> placed inside a <code>&lt;tosi-product-section&gt;</code> becomes a <strong>follower</strong>: it&#39;s driven by the parent section&#39;s pin progress instead of document scroll, and sizes to fill its parent.</p>
+<p>See also <a href="/tosi-interpolator/"><code>&lt;tosi-interpolator&gt;</code></a> and <a href="/tosi-filmstrip/"><code>&lt;tosi-filmstrip&gt;</code></a>.</p>
+
+  </article>
+  <nav class="doc-nav" aria-label="Documentation">
+  <ul>
+    <li><a href="/">tosijs-product</a></li>
+    <li><a href="/tosi-filmstrip/">&lt;tosi-filmstrip&gt;</a></li>
+    <li><a href="/tosi-interpolator/">&lt;tosi-interpolator&gt;</a></li>
+    <li><a href="/tosi-prism/">&lt;tosi-prism&gt;</a></li>
+    <li><a href="/tosi-product/" aria-current="page" class="current">&lt;tosi-product&gt;</a></li>
+    <li><a href="/tosi-b3d-scroll/">&lt;tosi-scroll-camera&gt; · &lt;tosi-scroll-time&gt; · &lt;tosi-scroll-animation&gt;</a></li>
+    <li><a href="/tosi-scroll-map/">&lt;tosi-scroll-map&gt;</a></li>
+    <li><a href="/components/">Component Reference</a></li>
+    <li><a href="/getting-started/">Getting Started</a></li>
+  </ul>
+  </nav>
+  <ul class="doc-navbar">
+    <li><a href="https://tosijs.net" data-icon="tosi">tosijs</a></li>
+    <li><a href="https://ui.tosijs.net" data-icon="tosi">tosijs-ui</a></li>
+    <li><a href="https://3d.tosijs.net" data-icon="tosi">tosijs-3d</a></li>
+    <li><a href="https://github.com/tonioloewald/tosijs-product" data-icon="github">github</a></li>
+    <li><a href="https://www.npmjs.com/package/tosijs-product" data-icon="npm">npmjs</a></li>
+  </ul>
+  </tosi-doc-system>
+  <script src="/iife.js"></script>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Hide the pre-rendered body until <tosi-doc-system> hydrates, then fade it
+       in — avoids the layout shift as the static markup is swapped for the live
+       doc browser. <noscript> keeps it visible for no-JS readers/crawlers; the
+       timeout is a safety net so a failed/slow hydration can't leave it blank. -->
+  <style>body{opacity:0;transition:opacity .25s ease}</style>
+  <noscript><style>body{opacity:1!important}</style></noscript>
+  <script>setTimeout(function(){if(document.body)document.body.style.opacity='1'},4000)</script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="/doc-system.css" data-tosi-doc-system />
+  <title>&lt;tosi-scroll-map&gt; — tosijs-product</title>
+  <meta name="description" content="Waypoint-driven scroll controller for a tosijs-ui &lt;tosi-map&gt; (Mapbox). Inside a &lt;tosi-map&gt; within a section, each &lt;tosi-waypoint coords=&quot;lat,lng,zoom&quot;&gt;" />
+  <link rel="canonical" href="https://product.tosijs.net/tosi-scroll-map/" />
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="tosijs-product" />
+  <meta property="og:title" content="&lt;tosi-scroll-map&gt; — tosijs-product" />
+  <meta property="og:description" content="Waypoint-driven scroll controller for a tosijs-ui &lt;tosi-map&gt; (Mapbox). Inside a &lt;tosi-map&gt; within a section, each &lt;tosi-waypoint coords=&quot;lat,lng,zoom&quot;&gt;" />
+  <meta property="og:url" content="https://product.tosijs.net/tosi-scroll-map/" />
+  <meta name="twitter:card" content="summary" />
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"\u003ctosi-scroll-map>","description":"Waypoint-driven scroll controller for a tosijs-ui \u003ctosi-map> (Mapbox). Inside a \u003ctosi-map> within a section, each \u003ctosi-waypoint coords=\"lat,lng,zoom\">","url":"https://product.tosijs.net/tosi-scroll-map/","inLanguage":"en","isPartOf":{"@type":"WebSite","name":"tosijs-product","url":"https://product.tosijs.net"}}</script>
+  <link rel="icon" href="/favicon.svg" />
+<script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
+</head>
+<body>
+  <tosi-doc-system docs="/docs.json" config="{&quot;projectName&quot;:&quot;tosijs-product&quot;,&quot;projectLinks&quot;:{&quot;tosijs&quot;:&quot;https://tosijs.net&quot;,&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs-product&quot;}}">
+  <article class="doc-content">
+<h1><code>&lt;tosi-scroll-map&gt;</code></h1>
+<p>Waypoint-driven scroll controller for a tosijs-ui <a href="https://ui.tosijs.net/mapbox"><code>&lt;tosi-map&gt;</code></a>
+(Mapbox). Inside a <code>&lt;tosi-map&gt;</code> within a section, each <code>&lt;tosi-waypoint coords=&quot;lat,lng,zoom&quot;&gt;</code>
+becomes a keyframe; as the section pins, the map flies between them — pure declarative HTML, no
+scroll callbacks. Latitude, longitude and zoom interpolate independently, so a low-zoom mid-flight
+waypoint gives a dramatic zoom-out-then-in.</p>
+<style>.doc-content:has(.doc-demo){overflow:visible !important}.doc-demo .media{height:var(--tosi-view-size,70vh);position:relative;overflow:hidden;border-radius:12px;background:#0a0a12}.doc-demo .media>tosi-map{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}</style>
+<tosi-product class="doc-demo">
+<tosi-product-section scroll="150">
+<div class="media">
+<tosi-map token="pk.eyJ1IjoicG9kcGVyc29uIiwiYSI6ImNqc2JlbWU0bjA1ZmY0YW5ycHZod3VhbWcifQ.arvqfpOqMgFYkKgQ35UScA" coords="37.4636,-122.4286,12" map-style="mapbox://styles/mapbox/satellite-streets-v12">
+<tosi-scroll-map data-scroll-animate easing="ease-in-out">
+<tosi-waypoint progress="0" coords="37.4636,-122.4286,12"></tosi-waypoint>
+<tosi-waypoint progress="0.5" coords="51,0,2"></tosi-waypoint>
+<tosi-waypoint progress="1" coords="65.0121,25.4651,12"></tosi-waypoint>
+</tosi-scroll-map>
+</tosi-map>
+</div>
+</tosi-product-section>
+</tosi-product>
+
+<h2>Attributes</h2>
+<p><code>&lt;tosi-scroll-map&gt;</code></p>
+<ul>
+<li><strong><code>easing</code></strong> — <code>&quot;ease-in-out&quot;</code> eases each segment (default: linear).</li>
+</ul>
+<p><code>&lt;tosi-waypoint&gt;</code></p>
+<ul>
+<li><strong><code>progress</code></strong> — 0 → 1 keyframe position.</li>
+<li><strong><code>coords</code></strong> — <code>&quot;lat,lng,zoom&quot;</code> (the same triple <code>&lt;tosi-map&gt;</code> takes), or separate <strong><code>lat</code></strong> / <strong><code>lng</code></strong> / <strong><code>zoom</code></strong> attributes.</li>
+</ul>
+<p>See also <a href="/tosi-b3d-scroll/"><code>&lt;tosi-scroll-camera&gt;</code></a> and <a href="/tosi-product/"><code>&lt;tosi-product&gt;</code></a>.</p>
+
+  </article>
+  <nav class="doc-nav" aria-label="Documentation">
+  <ul>
+    <li><a href="/">tosijs-product</a></li>
+    <li><a href="/tosi-filmstrip/">&lt;tosi-filmstrip&gt;</a></li>
+    <li><a href="/tosi-interpolator/">&lt;tosi-interpolator&gt;</a></li>
+    <li><a href="/tosi-prism/">&lt;tosi-prism&gt;</a></li>
+    <li><a href="/tosi-product/">&lt;tosi-product&gt;</a></li>
+    <li><a href="/tosi-b3d-scroll/">&lt;tosi-scroll-camera&gt; · &lt;tosi-scroll-time&gt; · &lt;tosi-scroll-animation&gt;</a></li>
+    <li><a href="/tosi-scroll-map/" aria-current="page" class="current">&lt;tosi-scroll-map&gt;</a></li>
+    <li><a href="/components/">Component Reference</a></li>
+    <li><a href="/getting-started/">Getting Started</a></li>
+  </ul>
+  </nav>
+  <ul class="doc-navbar">
+    <li><a href="https://tosijs.net" data-icon="tosi">tosijs</a></li>
+    <li><a href="https://ui.tosijs.net" data-icon="tosi">tosijs-ui</a></li>
+    <li><a href="https://3d.tosijs.net" data-icon="tosi">tosijs-3d</a></li>
+    <li><a href="https://github.com/tonioloewald/tosijs-product" data-icon="github">github</a></li>
+    <li><a href="https://www.npmjs.com/package/tosijs-product" data-icon="npm">npmjs</a></li>
+  </ul>
+  </tosi-doc-system>
+  <script src="/iife.js"></script>
+</body>
+</html>

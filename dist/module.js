@@ -284,6 +284,12 @@ class TosiProduct extends Component {
       cumOffset += naturalSize;
       cumRunway += pinDuration + exitDuration;
     }
+    const tail = items[items.length - 1];
+    if (tail) {
+      cumRunway -= tail.exitDuration;
+      tail.exitDuration = 0;
+      tail.rangeEnd = tail.pinEnd;
+    }
     this._items = items;
     this._totalRunway = cumRunway;
     if (!this._isNested) {

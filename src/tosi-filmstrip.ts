@@ -1,3 +1,49 @@
+/*#
+# `<tosi-filmstrip>`
+
+Canvas frame-animator. Rather than scrubbing a `<video>` (which stutters on random-access seeks),
+`<tosi-filmstrip>` blits frames from a single **WebP/JPG mosaic grid** to a hardware-accelerated
+canvas — instant, frame-perfect seeking driven by scroll.
+
+<style>.doc-content:has(.doc-demo){overflow:visible !important}.doc-demo .media{height:var(--tosi-view-size,70vh);position:relative;overflow:hidden;border-radius:12px;background:#0a0a12}.doc-demo .media>tosi-filmstrip{position:absolute;inset:0;width:100%;height:100%}.doc-demo .cap{position:absolute;left:0;right:0;bottom:1rem;text-align:center;color:#fff;font-weight:700;filter:drop-shadow(0 1px 6px #000)}</style>
+<tosi-product class="doc-demo">
+<tosi-product-section scroll="100">
+<div class="media">
+<tosi-filmstrip src="/agent-owl_10x10_100.jpg" cols="10" rows="10" total="100" data-scroll-animate></tosi-filmstrip>
+<div class="cap">100 frames from one image</div>
+</div>
+</tosi-product-section>
+</tosi-product>
+
+## Attributes
+
+- **`src`** — the mosaic image. Filenames may encode the grid — `name_COLSxROWS_TOTAL.webp` is auto-parsed.
+- **`cols`**, **`rows`**, **`total`** — grid columns, rows and frame count (optional when encoded in the filename).
+- **`data-scroll-animate`** — marks it as a scroll-driven animator for its section.
+
+## Making a mosaic
+
+The `tosi-mosaic` CLI (needs `ffmpeg`) converts a video to a grid:
+
+```bash
+bunx tosi-mosaic my-video.mp4 --frames 100 --width 1280
+```
+
+Produces `my-video_10x10_100.webp`. A grid (not one long strip) keeps within the browser's max image size while delivering every frame in a single request.
+
+## Editable example
+
+```html
+<tosi-product>
+  <tosi-product-section scroll="150">
+    <tosi-filmstrip src="/agent-owl_10x10_100.jpg" cols="10" rows="10" total="100" data-scroll-animate></tosi-filmstrip>
+  </tosi-product-section>
+</tosi-product>
+```
+
+See also [`<tosi-product>`](/tosi-product/) and [`<tosi-interpolator>`](/tosi-interpolator/).
+*/
+
 import { Component, elements } from "tosijs";
 
 const { canvas } = elements;

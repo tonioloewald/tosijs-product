@@ -12,8 +12,18 @@ Full documentation, with live code examples, is at the links below.
 
 ## Pages
 
+- https://product.tosijs.net/tosi-filmstrip/ — <tosi-filmstrip>
+  Canvas frame-animator. Rather than scrubbing a `<video>` (which stutters on random-access seeks),
 - https://product.tosijs.net/tosi-interpolator/ — <tosi-interpolator>
   Declarative CSS-property interpolation between scroll **waypoints**. Wrap any element, add
+- https://product.tosijs.net/tosi-prism/ — <tosi-prism>
+  Lazy-loads PrismJS (from jsDelivr) to syntax-highlight its own text content. Set the language with
+- https://product.tosijs.net/tosi-product/ — <tosi-product>
+  The scroll engine. A `<tosi-product>` owns the scrollable region it lives in: it measures a
+- https://product.tosijs.net/tosi-b3d-scroll/ — <tosi-scroll-camera> · <tosi-scroll-time> · <tosi-scroll-animation>
+  Scroll controllers for a tosijs-ui [`<tosi-3d>`](https://ui.tosijs.net/babylon-3d) BabylonJS scene.
+- https://product.tosijs.net/tosi-scroll-map/ — <tosi-scroll-map>
+  Waypoint-driven scroll controller for a tosijs-ui [`<tosi-map>`](https://ui.tosijs.net/mapbox)
 - https://product.tosijs.net/components/ — Component Reference
   Top-level container that wraps your scroll story. No required attributes.
 - https://product.tosijs.net/getting-started/ — Getting Started

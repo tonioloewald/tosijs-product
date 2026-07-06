@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Hide the pre-rendered body until <tosi-doc-system> hydrates, then fade it
+       in — avoids the layout shift as the static markup is swapped for the live
+       doc browser. <noscript> keeps it visible for no-JS readers/crawlers; the
+       timeout is a safety net so a failed/slow hydration can't leave it blank. -->
+  <style>body{opacity:0;transition:opacity .25s ease}</style>
+  <noscript><style>body{opacity:1!important}</style></noscript>
+  <script>setTimeout(function(){if(document.body)document.body.style.opacity='1'},4000)</script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="/doc-system.css" data-tosi-doc-system />
+  <title>&lt;tosi-prism&gt; — tosijs-product</title>
+  <meta name="description" content="Lazy-loads PrismJS (from jsDelivr) to syntax-highlight its own text content. Set the language with language (default markup)." />
+  <link rel="canonical" href="https://product.tosijs.net/tosi-prism/" />
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="tosijs-product" />
+  <meta property="og:title" content="&lt;tosi-prism&gt; — tosijs-product" />
+  <meta property="og:description" content="Lazy-loads PrismJS (from jsDelivr) to syntax-highlight its own text content. Set the language with language (default markup)." />
+  <meta property="og:url" content="https://product.tosijs.net/tosi-prism/" />
+  <meta name="twitter:card" content="summary" />
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"\u003ctosi-prism>","description":"Lazy-loads PrismJS (from jsDelivr) to syntax-highlight its own text content. Set the language with language (default markup).","url":"https://product.tosijs.net/tosi-prism/","inLanguage":"en","isPartOf":{"@type":"WebSite","name":"tosijs-product","url":"https://product.tosijs.net"}}</script>
+  <link rel="icon" href="/favicon.svg" />
+<script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
+</head>
+<body>
+  <tosi-doc-system docs="/docs.json" config="{&quot;projectName&quot;:&quot;tosijs-product&quot;,&quot;projectLinks&quot;:{&quot;tosijs&quot;:&quot;https://tosijs.net&quot;,&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs-product&quot;}}">
+  <article class="doc-content">
+<h1><code>&lt;tosi-prism&gt;</code></h1>
+<p>Lazy-loads PrismJS (from jsDelivr) to syntax-highlight its own text content. Set the language with
+<strong><code>language</code></strong> (default <code>markup</code>). Unlike a scroll scene it needs no engine — drop it anywhere.</p>
+<tosi-prism language="javascript">
+const app = tosiProduct(
+  tosiProductSection({ scroll: 200 })
+)
+app.themes = { midnight: { '--bg': '#08081a', '--fg': '#f0f0f5' } }
+app.defaultTheme = 'midnight'
+</tosi-prism>
+
+<h2>Attributes</h2>
+<ul>
+<li><strong><code>language</code></strong> — Prism language id (<code>markup</code>, <code>javascript</code>, <code>css</code>, <code>bash</code>, …). Default <code>markup</code>.</li>
+</ul>
+<h2>Helpers</h2>
+<p>The module also exports <code>loadPrism</code> / <code>highlightCodeBlocks</code> for post-processing other rendered code
+(e.g. markdown output):</p>
+<pre><code class="language-typescript">import { loadPrism, highlightCodeBlocks } from &#39;tosijs-product&#39;
+await loadPrism([&#39;javascript&#39;, &#39;css&#39;])
+highlightCodeBlocks(document.querySelector(&#39;.rendered-markdown&#39;))
+</code></pre>
+<blockquote>
+<p>Renamed from <code>tosi-code</code> in v0.6.x to avoid clashing with tosijs-ui&#39;s ace-based <code>&lt;tosi-code&gt;</code> editor.</p>
+</blockquote>
+<p>See also <a href="/tosi-product/"><code>&lt;tosi-product&gt;</code></a>.</p>
+
+  </article>
+  <nav class="doc-nav" aria-label="Documentation">
+  <ul>
+    <li><a href="/">tosijs-product</a></li>
+    <li><a href="/tosi-filmstrip/">&lt;tosi-filmstrip&gt;</a></li>
+    <li><a href="/tosi-interpolator/">&lt;tosi-interpolator&gt;</a></li>
+    <li><a href="/tosi-prism/" aria-current="page" class="current">&lt;tosi-prism&gt;</a></li>
+    <li><a href="/tosi-product/">&lt;tosi-product&gt;</a></li>
+    <li><a href="/tosi-b3d-scroll/">&lt;tosi-scroll-camera&gt; · &lt;tosi-scroll-time&gt; · &lt;tosi-scroll-animation&gt;</a></li>
+    <li><a href="/tosi-scroll-map/">&lt;tosi-scroll-map&gt;</a></li>
+    <li><a href="/components/">Component Reference</a></li>
+    <li><a href="/getting-started/">Getting Started</a></li>
+  </ul>
+  </nav>
+  <ul class="doc-navbar">
+    <li><a href="https://tosijs.net" data-icon="tosi">tosijs</a></li>
+    <li><a href="https://ui.tosijs.net" data-icon="tosi">tosijs-ui</a></li>
+    <li><a href="https://3d.tosijs.net" data-icon="tosi">tosijs-3d</a></li>
+    <li><a href="https://github.com/tonioloewald/tosijs-product" data-icon="github">github</a></li>
+    <li><a href="https://www.npmjs.com/package/tosijs-product" data-icon="npm">npmjs</a></li>
+  </ul>
+  </tosi-doc-system>
+  <script src="/iife.js"></script>
+</body>
+</html>

@@ -1,5 +1,17 @@
 # CLAUDE.md
 
+> **Shared engineering practices** live at
+> **https://github.com/tonioloewald/tosijs-coding-practices** — and, when checked out beside
+> this repo, at [`../tosijs-coding-practices`](../tosijs-coding-practices/README.md). Read that
+> index first for the cross-project defaults (development, testing, code quality, performance,
+> review, releasing, deployment, and the **observant** tosijs/tjs stack). This file records only
+> what is **specific to or divergent from** those defaults — when they conflict, this file wins.
+>
+> Those docs are **living, not graven in stone.** Don't rewrite them unprompted, but do speak up:
+> voice concerns, flag inconsistencies, and suggest improvements as you work. Continuous
+> improvement is the goal — see the repo's `CONTRIBUTING.md`.
+
+
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project
@@ -59,6 +71,7 @@ All components extend `tosijs`'s `Component` class (Custom Elements with shadow 
 | `TosiScrollCamera`    | `<tosi-scroll-camera>`    | `tosiScrollCamera`    | Waypoint-driven camera controller for B3d scenes (alpha/beta/radius/position/fov)                                                                                                                                                    |
 | `TosiScrollTime`      | `<tosi-scroll-time>`      | `tosiScrollTime`      | Maps scroll progress to day/night cycle on B3d skybox (`from`/`to` hours)                                                                                                                                                            |
 | `TosiScrollAnimation` | `<tosi-scroll-animation>` | `tosiScrollAnimation` | Scrubs a named BabylonJS AnimationGroup to scroll-driven frame                                                                                                                                                                       |
+| `TosiScrollMap`       | `<tosi-scroll-map>`       | `tosiScrollMap`       | Waypoint-driven scroll controller for a tosijs-ui `<tosi-map>` (Mapbox). `<tosi-waypoint coords="lat,lng,zoom">` children become keyframes; lat/lng/zoom interpolate independently as the section pins. `easing` attr (default linear). |
 | `TosiPrism`           | `<tosi-prism>`            | `tosiPrism`           | Lazy-loads PrismJS from CDN to syntax-highlight its text content (`language` attr, default `markup`). Also exports `loadPrism` / `highlightCodeBlocks` helpers for post-processing other rendered code (e.g. markdownViewer output). |
 
 ### Scroll engine flow
@@ -117,7 +130,7 @@ Color values blend through `color-mix(in srgb, ...)`. Numeric strings interpolat
 - **Progress is always 0→1**: pin progress maps to this range; exit phase pins at 1.
 - **Mosaic filenames encode grid info**: `name_COLSxROWS_TOTAL.webp` — `TosiFilmstrip` auto-parses this.
 - **IIFE build** (`dist/index.js`) is self-contained (bundles tosijs + tosijs-ui) and exposes `globalThis.tosijs`, `globalThis.tosijsUi`, and `globalThis.tosijsProduct`. Entry point: `src/index-iife.ts`.
-- **Peer dependencies**: `tosijs` (^1.6.4) and `tosijs-ui` (^1.6.11) are required. `tosijs-ui` also supplies the doc-site build system (`tosijs-ui/site`). Dev uses local `file:` links to sibling directories `../tosijs` and `../tosijs-ui`.
+- **Peer dependencies**: `tosijs` (^1.6.4) and `tosijs-ui` (^1.6.19) are required. `tosijs-ui` also supplies the doc-site build system (`tosijs-ui/site`). Dev uses local `file:` links to sibling directories `../tosijs` and `../tosijs-ui`.
 
 ### CLI tool
 
@@ -134,6 +147,7 @@ bunx tosi-mosaic <video-file> [-f frames] [-w width] [-q quality] [-r fps]
 - `src/tosi-interpolator.ts` — `TosiInterpolator`, `TosiWaypoint`, `interpolateStrings`
 - `src/waypoints.ts` — `interpolateWaypoints` helper (numeric interpolation with easeInOutQuad)
 - `src/tosi-b3d-scroll.ts` — `TosiScrollCamera`, `TosiScrollTime`, `TosiScrollAnimation` (B3d scroll controllers; use `<tosi-waypoint>` children for camera keyframes)
+- `src/tosi-scroll-map.ts` — `TosiScrollMap` (Mapbox scroll controller; finds an enclosing/sibling `<tosi-map>`, flies between `<tosi-waypoint coords="lat,lng,zoom">` keyframes)
 - `src/tosi-prism.ts` — `TosiPrism` component + reusable `loadPrism(languages?)` and `highlightCodeBlocks(root)` helpers (Prism loads lazily from jsDelivr CDN). Renamed from `tosi-code` in v0.6.x to avoid clashing with tosijs-ui's `<tosi-code>` (ace-based editor).
 - `src/interpolation.test.ts` — tests for `interpolateStrings` and `interpolateWaypoints`
 - `src/index.ts` — re-exports all public API

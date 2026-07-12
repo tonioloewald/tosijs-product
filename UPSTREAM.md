@@ -5,7 +5,18 @@ seem worth raising in tosijs-ui (or in tosijs / the broader ecosystem)
 rather than working around locally. Add new entries at the top with a
 short context block and a concrete suggestion.
 
+> **This file is a local mirror, not the channel.** Per
+> [cross-project.md](https://github.com/tonioloewald/tosijs-coding-practices/blob/main/practices/cross-project.md)
+> ("file, don't fix"), the **GitHub issue on the target repo** is how we actually tell
+> tosijs-ui something — this file just keeps the context where we work. **An entry here
+> without a filed issue is a complaint nobody will ever read.** So: file the issue, link it
+> here, and mark `✅ RESOLVED (fixed in <pkg>@<version>)` + close the issue when it lands.
+>
+> All open entries below were filed as issues on 2026-07-12.
+
 ## Strategic — `tosijs-product` as a first-class integration target
+
+**Issue:** https://github.com/tonioloewald/tosijs-ui/issues/9
 
 `tosi-product`, `tosi-product-section`, `tosi-product-header`,
 `tosi-interpolator`, `tosi-waypoint`, `tosi-filmstrip` are exactly the
@@ -63,6 +74,8 @@ core element. Then `<tosi-3d>` narratives are pure HTML like the rest.
 
 ## Doc-browser resets the tab `<title>` client-side, ignoring `headTitle`
 
+**Issue:** https://github.com/tonioloewald/tosijs-ui/issues/6
+
 **Context.** The static generator writes the right `<title>` (respects the doc's
 `headTitle` metadata — verified: our home page's static `<title>` is
 "tosijs-product — cinematic, scroll-driven product pages in HTML"). But after
@@ -78,6 +91,8 @@ and de-dupe when `doc.title` already equals/contains `projectName`.
 
 ## `docPaths` silently shadowed by `outputDir`
 
+**Issue:** https://github.com/tonioloewald/tosijs-ui/issues/5
+
 **Context.** Our pre-adoption setup kept source `.md` docs in `docs/`. After
 adoption, `outputDir` defaults to `docs/`, and `buildSite` begins with
 `rm -rf <outputDir>` — so on the first build it deleted our source docs
@@ -90,6 +105,8 @@ and throw with an actionable message. Costs nothing; saves real grief.
 
 ## `llms.txt generated (0 entries)` even when docs were extracted
 
+**Issue:** https://github.com/tonioloewald/tosijs-ui/issues/7
+
 **Context.** Our first build extracted 3 docs into `docs.json` but
 `generateLlmsTxt` reports `0 entries`. Need to investigate whether this is
 metadata-driven (docs lack a frontmatter shape that `make-llms-txt` looks
@@ -100,6 +117,8 @@ behavior (e.g. "indexed N, included 0 in llms.txt because [reason]"), or
 document the minimum metadata a doc needs to appear in llms.txt.
 
 ## Console errors from `tosi-product` upgrades during doc-system hydration
+
+**Issue:** https://github.com/tonioloewald/tosijs-ui/issues/8
 
 **Context.** Two `Cannot read properties of undefined (reading 'toggleAttribute')`
 errors fire on a doc page that contains no `<tosi-product>` markup (just

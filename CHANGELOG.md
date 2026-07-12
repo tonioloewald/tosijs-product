@@ -6,7 +6,23 @@ All notable changes to **tosijs-product** are documented here. The format is bas
 
 For releases before 0.6.1, see the git history (`git log`) and tags.
 
-## [0.6.1] - 2026-07-11
+## [Unreleased]
+
+### Removed
+
+- **The legacy standalone demo build.** Deleted `dev.ts` and the `build:legacy` script, plus the
+  now-dead demo pages it built (`demo/{index,embed,theme}.{html,ts,js}`, `demo/test.html`) and the
+  stale repo-root `index.html`. The `tosijs-ui/site` doc-system (`bin/site.ts`) has fully
+  superseded them: it builds both the doc site (`docs/`) and the library (`dist/`). `demo/` now
+  holds only what the doc-system consumes — `site.ts` (the hydration `bundleEntry`) and `assets/`.
+
+### Fixed
+
+- **GitHub Pages served a stale site with broken media** (`.glb` / `.mp4` / `.json` all 404). Pages
+  was still configured for the pre-doc-system layout — source `main` @ `/` (repo root) — so it
+  served the old hand-written root `index.html` and never exposed the generated `docs/`. Repointed
+  Pages to `main` @ `/docs`, which the built site requires (it uses absolute `/…` asset paths, so
+  `docs/` must be the web root). No code or asset was at fault.
 
 Two months of accumulated work released off `v0.6.0`. No breaking API changes — the only
 public-surface delta is additive.

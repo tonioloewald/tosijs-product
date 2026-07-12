@@ -28,8 +28,7 @@
     "start": "bun bin/site.ts",
     "format": "bun eslint src demo --ext .ts --fix && bun prettier --write .",
     "test": "bun test",
-    "build": "bun bin/site.ts --build",
-    "build:legacy": "bun dev.ts --build"
+    "build": "bun bin/site.ts --build"
   },
   "author": "Tonio Loewald",
   "license": "Apache-2.0",

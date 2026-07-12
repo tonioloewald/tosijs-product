@@ -26,7 +26,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 bun install              # Install dependencies
 bun run start            # Build, then start the doc-site dev server (bin/site.ts)
 bun run build            # Build the doc site + library, then exit (bin/site.ts --build)
-bun run build:legacy     # Old standalone demo build (dev.ts) — kept for reference
 bun run format           # ESLint + Prettier
 bun run test             # Bun test runner (currently covers interpolation helpers)
 bun test src/interpolation.test.ts   # Run a single test file
@@ -156,12 +155,8 @@ bunx tosi-mosaic <video-file> [-f frames] [-w width] [-q quality] [-r fps]
 - `bin/site.ts` — build entry (doc site via tosijs-ui/site + library via `Bun.build`/`tsc`)
 - `tosijs-product-site.config.ts` — doc-site config (`docPaths`, `staticDirs`, `bundleEntry`, etc.)
 - `demo/site.ts` — doc-site hydration bundle (`bundleEntry`); registers custom elements + wires the doc-system's live-example `context` to `tosijs-product` exports
-- `dev.ts` — **legacy** standalone build/dev server (`build:legacy`); the old per-demo build, superseded by `bin/site.ts`
-- `demo/index.html` + `demo/index.ts` — main demo (page chrome, theme transitions, embedded engines)
-- `demo/embed.html` + `demo/embed.ts` — focused embeddability test (siblings + nested horizontal)
-- `demo/theme.html` + `demo/theme.ts` — focused theme transition test
-- `demo/example.html` — pure HTML demo using only the IIFE build
-- `docs/` — **generated** static site output (wiped and rebuilt by `buildSite`; do not edit)
+- `demo/assets/` — media (`staticDirs`); flattened to the **web root** at build, so reference `/agent-owl.mp4`, `/macbook_neo.glb`, not `assets/…`
+- `docs/` — **generated** static site output (wiped and rebuilt by `buildSite`; do not edit). **GitHub Pages serves the site from `main` @ `/docs`** — the built site uses absolute `/…` asset paths, so `docs/` must be the web root. Don't repoint Pages at the repo root.
 - `UPSTREAM.md` — notes on rough edges found while adopting `tosijs-ui/site`, to raise upstream
 
 ## tosijs framework essentials

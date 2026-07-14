@@ -55,7 +55,12 @@ const { div, slot } = elements;
 export type ThemeMap = Record<string, string>;
 export type ThemeRegistry = Record<string, ThemeMap>;
 
-function isColor(s: string): boolean {
+/**
+ * Does this CSS value look like a color? Recognises `#hex`, `rgb()`/`rgba()`, `hsl()`/`hsla()`,
+ * `color()`, and a small set of named colors. Used to decide whether two theme values should be
+ * blended with `color-mix()` or interpolated numerically.
+ */
+export function isColor(s: string): boolean {
   const t = s.trim();
   return (
     t.startsWith("#") ||
@@ -74,11 +79,23 @@ function isColor(s: string): boolean {
   );
 }
 
-function interpolateThemeValue(from: string, to: string, t: number): string {
+/** Format a float for CSS: fixed precision, no trailing zeros (0.7*100 -> "70", not "70.000000000001"). */
+function trimNum(v: number): string {
+  return v.toFixed(4).replace(/0+$/, "").replace(/\.$/, "");
+}
+
+/**
+ * Blend one theme value into another at `t` (0→1).
+ *
+ * Colors blend through `color-mix(in srgb, …)`. Values containing matching runs of numbers
+ * (`0.5rem 1rem`, `translateY(20px)`) interpolate per-number. Anything else steps at the
+ * midpoint, since there's no meaningful in-between for e.g. a font-family.
+ */
+export function interpolateThemeValue(from: string, to: string, t: number): string {
   if (from === to || t <= 0) return from;
   if (t >= 1) return to;
   if (isColor(from) && isColor(to)) {
-    return `color-mix(in srgb, ${from} ${(1 - t) * 100}%, ${to})`;
+    return `color-mix(in srgb, ${from} ${trimNum((1 - t) * 100)}%, ${to})`;
   }
   // Fallback: numeric interpolation if both contain matching numbers,
   // otherwise step at midpoint.
@@ -93,7 +110,7 @@ function interpolateThemeValue(from: string, to: string, t: number): string {
       const bm = bNums[i];
       result += from.substring(lastIndex, am.index);
       const v = parseFloat(am[0]) + (parseFloat(bm[0]) - parseFloat(am[0])) * t;
-      result += v.toFixed(4).replace(/0+$/, "").replace(/\.$/, "");
+      result += trimNum(v);
       lastIndex = am.index! + am[0].length;
     }
     result += from.substring(lastIndex);
@@ -126,7 +143,8 @@ function getScrollParent(el: HTMLElement): EventTarget {
   return window;
 }
 
-function findEnclosingSection(el: HTMLElement): HTMLElement | null {
+/** The nearest ancestor `<tosi-product-section>`, or `null` if this element isn't inside one. */
+export function findEnclosingSection(el: HTMLElement): HTMLElement | null {
   let node: HTMLElement | null = el.parentElement;
   while (node) {
     if (node.tagName.toLowerCase() === "tosi-product-section") {
@@ -137,13 +155,80 @@ function findEnclosingSection(el: HTMLElement): HTMLElement | null {
   return null;
 }
 
-function nearestEnclosingProduct(el: HTMLElement | null): HTMLElement | null {
+/**
+ * The nearest ancestor `<tosi-product>` (inclusive of `el` itself), or `null`.
+ *
+ * This is how an engine decides which animators are *its own*: a nested (follower) engine owns
+ * the animators inside it, so the outer engine must skip them rather than drive them twice.
+ */
+export function nearestEnclosingProduct(el: HTMLElement | null): HTMLElement | null {
   let node = el;
   while (node) {
     if (node.tagName.toLowerCase() === "tosi-product") return node;
     node = node.parentElement;
   }
   return null;
+}
+
+/**
+ * Map a section's 0→1 pin progress onto an animator's `data-scroll-range="start,end"`
+ * sub-range, clamped to 0→1. A degenerate range (end <= start) acts as a step at `end`.
+ */
+export function rangeProgress(progress: number, rangeStr: string | null): number {
+  const [start, end] = (rangeStr || "0,1").split(",").map(Number);
+  const range = end - start;
+  if (range <= 0) return progress >= end ? 1 : 0;
+  return Math.max(0, Math.min(1, (progress - start) / range));
+}
+
+export interface ThemeSource {
+  fromName: string;
+  toName: string;
+  t: number;
+}
+
+/**
+ * Resolve which theme(s) are in force at `activeIdx`, walking back to the nearest
+ * preceding theme-bearing item so non-section interludes (markdown blocks, embed
+ * hosts) inherit the most recent section's theme instead of snapping to default.
+ * A `theme-from`/`theme-to` pair only interpolates while its own item is active;
+ * once we've moved past it, it holds at the to-value.
+ */
+export function resolveThemeSource(
+  items: readonly { element: HTMLElement }[],
+  activeIdx: number,
+  activeProgress: number,
+  defaultTheme: string
+): ThemeSource {
+  let fromName = defaultTheme;
+  let toName = defaultTheme;
+  let t = 0;
+
+  let themeIdx = activeIdx;
+  while (themeIdx >= 0) {
+    const el = items[themeIdx].element;
+    const themeAttr = el.getAttribute("theme");
+    const fromAttr = el.getAttribute("theme-from");
+    const toAttr = el.getAttribute("theme-to");
+    if (themeAttr || fromAttr || toAttr) {
+      if (fromAttr && toAttr) {
+        fromName = fromAttr;
+        toName = toAttr;
+        // Only interpolate while we're still in this item's pin phase.
+        // If we've moved past it (themeIdx < activeIdx) or it's exiting,
+        // hold at the to-value.
+        t = themeIdx === activeIdx ? activeProgress : 1;
+      } else {
+        const single = (themeAttr || fromAttr || toAttr) as string;
+        fromName = single;
+        toName = single;
+      }
+      break;
+    }
+    themeIdx--;
+  }
+
+  return { fromName, toName, t };
 }
 
 interface Item {
@@ -534,37 +619,12 @@ export class TosiProduct extends Component {
     const themeNames = Object.keys(this.themes);
     if (themeNames.length === 0) return;
 
-    let fromName = this.defaultTheme;
-    let toName = this.defaultTheme;
-    let t = 0;
-
-    // Find the nearest theme source. If the active item is a section, use it.
-    // Otherwise carry forward the most recent preceding section's theme so
-    // markdown blocks and other non-section interludes don't snap to default.
-    let themeIdx = activeIdx;
-    while (themeIdx >= 0) {
-      const it = this._items[themeIdx];
-      const el = it.element;
-      const themeAttr = el.getAttribute("theme");
-      const fromAttr = el.getAttribute("theme-from");
-      const toAttr = el.getAttribute("theme-to");
-      if (themeAttr || fromAttr || toAttr) {
-        if (fromAttr && toAttr) {
-          fromName = fromAttr;
-          toName = toAttr;
-          // Only interpolate while we're still in this item's pin phase.
-          // If we've moved past it (themeIdx < activeIdx) or it's exiting,
-          // hold at the to-value.
-          t = themeIdx === activeIdx ? activeProgress : 1;
-        } else {
-          const single = (themeAttr || fromAttr || toAttr) as string;
-          fromName = single;
-          toName = single;
-        }
-        break;
-      }
-      themeIdx--;
-    }
+    const { fromName, toName, t } = resolveThemeSource(
+      this._items,
+      activeIdx,
+      activeProgress,
+      this.defaultTheme
+    );
 
     const fromTheme = this.themes[fromName];
     const toTheme = this.themes[toName];
@@ -627,15 +687,10 @@ export class TosiProductSection extends Component {
         el === this ? null : (el.parentElement as HTMLElement | null)
       );
       if (ownerProduct !== myProduct) continue;
-      const rangeStr = el.getAttribute("data-scroll-range") || "0,1";
-      const [start, end] = rangeStr.split(",").map(Number);
-      const range = end - start;
-      const localProgress =
-        range <= 0
-          ? progress >= end
-            ? 1
-            : 0
-          : Math.max(0, Math.min(1, (progress - start) / range));
+      const localProgress = rangeProgress(
+        progress,
+        el.getAttribute("data-scroll-range")
+      );
       (el as HTMLElement).style.setProperty(
         "--local-progress",
         localProgress.toString()

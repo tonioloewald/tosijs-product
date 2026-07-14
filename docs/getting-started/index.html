@@ -44,7 +44,7 @@
   tosiInterpolator,
   tosiWaypoint,
   tosiFilmstrip,
-  tosiScrollMapper,
+  tosiScrollMap,
   tosiScrollCamera,
 } from &quot;tosijs-product&quot;;
 </code></pre>
@@ -120,32 +120,29 @@
   &gt;&lt;/video&gt;
 &lt;/tosi-product-section&gt;
 </code></pre>
-<p>For smoother results, convert the video to a filmstrip mosaic (see <a href="components.md#tosi-filmstrip">Components</a>).</p>
+<p>For smoother results, convert the video to a filmstrip mosaic (see <a href="/tosi-filmstrip/"><code>&lt;tosi-filmstrip&gt;</code></a>).</p>
 <h2>Lottie animations</h2>
 <pre><code class="language-html">&lt;tosi-product-section scroll=&quot;200&quot;&gt;
   &lt;tosi-lottie src=&quot;animation.json&quot; data-scroll-animate=&quot;lottie&quot;&gt;&lt;/tosi-lottie&gt;
 &lt;/tosi-product-section&gt;
 </code></pre>
-<h2>Nested and horizontal scrolling</h2>
-<p>Sections auto-detect their scroll parent. Place a <code>&lt;tosi-product&gt;</code> inside any scrollable container and it works:</p>
+<h2>Embedding, nesting and horizontal scrolling</h2>
+<p>The engine detects the scroll container it lives in, so a <code>&lt;tosi-product&gt;</code> works inside any
+scrollable element, not just the page:</p>
 <pre><code class="language-html">&lt;div style=&quot;height: 60vh; overflow-y: auto;&quot;&gt;
   &lt;tosi-product&gt;
     &lt;tosi-product-section scroll=&quot;200&quot;&gt;...&lt;/tosi-product-section&gt;
   &lt;/tosi-product&gt;
 &lt;/div&gt;
 </code></pre>
-<p>For horizontal scrolling, set <code>direction=&quot;horizontal&quot;</code> and use the appropriate layout on the parent:</p>
-<pre><code class="language-html">&lt;div style=&quot;overflow-x: auto; white-space: nowrap;&quot;&gt;
-  &lt;tosi-product style=&quot;display: inline-flex; width: max-content; height: 100%&quot;&gt;
-    &lt;tosi-product-section
-      direction=&quot;horizontal&quot;
-      scroll=&quot;200&quot;
-      style=&quot;flex-shrink: 0&quot;
-    &gt;
-      ...
-    &lt;/tosi-product-section&gt;
-  &lt;/tosi-product&gt;
-&lt;/div&gt;
+<p>Put a <code>&lt;tosi-product&gt;</code> <strong>inside a section</strong> and it becomes a <em>follower</em>: instead of listening to
+scroll itself, it is driven by the parent section&#39;s pin progress and sizes to fill it. That&#39;s how
+you nest a whole sub-story inside one scene of a bigger one.</p>
+<p>For horizontal scrolling, set <code>direction=&quot;horizontal&quot;</code> on the <strong><code>&lt;tosi-product&gt;</code></strong> — it&#39;s an engine
+attribute, not a section one, because the engine is what lays the runway out:</p>
+<pre><code class="language-html">&lt;tosi-product direction=&quot;horizontal&quot;&gt;
+  &lt;tosi-product-section scroll=&quot;200&quot;&gt;...&lt;/tosi-product-section&gt;
+&lt;/tosi-product&gt;
 </code></pre>
 <h2>Accessibility</h2>
 <p>When <code>prefers-reduced-motion: reduce</code> is active, all scroll-driven child animations are skipped. Only <code>scrollCallback</code> continues to fire, allowing you to provide alternative experiences.</p>

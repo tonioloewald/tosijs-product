@@ -13,13 +13,16 @@ function isColor(s) {
     "currentColor"
   ].includes(t);
 }
+function trimNum(v) {
+  return v.toFixed(4).replace(/0+$/, "").replace(/\.$/, "");
+}
 function interpolateThemeValue(from, to, t) {
   if (from === to || t <= 0)
     return from;
   if (t >= 1)
     return to;
   if (isColor(from) && isColor(to)) {
-    return `color-mix(in srgb, ${from} ${(1 - t) * 100}%, ${to})`;
+    return `color-mix(in srgb, ${from} ${trimNum((1 - t) * 100)}%, ${to})`;
   }
   const numRegex = /-?\d+(?:\.\d+)?/g;
   const aNums = Array.from(from.matchAll(numRegex));
@@ -32,7 +35,7 @@ function interpolateThemeValue(from, to, t) {
       const bm = bNums[i];
       result += from.substring(lastIndex, am.index);
       const v = parseFloat(am[0]) + (parseFloat(bm[0]) - parseFloat(am[0])) * t;
-      result += v.toFixed(4).replace(/0+$/, "").replace(/\.$/, "");
+      result += trimNum(v);
       lastIndex = am.index + am[0].length;
     }
     result += from.substring(lastIndex);
@@ -73,6 +76,39 @@ function nearestEnclosingProduct(el) {
     node = node.parentElement;
   }
   return null;
+}
+function rangeProgress(progress, rangeStr) {
+  const [start, end] = (rangeStr || "0,1").split(",").map(Number);
+  const range = end - start;
+  if (range <= 0)
+    return progress >= end ? 1 : 0;
+  return Math.max(0, Math.min(1, (progress - start) / range));
+}
+function resolveThemeSource(items, activeIdx, activeProgress, defaultTheme) {
+  let fromName = defaultTheme;
+  let toName = defaultTheme;
+  let t = 0;
+  let themeIdx = activeIdx;
+  while (themeIdx >= 0) {
+    const el = items[themeIdx].element;
+    const themeAttr = el.getAttribute("theme");
+    const fromAttr = el.getAttribute("theme-from");
+    const toAttr = el.getAttribute("theme-to");
+    if (themeAttr || fromAttr || toAttr) {
+      if (fromAttr && toAttr) {
+        fromName = fromAttr;
+        toName = toAttr;
+        t = themeIdx === activeIdx ? activeProgress : 1;
+      } else {
+        const single = themeAttr || fromAttr || toAttr;
+        fromName = single;
+        toName = single;
+      }
+      break;
+    }
+    themeIdx--;
+  }
+  return { fromName, toName, t };
 }
 
 class TosiProduct extends Component {
@@ -382,30 +418,7 @@ class TosiProduct extends Component {
     const themeNames = Object.keys(this.themes);
     if (themeNames.length === 0)
       return;
-    let fromName = this.defaultTheme;
-    let toName = this.defaultTheme;
-    let t = 0;
-    let themeIdx = activeIdx;
-    while (themeIdx >= 0) {
-      const it = this._items[themeIdx];
-      const el = it.element;
-      const themeAttr = el.getAttribute("theme");
-      const fromAttr = el.getAttribute("theme-from");
-      const toAttr = el.getAttribute("theme-to");
-      if (themeAttr || fromAttr || toAttr) {
-        if (fromAttr && toAttr) {
-          fromName = fromAttr;
-          toName = toAttr;
-          t = themeIdx === activeIdx ? activeProgress : 1;
-        } else {
-          const single = themeAttr || fromAttr || toAttr;
-          fromName = single;
-          toName = single;
-        }
-        break;
-      }
-      themeIdx--;
-    }
+    const { fromName, toName, t } = resolveThemeSource(this._items, activeIdx, activeProgress, this.defaultTheme);
     const fromTheme = this.themes[fromName];
     const toTheme = this.themes[toName];
     if (!fromTheme && !toTheme)
@@ -458,10 +471,7 @@ class TosiProductSection extends Component {
       const ownerProduct = nearestEnclosingProduct(el === this ? null : el.parentElement);
       if (ownerProduct !== myProduct)
         continue;
-      const rangeStr = el.getAttribute("data-scroll-range") || "0,1";
-      const [start, end] = rangeStr.split(",").map(Number);
-      const range = end - start;
-      const localProgress = range <= 0 ? progress >= end ? 1 : 0 : Math.max(0, Math.min(1, (progress - start) / range));
+      const localProgress = rangeProgress(progress, el.getAttribute("data-scroll-range"));
       el.style.setProperty("--local-progress", localProgress.toString());
       el.dataset.localProgress = localProgress.toFixed(3);
       if (typeof el.setScrollProgress === "function") {
@@ -1218,10 +1228,16 @@ export {
   tosiPrism,
   tosiInterpolator,
   tosiFilmstrip,
+  resolveThemeSource,
+  rangeProgress,
+  nearestEnclosingProduct,
   loadPrism,
+  isColor,
   interpolateWaypoints,
+  interpolateThemeValue,
   interpolateStrings,
   highlightCodeBlocks,
+  findEnclosingSection,
   TosiWaypoint,
   TosiScrollTime,
   TosiScrollMap,

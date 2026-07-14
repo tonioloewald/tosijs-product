@@ -23,7 +23,7 @@ import {
   tosiInterpolator,
   tosiWaypoint,
   tosiFilmstrip,
-  tosiScrollMapper,
+  tosiScrollMap,
   tosiScrollCamera,
 } from "tosijs-product";
 ```
@@ -114,7 +114,7 @@ Add `data-scroll-animate="currentTime"` to any `<video>` element:
 </tosi-product-section>
 ```
 
-For smoother results, convert the video to a filmstrip mosaic (see [Components](components.md#tosi-filmstrip)).
+For smoother results, convert the video to a filmstrip mosaic (see [`<tosi-filmstrip>`](/tosi-filmstrip/)).
 
 ## Lottie animations
 
@@ -124,9 +124,10 @@ For smoother results, convert the video to a filmstrip mosaic (see [Components](
 </tosi-product-section>
 ```
 
-## Nested and horizontal scrolling
+## Embedding, nesting and horizontal scrolling
 
-Sections auto-detect their scroll parent. Place a `<tosi-product>` inside any scrollable container and it works:
+The engine detects the scroll container it lives in, so a `<tosi-product>` works inside any
+scrollable element, not just the page:
 
 ```html
 <div style="height: 60vh; overflow-y: auto;">
@@ -136,20 +137,17 @@ Sections auto-detect their scroll parent. Place a `<tosi-product>` inside any sc
 </div>
 ```
 
-For horizontal scrolling, set `direction="horizontal"` and use the appropriate layout on the parent:
+Put a `<tosi-product>` **inside a section** and it becomes a *follower*: instead of listening to
+scroll itself, it is driven by the parent section's pin progress and sizes to fill it. That's how
+you nest a whole sub-story inside one scene of a bigger one.
+
+For horizontal scrolling, set `direction="horizontal"` on the **`<tosi-product>`** — it's an engine
+attribute, not a section one, because the engine is what lays the runway out:
 
 ```html
-<div style="overflow-x: auto; white-space: nowrap;">
-  <tosi-product style="display: inline-flex; width: max-content; height: 100%">
-    <tosi-product-section
-      direction="horizontal"
-      scroll="200"
-      style="flex-shrink: 0"
-    >
-      ...
-    </tosi-product-section>
-  </tosi-product>
-</div>
+<tosi-product direction="horizontal">
+  <tosi-product-section scroll="200">...</tosi-product-section>
+</tosi-product>
 ```
 
 ## Accessibility

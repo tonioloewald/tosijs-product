@@ -27,16 +27,44 @@ bun install              # Install dependencies
 bun run start            # Build, then start the doc-site dev server (bin/site.ts)
 bun run build            # Build the doc site + library, then exit (bin/site.ts --build)
 bun run format           # ESLint + Prettier
-bun run test             # Bun test runner (currently covers interpolation helpers)
-bun test src/interpolation.test.ts   # Run a single test file
+bun run test             # Bun test runner (interpolation, theme, embedding)
+bun test src/theme.test.ts           # Run a single test file
+bun tsc --noEmit         # Typecheck (NOT run by the build — see below)
 ```
+
+**The build does not typecheck.** `buildLibrary()` invokes `tsc` with `.nothrow()` purely to
+emit declarations, so type errors never fail `bun run build` — they just silently produce
+worse `.d.ts`. Run `bun tsc --noEmit` yourself before considering a change done.
+
+### Testing the scroll engine
+
+Tests preload `happydom.ts` (see `bunfig.toml`) for a DOM in Bun. The engine is tested
+through **pure exported seams**, not by driving live components:
+
+| Seam                                                  | Covers                                                       |
+| ----------------------------------------------------- | ------------------------------------------------------------ |
+| `interpolateStrings`, `interpolateWaypoints`           | CSS/numeric interpolation between waypoints                  |
+| `interpolateThemeValue`, `isColor`, `resolveThemeSource` | Theme blending, and which theme is in force at a runway point |
+| `findEnclosingSection`, `nearestEnclosingProduct`, `rangeProgress` | Ownership (sibling + nested engines), sub-range mapping |
+
+**Never `document.body.appendChild` a `<tosi-product>` in a test.** Connecting it upgrades
+the custom element, and its `connectedCallback` registers listeners that keep happy-dom's
+event loop alive — `bun test` then hangs forever with no output instead of failing. Build
+trees **detached** (`div.innerHTML = …`, no append): the seams above are pure `parentElement`
+walks, so a detached, un-upgraded tree exercises them identically.
 
 **Build pipeline** (`bin/site.ts`): a thin wrapper over `tosijs-ui/site`'s reusable doc-system. Two stages:
 
 1. `buildSite(siteConfig)` (from `tosijs-ui/site`) renders the static doc site into `docs/` — scans `docPaths` (`src/` doc-comment blocks + `README.md` as the home page + `src/docs/*.md`), bundles the `demo/site.ts` hydration entry to IIFE, copies `staticDirs`, and emits `llms.txt`. Config lives in `tosijs-product-site.config.ts`.
 2. `buildLibrary()` produces the npm artefacts in `dist/`: `dist/module.js` (ESM, tosijs/tosijs-ui external), `dist/index.js` (self-contained IIFE for CDN), and flattened `dist/*.d.ts` (via `tsc --emitDeclarationOnly`, then moved up out of `dist/src/`).
 
-`docs/` is **generated output** — `buildSite` runs `rm -rf docs/` first, so never hand-edit it or put source `.md` there (source docs live in `src/docs/`). Tests preload `happydom.ts` (see `bunfig.toml`) for a DOM in Bun. Dev server runs on **8788** (`port` in the site config; 8787 is tosijs-ui's).
+`docs/` is **generated output** — `buildSite` runs `rm -rf docs/` first, so never hand-edit it or put source `.md` there (source docs live in `src/docs/`).
+
+### Dev server
+
+`bun run start` serves over **HTTPS on 8788** — https://localhost:8788 (`port` in the site config; 8787 is tosijs-ui's). It requires `tls/key.pem` + `tls/certificate.pem`, which are **gitignored** (locally-trusted, machine-specific): on a fresh clone the server refuses to start until you run `bunx tosijs-dev-certs` (needs `mkcert`).
+
+To drive the running site (scroll testing, DOM inspection, console), prefer **haltija** over other browser automation: `bunx haltija@latest -f`, then `hj navigate https://localhost:8788`, `hj eval '<js>'`, `hj console`. It can't reach localhost from a `file://` URL, so always point it at the dev server.
 
 ### README is the cinematic landing page
 
@@ -129,7 +157,12 @@ Color values blend through `color-mix(in srgb, ...)`. Numeric strings interpolat
 - **Progress is always 0→1**: pin progress maps to this range; exit phase pins at 1.
 - **Mosaic filenames encode grid info**: `name_COLSxROWS_TOTAL.webp` — `TosiFilmstrip` auto-parses this.
 - **IIFE build** (`dist/index.js`) is self-contained (bundles tosijs + tosijs-ui) and exposes `globalThis.tosijs`, `globalThis.tosijsUi`, and `globalThis.tosijsProduct`. Entry point: `src/index-iife.ts`.
-- **Peer dependencies**: `tosijs` (^1.6.4) and `tosijs-ui` (^1.6.19) are required. `tosijs-ui` also supplies the doc-site build system (`tosijs-ui/site`). Dev uses local `file:` links to sibling directories `../tosijs` and `../tosijs-ui`.
+- **Peer dependencies**: `tosijs` (^1.6.8) and `tosijs-ui` (^1.6.22) are required. `tosijs-ui` also supplies the doc-site build system (`tosijs-ui/site`), so it's a build dependency too — it is installed **from the registry**, not `file:`-linked to the sibling `../tosijs-ui` checkout (which tracks an unreleased beta; don't assume the two agree).
+- **`tjs-lang` tracks `tosijs-ui`**: when you bump the `tosijs-ui` peer, bump the `tjs-lang` devDependency to match, or the IIFE build breaks. (1.6.22 wants `tjs-lang ^0.9.0`; 1.6.19 wanted `^0.8.7`.)
+- **Bumping the peers is awkward in bun**: they're peer deps, so `bun install` / `bun update` will *not* pull a newer copy into `node_modules` — it just warns `incorrect peer dependency` and, worse, `bun update` rewrites your peer ranges back down to whatever is installed. Use `bun add -d tosijs@latest tosijs-ui@latest`, which installs the new versions **and** raises the peer ranges.
+- **Never run the dev server on `tosijs-ui` < 1.6.22.** `buildSite()` called `Bun.build()` in-process and Bun's bundler never returns its native arena, so RSS grew monotonically per rebuild (invisible to `Bun.gc()` and to heap profilers — the JS heap stays flat). A multi-day watch session reached **136GB RSS**. 1.6.22 moves the bundle to a child process and adds an RSS watchdog (`memoryLimitMb`, default 4096).
+- **Changelog**: user-visible changes go in `CHANGELOG.md` under `## [Unreleased]` ([Keep a Changelog](https://keepachangelog.com/en/1.1.0/)), per the shared coding practices.
+- **Upstream issues**: rough edges in `tosijs-ui` are **filed as GitHub issues on that repo**, then mirrored in `UPSTREAM.md` with the issue link — "file, don't fix". An `UPSTREAM.md` entry with no filed issue is a complaint nobody will read.
 
 ### CLI tool
 
@@ -149,6 +182,8 @@ bunx tosi-mosaic <video-file> [-f frames] [-w width] [-q quality] [-r fps]
 - `src/tosi-scroll-map.ts` — `TosiScrollMap` (Mapbox scroll controller; finds an enclosing/sibling `<tosi-map>`, flies between `<tosi-waypoint coords="lat,lng,zoom">` keyframes)
 - `src/tosi-prism.ts` — `TosiPrism` component + reusable `loadPrism(languages?)` and `highlightCodeBlocks(root)` helpers (Prism loads lazily from jsDelivr CDN). Renamed from `tosi-code` in v0.6.x to avoid clashing with tosijs-ui's `<tosi-code>` (ace-based editor).
 - `src/interpolation.test.ts` — tests for `interpolateStrings` and `interpolateWaypoints`
+- `src/theme.test.ts` — tests for `interpolateThemeValue`, `isColor`, `resolveThemeSource`
+- `src/embedding.test.ts` — tests for engine ownership (sibling/nested engines) and `rangeProgress`
 - `src/index.ts` — re-exports all public API
 - `src/index-iife.ts` — IIFE entry point; assigns `tosijs`, `tosijsUi`, `tosijsProduct` to `globalThis`
 - `src/docs/*.md` — extra doc-site pages (`getting-started.md`, `components.md`) scanned by `buildSite`
@@ -168,7 +203,7 @@ This library builds on `tosijs` and `tosijs-ui`. Key patterns to follow:
 - Extend `Component` from `tosijs`. Use `static initAttributes = { ... }` for declared attributes with defaults.
 - `content()` runs once to build shadow DOM. `render()` runs on attribute changes for structural updates. Bindings handle content updates — don't manually walk the DOM in render.
 - Use `static styleSpec = { ':host': { ... } }` for component styles (`:host` is rewritten automatically).
-- Export both the class (`TosiFoo`) and a factory (`tosiFoo = TosiFoo.elementCreator({ tag: 'tosi-foo' })`).
+- Export both the class (`TosiFoo`) and a factory (`tosiFoo = TosiFoo.elementCreator({ tag: 'tosi-foo' })`). Note: tosijs now warns that both `elementCreator({ tag })` and `static styleSpec` are **deprecated** (use `static preferredTagName` / `static shadowStyleSpec`). Every factory here still uses the old form — migrating is a pending chore, so don't be surprised by the warnings in test output.
 
 ### Element creators and elements
 

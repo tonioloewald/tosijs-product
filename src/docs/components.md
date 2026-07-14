@@ -1,230 +1,130 @@
 # Component Reference
 
-## tosi-product
+<!--{ "headTitle": "tosijs-product — component & API reference", "description": "Every element and exported function in tosijs-product: the scroll engine, the animators, the theme system, and the JavaScript API.", "keywords": [ "reference", "api", "components", "themes" ] }-->
 
-Top-level container that wraps your scroll story. No required attributes.
+Each element has its own page with a live, maximizable demo — those pages are generated from the
+source, so they never drift from the code. This page is the index, plus the two things that span
+several elements: the **theme system** and the **JavaScript API**.
+
+## Elements
+
+| Element                                                 | What it does                                                                                |
+| ------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| [`<tosi-product>`](/tosi-product/)                       | The scroll engine. Owns the runway, pins each section, then exits it. Also hosts the themes. |
+| [`<tosi-product-section>`](/tosi-product/)               | A scene. Pins for `scroll`% of the viewport, then scrolls out 1:1.                          |
+| [`<tosi-product-header>`](/tosi-product/)                | Sticky overlay header that slides in past a `threshold`.                                    |
+| [`<tosi-interpolator>`](/tosi-interpolator/)             | Interpolates CSS between `<tosi-waypoint>` keyframes.                                       |
+| [`<tosi-waypoint>`](/tosi-interpolator/)                 | A keyframe: a `progress` plus the values that hold at it.                                   |
+| [`<tosi-filmstrip>`](/tosi-filmstrip/)                   | Scrubs a WebP/PNG mosaic on a canvas — video without the decode.                            |
+| [`<tosi-scroll-map>`](/tosi-scroll-map/)                 | Flies a Mapbox `<tosi-map>` between `coords` waypoints.                                     |
+| [`<tosi-scroll-camera>`](/tosi-b3d-scroll/)              | Drives a BabylonJS camera (alpha/beta/radius/position/fov).                                 |
+| [`<tosi-scroll-time>`](/tosi-b3d-scroll/)                | Maps progress to a day/night cycle on a B3d skybox.                                         |
+| [`<tosi-scroll-animation>`](/tosi-b3d-scroll/)           | Scrubs a named BabylonJS `AnimationGroup`.                                                  |
+| [`<tosi-prism>`](/tosi-prism/)                           | Syntax-highlights its text content (PrismJS, loaded lazily).                                |
+
+## Driving anything with scroll
+
+Two attributes do the work, and they're the whole contract between the engine and an animator:
+
+- **`data-scroll-animate`** marks an element as scroll-driven. If it implements
+  `setScrollProgress(progress)`, the section calls it. Two values are handled natively for
+  elements that don't: `data-scroll-animate="currentTime"` scrubs a `<video>`, and
+  `data-scroll-animate="lottie"` scrubs a Bodymovin player.
+- **`data-scroll-range="start,end"`** scopes an animator to a slice of its section's progress, so
+  `"0.5,1"` means "animate across the second half only." The remapped value is also published as
+  the CSS custom property `--local-progress`, so you can use it directly in `calc()`.
+
+That's the extension point: **anything with a `setScrollProgress(progress)` method can be driven by
+the engine**, which is all `<tosi-scroll-map>` and the B3d controllers are.
+
+When `prefers-reduced-motion: reduce` is set, child animations are skipped entirely; only
+`scrollCallback` fires, so you can offer a static alternative.
+
+## Theme system
+
+Themes are named dictionaries of CSS custom properties, registered on the **engine**:
+
+```js
+const app = document.querySelector("tosi-product");
+
+app.themes = {
+  midnight: { "--bg": "#08081a", "--fg": "#f0f0f5" },
+  paper: { "--bg": "#f5f1e8", "--fg": "#1a1815" },
+};
+app.defaultTheme = "midnight";
+```
+
+Sections then declare which theme is in force as they pin:
 
 ```html
-<tosi-product>
-  <!-- sections go here -->
-</tosi-product>
+<tosi-product-section theme="midnight">…</tosi-product-section>
+<tosi-product-section theme-from="midnight" theme-to="paper">…</tosi-product-section>
 ```
 
-## tosi-product-section
+`theme` holds a theme constant for the whole pin. `theme-from`/`theme-to` **interpolates** between
+two themes across the pin progress, so the page changes mood as you scroll through the section.
 
-Converts scroll position into a normalized 0-1 progress value. Content is pinned to the viewport via `position: sticky` while the user scrolls through extra height created by the `scroll` attribute.
+| Property      | Type            | Default                    | Description                                                          |
+| ------------- | --------------- | -------------------------- | -------------------------------------------------------------------- |
+| `themes`      | `ThemeRegistry` | `{}`                       | Named theme dictionaries.                                            |
+| `defaultTheme`| `string`        | `""`                       | Theme in force before any section declares one.                      |
+| `themeTarget` | `HTMLElement`   | `document.documentElement` | Where resolved variables are written. A nested engine scopes to itself. |
 
-### Attributes
+Values blend according to type: colors through `color-mix(in srgb, …)`, values containing numbers
+per-number, and everything else steps at the midpoint. Because the resolved variables land on
+`document.documentElement` by default, **elements outside the engine re-theme too** — a page header,
+a sticky nav, the footer — simply by reading the same custom properties.
 
-| Attribute   | Default    | Description                                                                                                                                              |
-| ----------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `scroll`    | `100`      | Scroll distance as a percentage of the container dimension. `100` = one viewport height (or width for horizontal). `300` = three viewports of scrolling. |
-| `direction` | `vertical` | `"vertical"` or `"horizontal"`                                                                                                                           |
-| `debug`     | —          | When present, shows an overlay with the current progress value                                                                                           |
+Sections that declare no theme don't snap back to the default: the engine walks back to the nearest
+preceding theme-bearing section, so a markdown interlude between two scenes keeps the mood of the
+scene before it.
 
-### Properties
+## JavaScript API
 
-| Property         | Type                                          | Description                                             |
-| ---------------- | --------------------------------------------- | ------------------------------------------------------- |
-| `scrollCallback` | `(progress: number, el: HTMLElement) => void` | Called on every scroll update with the current progress |
-
-### How progress works
-
-Progress is calculated as `clamp(-offset / scrollAmount, 0, 1)` where offset is the section's position relative to the scroll container. The section queries children with `[data-scroll-animate]` or `[data-scroll-range]` and dispatches progress to each.
-
-Children receive progress via:
-
-1. `setScrollProgress(localProgress)` if the element implements it
-2. `data-scroll-animate="currentTime"` — sets `el.currentTime` on video elements
-3. `data-scroll-animate="lottie"` — calls `animation.goToAndStop(frame, true)` on Lottie players
-
-### Scroll ranges
-
-Use `data-scroll-range="start,end"` on any child to constrain its animation to a sub-range. For example, `data-scroll-range="0.5,1"` means the child only animates during the second half of the section's scroll.
-
-The CSS custom property `--local-progress` is set on every animated child and can be used in `calc()` expressions.
-
-### Reduced motion
-
-When `prefers-reduced-motion: reduce` is active, child animations are skipped. Only `scrollCallback` still fires.
-
-## tosi-interpolator
-
-Declarative CSS property interpolation between waypoints. Place `<tosi-waypoint>` children to define keyframes, and one or more content elements that receive the interpolated styles.
-
-### Attributes
-
-| Attribute | Default | Description                                                                    |
-| --------- | ------- | ------------------------------------------------------------------------------ |
-| `easing`  | —       | Set to `"ease-in-out"` for easeInOutQuad between waypoints. Default is linear. |
-
-```html
-<tosi-interpolator data-scroll-animate easing="ease-in-out">
-  <tosi-waypoint
-    progress="0.0"
-    style="opacity: 0; transform: translateY(50px)"
-  ></tosi-waypoint>
-  <tosi-waypoint
-    progress="0.5"
-    style="opacity: 1; transform: translateY(0px)"
-  ></tosi-waypoint>
-  <tosi-waypoint
-    progress="1.0"
-    style="opacity: 0; transform: translateY(-50px)"
-  ></tosi-waypoint>
-  <div>Your content here</div>
-</tosi-interpolator>
-```
-
-### Interpolation details
-
-- Numeric values within CSS strings are interpolated individually (e.g. `translateY(0px)` to `translateY(100px)`)
-- Colors (`#hex`, `rgb()`, `hsl()`, named colors) use `color-mix(in srgb, ...)`
-- Non-numeric, non-color values snap at the 50% mark
-
-## tosi-waypoint
-
-Defines a keyframe for `tosi-interpolator`. Hidden element — only its attributes matter.
-
-### Attributes
-
-| Attribute  | Description                                                        |
-| ---------- | ------------------------------------------------------------------ |
-| `progress` | 0-1 value defining where this keyframe sits in the scroll timeline |
-| `style`    | CSS styles at this keyframe                                        |
-
-When used inside `tosi-scroll-camera`, waypoints define camera properties instead of CSS styles (see below).
-
-## tosi-filmstrip
-
-Canvas-based frame animator using a single mosaic image (grid of frames). Provides stutter-free scrubbing without video decode overhead.
-
-### Attributes
-
-| Attribute | Description                   |
-| --------- | ----------------------------- |
-| `src`     | URL of the mosaic image       |
-| `cols`    | Number of columns in the grid |
-| `rows`    | Number of rows in the grid    |
-| `total`   | Total number of frames        |
-
-If the filename matches the pattern `name_COLSxROWS_TOTAL.ext`, the grid dimensions are parsed automatically.
-
-```html
-<tosi-filmstrip src="clip_10x10_100.webp" data-scroll-animate></tosi-filmstrip>
-```
-
-### Creating mosaics
-
-Use the included CLI tool:
-
-```bash
-bunx tosi-mosaic video.mp4 -f 100 -w 640 -q 75
-```
-
-Options: `-f` frames, `-w` frame width, `-q` WebP quality, `-r` input FPS.
-
-## tosi-scroll-mapper
-
-Generic scroll progress wrapper. Receives progress from its parent section and forwards it to a callback. Useful for driving third-party components (maps, charts, etc.) that don't implement `setScrollProgress`.
-
-### Properties
-
-| Property         | Type                         | Description                                                                |
-| ---------------- | ---------------------------- | -------------------------------------------------------------------------- |
-| `scrollCallback` | `(progress: number) => void` | Called with progress on every scroll update. `this` is the mapper element. |
+Every element also has a factory function (`tosiProduct()`, `tosiProductSection()`, …) following the
+tosijs convention. Import from `tosijs-product`:
 
 ```typescript
-tosiScrollMapper(
-  {
-    scrollCallback(progress) {
-      const map = this.querySelector("tosi-map");
-      map.coords = `${lat},${lng},${zoom}`;
-    },
-  },
-  mapBox({ token: "...", coords: "37.46,-122.43,12" })
-);
+import {
+  tosiProduct,
+  tosiProductSection,
+  tosiProductHeader,
+  tosiInterpolator,
+  tosiWaypoint,
+  tosiFilmstrip,
+  tosiScrollMap,
+  tosiScrollCamera,
+  tosiScrollTime,
+  tosiScrollAnimation,
+  tosiPrism,
+} from "tosijs-product";
 ```
 
-## tosi-scroll-camera
+### Helpers
 
-Waypoint-driven camera controller for BabylonJS scenes. Place inside or as a sibling of a `<tosi-3d>` element. Uses `<tosi-waypoint>` children to define camera keyframes.
+The engine's pure functions are exported too. They're the seams the test suite drives, and they're
+useful if you're building your own animator or debugging why a scene isn't behaving.
 
-### Attributes
+| Function                                             | Returns                | Description                                                                                     |
+| ---------------------------------------------------- | ---------------------- | ----------------------------------------------------------------------------------------------- |
+| `rangeProgress(progress, rangeStr)`                  | `number`               | Maps a section's 0→1 progress onto a `data-scroll-range="start,end"` slice, clamped to 0→1.     |
+| `interpolateStrings(a, b, t)`                        | `string`               | Interpolates the numbers inside two CSS strings — how `<tosi-interpolator>` blends keyframes.   |
+| `interpolateWaypoints(progress, waypoints)`          | `number`               | Numeric interpolation across waypoints, with easeInOutQuad.                                     |
+| `interpolateThemeValue(from, to, t)`                 | `string`               | Blends one theme value into another (colors via `color-mix`, numbers per-number, else steps).   |
+| `isColor(s)`                                         | `boolean`              | Whether a CSS value is a color, and so should be blended rather than stepped.                   |
+| `resolveThemeSource(items, activeIdx, progress, defaultTheme)` | `ThemeSource` | Which theme(s) are in force at a point on the runway, and how far between them.                 |
+| `findEnclosingSection(el)`                           | `HTMLElement \| null`  | The nearest ancestor `<tosi-product-section>`.                                                   |
+| `nearestEnclosingProduct(el)`                        | `HTMLElement \| null`  | The nearest ancestor `<tosi-product>` — how an engine tells its own animators from a nested engine's. |
 
-| Attribute | Default | Description                                                |
-| --------- | ------- | ---------------------------------------------------------- |
-| `easing`  | —       | Set to `"ease-in-out"` for easeInOutQuad between waypoints |
+### Types
 
-### Waypoint attributes
+```typescript
+type ThemeMap = Record<string, string>;       // CSS custom property → value
+type ThemeRegistry = Record<string, ThemeMap>; // theme name → ThemeMap
 
-For `ArcRotateCamera`:
-
-| Attribute                          | Description                                                       |
-| ---------------------------------- | ----------------------------------------------------------------- |
-| `alpha`                            | Horizontal rotation angle (radians)                               |
-| `beta`                             | Vertical rotation angle (radians). 0 = top-down, pi/2 = eye-level |
-| `radius`                           | Distance from target                                              |
-| `target-x`, `target-y`, `target-z` | Camera target position                                            |
-
-For positional cameras:
-
-| Attribute     | Description     |
-| ------------- | --------------- |
-| `x`, `y`, `z` | Camera position |
-| `fov`         | Field of view   |
-
-```html
-<tosi-scroll-camera data-scroll-animate easing="ease-in-out">
-  <tosi-waypoint
-    progress="0"
-    alpha="-1.57"
-    beta="1.2"
-    radius="110"
-  ></tosi-waypoint>
-  <tosi-waypoint
-    progress="0.5"
-    alpha="0"
-    beta="1.0"
-    radius="70"
-  ></tosi-waypoint>
-  <tosi-waypoint
-    progress="1"
-    alpha="1.57"
-    beta="1.55"
-    radius="76"
-  ></tosi-waypoint>
-</tosi-scroll-camera>
-```
-
-## tosi-scroll-time
-
-Maps scroll progress to a time-of-day value on a sibling `<tosi-b3d-skybox>` element. Set `realtimeScale="0"` on the skybox to disable auto-advancement.
-
-### Attributes
-
-| Attribute | Default | Description       |
-| --------- | ------- | ----------------- |
-| `from`    | `0`     | Start hour (0-24) |
-| `to`      | `24`    | End hour (0-24)   |
-
-```html
-<tosi-scroll-time data-scroll-animate from="6" to="18"></tosi-scroll-time>
-```
-
-## tosi-scroll-animation
-
-Scrubs a named BabylonJS AnimationGroup to the frame corresponding to scroll progress.
-
-### Attributes
-
-| Attribute | Description                           |
-| --------- | ------------------------------------- |
-| `name`    | Name of the AnimationGroup to control |
-
-```html
-<tosi-scroll-animation
-  data-scroll-animate
-  name="DoorOpen"
-></tosi-scroll-animation>
+interface ThemeSource {
+  fromName: string; // theme being blended out of
+  toName: string;   // theme being blended into
+  t: number;        // 0→1 position between them
+}
 ```

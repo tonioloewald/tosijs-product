@@ -43,6 +43,32 @@ narrative-landing capability.
 
 -->
 
+## `<tosi-map>` builds one `mapboxgl.Map` per render while `mapbox-gl.js` is still loading
+
+**Issue:** https://github.com/tonioloewald/tosijs-ui/issues/13 (filed 2026-07-14, `tosijs-ui@1.6.22`)
+
+**Context.** `MapBox.render()` takes its map-creation branch whenever `this._map` is falsy, but
+`_map` is only assigned **asynchronously**, inside `MapBox.mapboxAvailable.then(...)`. Anything that
+writes `coords` during the CDN-load window therefore starts another construction on every render —
+and `<tosi-scroll-map>` writes `coords` once per animation frame as its section pins. Measured in
+Chrome with the script resolution delayed 1.5s: **181 coords writes → 180 `mapboxgl.Map` instances
+and 180 canvases inside a single `<tosi-map>`**, each with its own WebGL context and tile requests.
+Chrome caps WebGL contexts around 16 and force-discards the oldest, so the *visible* map can end up
+on a discarded context.
+
+Second, subtler half: `_lastCoords` is updated **synchronously** on each of those pre-creation
+renders, while the map is constructed from the coords captured in that render's closure. So once the
+map exists, the update branch sees `coords === _lastCoords` and never applies the positions written
+during loading — they're silently dropped and the map sits at a stale center.
+
+**Why it didn't bite our demo.** At page load the hero's progress is 0, whose waypoint equals
+`<tosi-map>`'s initial `coords`, so no write occurs and no re-render fires. Scroll into the map
+section *while it is still loading* (slow network, cold cache) and you'd hit it.
+
+**Suggestion.** Single-flight the construction with a `_mapPending` guard, and inside the `.then()`
+read `this.coords` fresh (rather than the value captured at first render) before constructing, then
+set `_lastCoords`. Offered to send a PR.
+
 ## ✅ RESOLVED (tosijs-ui 1.6.16) — `<tosi-3d>` has no declarative model source
 
 **Resolution.** Landed in `tosijs-ui@1.6.16`. `<tosi-3d>` now takes declarative

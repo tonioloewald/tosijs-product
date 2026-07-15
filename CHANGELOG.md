@@ -8,6 +8,25 @@ For releases before 0.6.1, see the git history (`git log`) and tags.
 
 ## [Unreleased]
 
+## [0.6.3] — 2026-07-15
+
+### Changed
+
+- **Peers bumped to `tosijs ^1.6.9` and `tosijs-ui ^1.6.23`** — both stability releases we now
+  develop and test against. `tosijs-ui@1.6.23` is the dev-server safety release: its
+  `killStrayServer` previously `kill -9`'d every process *connected to* the dev port (`lsof -i:PORT`
+  matches remote-port sockets too), so `bun start` could SIGKILL the very browser rendering the
+  page — including a haltija/Playwright head driving `localhost:8788`. It now signals only the
+  listening JS runtime, SIGTERM first. It also adds an 8-hour idle timeout (`idleTimeoutHours: 0`
+  to disable) and an out-of-memory preflight (`DEV_SKIP_PREFLIGHT=1` to skip). `tosijs@1.6.9`
+  carries the `parts`-proxy fix (tosijs#13). No API change here; the IIFE grows +111 bytes gzip,
+  build/typecheck/tests unchanged and green.
+
+### Fixed
+
+- Doc-comment for `<tosi-prism>` called tosijs-ui's `<tosi-code>` "ace-based"; it is CodeMirror-based
+  as of the 1.7 line. Dropped the stale editor name.
+
 ## [0.6.2] — 2026-07-15
 
 ### Added

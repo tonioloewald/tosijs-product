@@ -1,4 +1,4 @@
-# tosijs-product v0.6.2
+# tosijs-product v0.6.3
 
 Scroll-linked animation components for tosijs.
 

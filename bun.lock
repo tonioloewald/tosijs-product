@@ -13,8 +13,8 @@
         "typescript": "^5.9.3",
       },
       "peerDependencies": {
-        "tosijs": "^1.6.8",
-        "tosijs-ui": "^1.6.22",
+        "tosijs": "^1.6.9",
+        "tosijs-ui": "^1.6.23",
       },
     },
   },
@@ -45,11 +45,11 @@
 
     "tjs-lang": ["tjs-lang@0.9.1", "", { "dependencies": { "acorn": "^8.15.0", "acorn-loose": "^8.5.2", "acorn-walk": "^8.3.4", "tosijs-schema": "^1.4.0" }, "bin": { "tjs": "src/cli/tjs.ts", "tjsx": "src/cli/tjsx.ts", "tjs-playground": "src/cli/playground.ts", "create-tjs-app": "src/cli/create-app.ts", "ajs-install-vscode": "bin/install-vscode.sh", "ajs-install-cursor": "bin/install-cursor.sh" } }, "sha512-ubG4qIKyb7gBXG5Ecc+QjqRX4B3kxzngWiQWkdPDpp3EM27oGwzMgR+QPUCoumuVV28RQ+d5XC1WmUpZyo7xIg=="],
 
-    "tosijs": ["tosijs@1.6.8", "", {}, "sha512-+eCWU68wPgSmawJhsV92Fb/TrfjIPhyfKNrtg/UU/m+AQHMj2cL400FH1hJ5B07bpTaWyHT+KHjAof6AdV3RXA=="],
+    "tosijs": ["tosijs@1.6.9", "", {}, "sha512-CGn79N3LWRV/W+yBjovVqZB3SpovFdmSiwy2WsGVYFT8PtuxkTZFyl8fEukk6r0N9FaPTQpsOUvzhbXMdKzrjQ=="],
 
     "tosijs-schema": ["tosijs-schema@1.4.0", "", {}, "sha512-ESNQNw3dcCU3hMhrMLQvzPP+mRth+cew/YMjQt4Y6z8Hth2AMYCVRk/uc/MXcSoLiZhmhL0bF2hu66xlIsjZCQ=="],
 
-    "tosijs-ui": ["tosijs-ui@1.6.22", "", { "peerDependencies": { "@resvg/resvg-js": "^2.6.2", "happy-dom": "^20.7.0", "marked": "^16.4.2", "tjs-lang": "^0.9.0", "tosijs": "^1.6.6" }, "optionalPeers": ["@resvg/resvg-js", "happy-dom", "tjs-lang"], "bin": { "tosijs-dev-certs": "tls/create-dev-certs.sh", "tosijs-make-icons": "bin/make-icon-data.js" } }, "sha512-NxZJjEi2PFZUrQb5ogZKLFjKdl7CJvgkNEukCB138H9pOyTj1KlFQyqLzFIrI1TIMnUHb2dyliY4lK0gftB25A=="],
+    "tosijs-ui": ["tosijs-ui@1.6.23", "", { "peerDependencies": { "@resvg/resvg-js": "^2.6.2", "happy-dom": "^20.7.0", "marked": "^16.4.2", "tjs-lang": "^0.9.0", "tosijs": "^1.6.9" }, "optionalPeers": ["@resvg/resvg-js", "happy-dom", "tjs-lang"], "bin": { "tosijs-make-icons": "bin/make-icon-data.js", "tosijs-dev-certs": "tls/create-dev-certs.sh" } }, "sha512-CHc/ydZiR+QAo6C2vWp3rVff2I7km1Eea3tnvldFmC/TnUZAHFN77hiK25d6PWdnkQ5wKXYFlta1AlblkTxOSg=="],
 
     "typescript": ["typescript@5.9.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw=="],
 

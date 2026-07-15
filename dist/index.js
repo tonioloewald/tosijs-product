@@ -13693,6 +13693,20 @@ ${$}
         });
     }
     _hydrated = false;
+    _whenHydrated;
+    _resolveHydrated;
+    get hydrated() {
+      return this._hydrated;
+    }
+    get whenHydrated() {
+      if (this._hydrated)
+        return Promise.resolve();
+      if (this._whenHydrated == null)
+        this._whenHydrated = new Promise((E) => {
+          this._resolveHydrated = E;
+        });
+      return this._whenHydrated;
+    }
     hydrate() {
       if (!this._hydrated) {
         this.initValue();
@@ -13734,7 +13748,7 @@ ${$}
             });
           }
         }
-        this._hydrated = true;
+        this._hydrated = true, this._parts = undefined, this._resolveHydrated?.();
       }
     }
     render() {
@@ -13965,7 +13979,7 @@ ${$}
       $.length = 0, f.clear(), H.length = 0, E.disconnect();
     } };
   }
-  var jM = "1.6.8";
+  var jM = "1.6.9";
   function NE(E) {
     return Object.assign(y, E), y;
   }
@@ -21449,6 +21463,21 @@ ${items}
     return docMarked.parse(text);
   }
 
+  // node_modules/tosijs-ui/dist/doc-system/doc-title.js
+  function pageTitle(doc, projectName) {
+    const headTitle = doc.headTitle?.trim();
+    if (headTitle)
+      return headTitle;
+    const project = projectName?.trim() ?? "";
+    if (!project)
+      return doc.title;
+    const t2 = doc.title.toLowerCase();
+    const p3 = project.toLowerCase();
+    if (t2.includes(p3) || p3.includes(t2))
+      return doc.title;
+    return `${doc.title} — ${project}`;
+  }
+
   // node_modules/tosijs-ui/dist/tab-selector.js
   var { div: div7, slot: slot6, span: span6, button: button6 } = k;
 
@@ -22751,13 +22780,6 @@ ${items}
       const { editors } = this.parts;
       return [...editors.children].find((elt) => elt.getAttribute("hidden") === null);
     }
-    get hydrated() {
-      try {
-        return this.parts.js !== undefined;
-      } catch {
-        return false;
-      }
-    }
     getEditorValue(which) {
       if (!this.hydrated)
         return this.pendingValues[which] ?? "";
@@ -23996,7 +24018,7 @@ return ${extracted.testRunner}`;
       LiveExample.insertExamples(docContent, context, doc.path || undefined);
       scrollToHashExample();
       if (routing === "path") {
-        document.title = projectName ? `${doc.title} — ${projectName}` : doc.title;
+        document.title = pageTitle(doc, projectName);
       }
     };
     const navigateTo = (filename) => {
@@ -28948,7 +28970,7 @@ ${parts.join(`
   var tosiTagList = TosiTagList.elementCreator();
   var xinTagList = gE((...args) => tosiTagList(...args), "xinTagList is deprecated, use tosiTagList instead (tag is now <tosi-tag-list>)");
   // node_modules/tosijs-ui/dist/version.js
-  var version = "1.6.22";
+  var version = "1.6.23";
   // node_modules/tosijs-ui/dist/tooltip.js
   var { span: span18 } = k;
   var tooltipFloat = null;

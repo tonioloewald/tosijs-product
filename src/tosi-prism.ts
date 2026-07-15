@@ -27,7 +27,7 @@ await loadPrism(['javascript', 'css'])
 highlightCodeBlocks(document.querySelector('.rendered-markdown'))
 ```
 
-> Renamed from `tosi-code` in v0.6.x to avoid clashing with tosijs-ui's ace-based `<tosi-code>` editor.
+> Renamed from `tosi-code` in v0.6.x to avoid clashing with tosijs-ui's `<tosi-code>` code editor.
 
 See also [`<tosi-product>`](/tosi-product/).
 */

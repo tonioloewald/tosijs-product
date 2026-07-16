@@ -19,8 +19,18 @@ For releases before 0.6.1, see the git history (`git log`) and tags.
   page — including a haltija/Playwright head driving `localhost:8788`. It now signals only the
   listening JS runtime, SIGTERM first. It also adds an 8-hour idle timeout (`idleTimeoutHours: 0`
   to disable) and an out-of-memory preflight (`DEV_SKIP_PREFLIGHT=1` to skip). `tosijs@1.6.9`
-  carries the `parts`-proxy fix (tosijs#13). No API change here; the IIFE grows +111 bytes gzip,
-  build/typecheck/tests unchanged and green.
+  carries the `parts`-proxy fix (tosijs#13). No API change here; build/typecheck/tests unchanged
+  and green.
+
+  **On bundle size:** this bump adds essentially nothing (library `dist/index.js` +165 bytes
+  gzip → ~290KB; doc-site `docs/iife.js` +111 bytes → ~122KB). Note that number is *small because
+  the cost was already paid at our previous floor* — tosijs-ui moved its editor from ACE to
+  CodeMirror around 1.6.21, below our 0.6.2 `^1.6.22` pin, so 0.6.2 already carried it. It is **not**
+  that the editor doesn't reach us: `src/index-iife.ts` does `import * as tosijsUi`, so the library
+  IIFE bundles the whole barrel (editor included), and the doc-site live-examples pull CodeMirror via
+  the lazily-served `/tjs/` chunk (`docs/tjs/tjs-browser.js`, ~327KB raw). A forthcoming tosijs-ui
+  release makes doc pages ship **zero** CodeMirror unless a reader actually opens an editor, dropping
+  bundle size back toward pre-ACE levels — a win we inherit on the next peer bump, no work here.
 
 ### Fixed
 

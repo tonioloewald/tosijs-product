@@ -8,6 +8,19 @@ For releases before 0.6.1, see the git history (`git log`) and tags.
 
 ## [Unreleased]
 
+## [0.6.5] — 2026-07-27
+
+### Fixed
+
+- **Published tarball was 13.7MB and shipped doc-site internals.** `files` was `["dist", "bin", …]`,
+  which globbed *everything* in those dirs — and the tosijs-ui 1.7 build drops a full doc-site
+  hydration bundle into `dist/hydrate/` (including a 161KB CodeMirror editor and a 4.19MB
+  `dist/iife.js.map`), plus `bin/site.ts` (the doc build entry, not a consumer CLI). None of it is
+  referenced by the package `exports`. Replaced the glob with an explicit allowlist
+  (`dist/index.js`, `dist/module.js`, the two `.d.ts`, `bin/tosi-mosaic.ts`, README, LICENSE):
+  **13.7MB → 2.8MB unpacked, 27 files → 8.** First shipped in 0.6.4; consumers on 0.6.4 should
+  upgrade. (The remaining size is `dist/index.js`; trimming that CDN IIFE is tracked in `TODO.md`.)
+
 ## [0.6.4] — 2026-07-27
 
 Supersedes 0.6.3, which was tagged in git but never published to npm; this is the first

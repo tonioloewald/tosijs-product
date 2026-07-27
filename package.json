@@ -1,6 +1,6 @@
 {
   "name": "tosijs-product",
-  "version": "0.6.4",
+  "version": "0.6.5",
   "description": "Scroll-linked animation components for tosijs",
   "source": "src/index.ts",
   "type": "module",
@@ -16,8 +16,11 @@
     }
   },
   "files": [
-    "dist",
-    "bin",
+    "dist/index.js",
+    "dist/module.js",
+    "dist/index.d.ts",
+    "dist/tosi-product.d.ts",
+    "bin/tosi-mosaic.ts",
     "README.md",
     "LICENSE"
   ],

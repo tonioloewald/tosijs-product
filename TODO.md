@@ -2,6 +2,18 @@
 
 Follow-ups filed during releases (per the shared review/releasing practices). Newest first.
 
+## Why does the doc-site bundle land in `dist/hydrate/`?
+
+**Filed:** 0.6.5 (2026-07-27). **Severity:** hygiene (npm side fixed by the `files` allowlist).
+
+The tosijs-ui 1.7 build writes a full doc-site hydration bundle (`hydrate.js`, `code-editor-cm`,
+`site-*`, sourcemaps) into `dist/hydrate/` — doc-site output that belongs in `docs/`, not `dist/`
+(the npm-publish dir). The 0.6.5 `files` allowlist stops it reaching the tarball, but it still
+bloats the git tree and is confusing. Find where it's configured (our `bin/site.ts` /
+`tosijs-product-site.config.ts`, or a tosijs-ui/site default in 1.7) and point it at `docs/`, or
+`rm -rf dist/hydrate` in `buildLibrary()` alongside the existing `dist/src`/`dist/demo` cleanup. If
+it's a tosijs-ui/site default, file upstream.
+
 ## Trim the self-contained IIFE so it doesn't bundle the CodeMirror editor
 
 **Filed:** 0.6.4 (2026-07-27). **Severity:** efficiency (not a correctness regression).

@@ -59,7 +59,7 @@
 .tp-hero .media-overlay h1, .tp-hero .media-overlay h2 { color:#fff; }
 .doc-content:has(.tp-hero) > h1, .doc-content:has(.tp-hero) > h2, .doc-content:has(.tp-hero) > h3 { color:var(--text-color); border:none; letter-spacing:-.01em; margin:1.6em 0 .4em; }
 .tp-hero { --bg:var(--background,#08081a); --fg:var(--text-color,#f0f0f5); --muted:color-mix(in srgb, var(--text-color,#f0f0f5) 62%, var(--background,#08081a)); --accent:var(--brand-color,#9be7ff); --surface:color-mix(in srgb, var(--text-color,#f0f0f5) 8%, transparent); --border:color-mix(in srgb, var(--text-color,#f0f0f5) 16%, transparent); }
-.tp-hero .scene { height: var(--tosi-view-size, 100vh); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:2rem; text-align:center; background:var(--bg); color:var(--fg); }
+.tp-hero .scene { padding: clamp(4rem, 15vh, 11rem) 2rem; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; background:var(--bg); color:var(--fg); }
 .tp-hero .scene h1 { font-size: clamp(2.5rem, 9vw, 6rem); margin:0 0 .2em; font-weight:800; letter-spacing:-.02em; }
 .tp-hero .scene h2 { font-size: clamp(2rem, 6vw, 4rem); margin:0 0 .4em; font-weight:800; }
 .tp-hero .scene p { font-size: clamp(1rem, 1.6vw, 1.25rem); color:var(--muted); max-width:580px; margin:0; }
@@ -78,7 +78,7 @@
 </style>
 <div class="tp-hero">
 <tosi-product>
-<tosi-product-section scroll="100">
+<tosi-product-section scroll="60">
 <div class="scene">
 <tosi-interpolator data-scroll-animate easing="ease-in-out">
 <tosi-waypoint progress="0" style="transform: scale(1) translateY(0px)"></tosi-waypoint>
@@ -89,7 +89,7 @@
 <div class="pill">scroll ↓</div>
 </div>
 </tosi-product-section>
-<tosi-product-section scroll="200">
+<tosi-product-section scroll="80">
 <div class="scene">
 <tosi-interpolator data-scroll-animate easing="ease-in-out">
 <tosi-waypoint progress="0" style="opacity:0; transform: translateY(60px) scale(.95)"></tosi-waypoint>
@@ -101,7 +101,7 @@
 <div class="pill">&lt;tosi-interpolator&gt;</div>
 </div>
 </tosi-product-section>
-<tosi-product-section scroll="300">
+<tosi-product-section scroll="180">
 <div class="scene">
 <div class="feature-list">
 <h2>Staged reveal</h2>

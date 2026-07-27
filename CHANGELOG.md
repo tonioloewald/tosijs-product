@@ -8,6 +8,32 @@ For releases before 0.6.1, see the git history (`git log`) and tags.
 
 ## [Unreleased]
 
+## [0.6.4] — 2026-07-27
+
+Supersedes 0.6.3, which was tagged in git but never published to npm; this is the first
+release on the tosijs-ui 1.7 line.
+
+### Changed
+
+- **Peers bumped to `tosijs ^1.7.5` and `tosijs-ui ^1.7.1`** (tjs-lang devDep → `^0.12.0`, which
+  `tosijs-ui@1.7.1` requires). The reason to move: tosijs-ui 1.7 makes the **doc-system ship the
+  code editor lazily** — a reader who never opens an editor downloads **zero** CodeMirror. Our
+  doc-site hydration entry is now a module (`/hydrate.js`, ~130KB gzip) with the editor as a lazy
+  chunk, down from the old flattened IIFE. No change to `tosijs-product`'s own API; verified
+  end-to-end (all custom elements hydrate; the `<tosi-scroll-map>` flyover drives the full
+  waypoint flight); 48/48 tests, typecheck, and build all green.
+
+### ⚠️ Known regression (self-contained CDN build only)
+
+- **`dist/index.js` (the IIFE for `<script src=…>` / CDN use) grew ~290KB → ~650KB gzip.** It does
+  `import * as tosijsUi`, pulling tosijs-ui's whole barrel — which in 1.7 statically includes the
+  CodeMirror editor — and an IIFE cannot code-split, so the lazy-editor win does **not** reach it.
+  This affects **only** the self-contained CDN path. The **ESM build is unaffected** (`dist/module.js`
+  ~9KB gzip, tosijs-ui `external`) — bundler consumers, the recommended path, pay nothing. Tracked
+  in `TODO.md`: trim `src/index-iife.ts` to not drag the editor (or adopt an editor-free tosijs-ui
+  barrel entry when one exists). **If you consume via CDN and size matters, prefer the ESM build
+  until this is resolved.**
+
 ## [0.6.3] — 2026-07-15
 
 ### Changed

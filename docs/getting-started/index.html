@@ -28,7 +28,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="/doc-system.css" data-tosi-doc-system />
+  <link rel="stylesheet" href="../doc-system.css" data-tosi-doc-system />
   <title>Getting Started — tosijs-product</title>
   <meta name="description" content="A single script tag gives you everything — tosijs, tosijs-ui, and tosijs-product with all custom elements registered" />
   <link rel="canonical" href="https://product.tosijs.net/getting-started/" />
@@ -39,17 +39,17 @@
   <meta property="og:url" content="https://product.tosijs.net/getting-started/" />
   <meta name="twitter:card" content="summary" />
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Getting Started","description":"A single script tag gives you everything — tosijs, tosijs-ui, and tosijs-product with all custom elements registered","url":"https://product.tosijs.net/getting-started/","inLanguage":"en","isPartOf":{"@type":"WebSite","name":"tosijs-product","url":"https://product.tosijs.net"}}</script>
-  <link rel="icon" href="/favicon.svg" />
+  <link rel="icon" href="../favicon.svg" />
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="/docs.json" config="{&quot;projectName&quot;:&quot;tosijs-product&quot;,&quot;projectLinks&quot;:{&quot;tosijs&quot;:&quot;https://tosijs.net&quot;,&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs-product&quot;}}">
+  <tosi-doc-system docs="../docs.json" config="{&quot;projectName&quot;:&quot;tosijs-product&quot;,&quot;projectLinks&quot;:{&quot;tosijs&quot;:&quot;https://tosijs.net&quot;,&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs-product&quot;}}">
   <article class="doc-content">
 <h1>Getting Started</h1>
 <h2>Installation</h2>
 <h3>Pure HTML (IIFE build)</h3>
 <p>A single script tag gives you everything — tosijs, tosijs-ui, and tosijs-product with all custom elements registered:</p>
-<pre><code class="language-html">&lt;script src=&quot;https://cdn.jsdelivr.net/npm/tosijs-product/dist/index.js&quot;&gt;&lt;/script&gt;
+<pre><code class="language-markup">&lt;script src=&quot;https://cdn.jsdelivr.net/npm/tosijs-product/dist/index.js&quot;&gt;&lt;/script&gt;
 </code></pre>
 <h3>ESM (bundled apps)</h3>
 <pre><code class="language-bash">bun install tosijs tosijs-ui tosijs-product
@@ -106,7 +106,7 @@
 </ul>
 <h2>Scroll ranges</h2>
 <p>Use <code>data-scroll-range</code> to constrain a child&#39;s animation to part of the section:</p>
-<pre><code class="language-html">&lt;tosi-product-section scroll=&quot;300&quot;&gt;
+<pre><code class="language-markup">&lt;tosi-product-section scroll=&quot;300&quot;&gt;
   &lt;!-- First half --&gt;
   &lt;tosi-interpolator data-scroll-range=&quot;0,0.5&quot; easing=&quot;ease-in-out&quot;&gt;
     &lt;tosi-waypoint progress=&quot;0&quot; style=&quot;opacity: 0&quot;&gt;&lt;/tosi-waypoint&gt;
@@ -126,7 +126,7 @@
 </code></pre>
 <h2>Video scrubbing</h2>
 <p>Add <code>data-scroll-animate=&quot;currentTime&quot;</code> to any <code>&lt;video&gt;</code> element:</p>
-<pre><code class="language-html">&lt;tosi-product-section scroll=&quot;300&quot;&gt;
+<pre><code class="language-markup">&lt;tosi-product-section scroll=&quot;300&quot;&gt;
   &lt;video
     src=&quot;clip.mp4&quot;
     data-scroll-animate=&quot;currentTime&quot;
@@ -138,14 +138,14 @@
 </code></pre>
 <p>For smoother results, convert the video to a filmstrip mosaic (see <a href="/tosi-filmstrip/"><code>&lt;tosi-filmstrip&gt;</code></a>).</p>
 <h2>Lottie animations</h2>
-<pre><code class="language-html">&lt;tosi-product-section scroll=&quot;200&quot;&gt;
+<pre><code class="language-markup">&lt;tosi-product-section scroll=&quot;200&quot;&gt;
   &lt;tosi-lottie src=&quot;animation.json&quot; data-scroll-animate=&quot;lottie&quot;&gt;&lt;/tosi-lottie&gt;
 &lt;/tosi-product-section&gt;
 </code></pre>
 <h2>Embedding, nesting and horizontal scrolling</h2>
 <p>The engine detects the scroll container it lives in, so a <code>&lt;tosi-product&gt;</code> works inside any
 scrollable element, not just the page:</p>
-<pre><code class="language-html">&lt;div style=&quot;height: 60vh; overflow-y: auto;&quot;&gt;
+<pre><code class="language-markup">&lt;div style=&quot;height: 60vh; overflow-y: auto;&quot;&gt;
   &lt;tosi-product&gt;
     &lt;tosi-product-section scroll=&quot;200&quot;&gt;...&lt;/tosi-product-section&gt;
   &lt;/tosi-product&gt;
@@ -156,7 +156,7 @@ scroll itself, it is driven by the parent section&#39;s pin progress and sizes t
 you nest a whole sub-story inside one scene of a bigger one.</p>
 <p>For horizontal scrolling, set <code>direction=&quot;horizontal&quot;</code> on the <strong><code>&lt;tosi-product&gt;</code></strong> — it&#39;s an engine
 attribute, not a section one, because the engine is what lays the runway out:</p>
-<pre><code class="language-html">&lt;tosi-product direction=&quot;horizontal&quot;&gt;
+<pre><code class="language-markup">&lt;tosi-product direction=&quot;horizontal&quot;&gt;
   &lt;tosi-product-section scroll=&quot;200&quot;&gt;...&lt;/tosi-product-section&gt;
 &lt;/tosi-product&gt;
 </code></pre>
@@ -166,15 +166,15 @@ attribute, not a section one, because the engine is what lays the runway out:</p
   </article>
   <nav class="doc-nav" aria-label="Documentation">
   <ul>
-    <li><a class="doc-link" href="/">tosijs-product</a></li>
-    <li><a class="doc-link" href="/tosi-filmstrip/">&lt;tosi-filmstrip&gt;</a></li>
-    <li><a class="doc-link" href="/tosi-interpolator/">&lt;tosi-interpolator&gt;</a></li>
-    <li><a class="doc-link" href="/tosi-prism/">&lt;tosi-prism&gt;</a></li>
-    <li><a class="doc-link" href="/tosi-product/">&lt;tosi-product&gt;</a></li>
-    <li><a class="doc-link" href="/tosi-b3d-scroll/">&lt;tosi-scroll-camera&gt; · &lt;tosi-scroll-time&gt; · &lt;tosi-scroll-animation&gt;</a></li>
-    <li><a class="doc-link" href="/tosi-scroll-map/">&lt;tosi-scroll-map&gt;</a></li>
-    <li><a class="doc-link" href="/components/">Component Reference</a></li>
-    <li><a class="doc-link current" href="/getting-started/" aria-current="page">Getting Started</a></li>
+    <li><a class="doc-link" href="../">tosijs-product</a></li>
+    <li><a class="doc-link" href="../tosi-filmstrip/">&lt;tosi-filmstrip&gt;</a></li>
+    <li><a class="doc-link" href="../tosi-interpolator/">&lt;tosi-interpolator&gt;</a></li>
+    <li><a class="doc-link" href="../tosi-prism/">&lt;tosi-prism&gt;</a></li>
+    <li><a class="doc-link" href="../tosi-product/">&lt;tosi-product&gt;</a></li>
+    <li><a class="doc-link" href="../tosi-b3d-scroll/">&lt;tosi-scroll-camera&gt; · &lt;tosi-scroll-time&gt; · &lt;tosi-scroll-animation&gt;</a></li>
+    <li><a class="doc-link" href="../tosi-scroll-map/">&lt;tosi-scroll-map&gt;</a></li>
+    <li><a class="doc-link" href="../components/">Component Reference</a></li>
+    <li><a class="doc-link current" href="../getting-started/" aria-current="page">Getting Started</a></li>
   </ul>
   </nav>
   <ul class="doc-navbar">
@@ -185,6 +185,6 @@ attribute, not a section one, because the engine is what lays the runway out:</p
     <li><a href="https://www.npmjs.com/package/tosijs-product" data-icon="npm">npmjs</a></li>
   </ul>
   </tosi-doc-system>
-  <script type="module" src="/hydrate.js"></script>
+  <script type="module" src="../hydrate.js"></script>
 </body>
 </html>

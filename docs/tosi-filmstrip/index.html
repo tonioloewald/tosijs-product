@@ -28,7 +28,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="/doc-system.css" data-tosi-doc-system />
+  <link rel="stylesheet" href="../doc-system.css" data-tosi-doc-system />
   <title>&lt;tosi-filmstrip&gt; — tosijs-product</title>
   <meta name="description" content="Canvas frame-animator. Rather than scrubbing a &lt;video&gt; (which stutters on random-access seeks), &lt;tosi-filmstrip&gt; blits frames from a single WebP/JPG mosaic…" />
   <link rel="canonical" href="https://product.tosijs.net/tosi-filmstrip/" />
@@ -39,17 +39,17 @@
   <meta property="og:url" content="https://product.tosijs.net/tosi-filmstrip/" />
   <meta name="twitter:card" content="summary" />
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"\u003ctosi-filmstrip>","description":"Canvas frame-animator. Rather than scrubbing a \u003cvideo> (which stutters on random-access seeks), \u003ctosi-filmstrip> blits frames from a single WebP/JPG mosaic…","url":"https://product.tosijs.net/tosi-filmstrip/","inLanguage":"en","isPartOf":{"@type":"WebSite","name":"tosijs-product","url":"https://product.tosijs.net"}}</script>
-  <link rel="icon" href="/favicon.svg" />
+  <link rel="icon" href="../favicon.svg" />
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="/docs.json" config="{&quot;projectName&quot;:&quot;tosijs-product&quot;,&quot;projectLinks&quot;:{&quot;tosijs&quot;:&quot;https://tosijs.net&quot;,&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs-product&quot;}}">
+  <tosi-doc-system docs="../docs.json" config="{&quot;projectName&quot;:&quot;tosijs-product&quot;,&quot;projectLinks&quot;:{&quot;tosijs&quot;:&quot;https://tosijs.net&quot;,&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs-product&quot;}}" data-layout="full-width">
   <article class="doc-content">
 <h1><code>&lt;tosi-filmstrip&gt;</code></h1>
 <p>Canvas frame-animator. Rather than scrubbing a <code>&lt;video&gt;</code> (which stutters on random-access seeks),
 <code>&lt;tosi-filmstrip&gt;</code> blits frames from a single <strong>WebP/JPG mosaic grid</strong> to a hardware-accelerated
 canvas — instant, frame-perfect seeking driven by scroll.</p>
-<style>.doc-content:has(.doc-demo){overflow:visible !important}.doc-demo .media{height:var(--tosi-view-size,70vh);position:relative;overflow:hidden;border-radius:12px;background:#0a0a12}.doc-demo .media>tosi-filmstrip{position:absolute;inset:0;width:100%;height:100%}.doc-demo .cap{position:absolute;left:0;right:0;bottom:1rem;text-align:center;color:#fff;font-weight:700;filter:drop-shadow(0 1px 6px #000)}</style>
+<style>.doc-content:has(.doc-demo){--doc-content-padding:0;overflow:visible !important}.doc-content:has(.doc-demo)>:not(.doc-demo):not(style){max-width:44rem;margin-inline:auto;padding-inline:1.25rem;box-sizing:border-box}.doc-demo .media{aspect-ratio:16/9;max-height:var(--tosi-view-size,70vh);position:relative;overflow:hidden;background:#0a0a12}.doc-demo .media>tosi-filmstrip{position:absolute;inset:0;width:100%;height:100%}.doc-demo .cap{position:absolute;left:0;right:0;bottom:1rem;text-align:center;color:#fff;font-weight:700;filter:drop-shadow(0 1px 6px #000)}</style>
 <tosi-product class="doc-demo">
 <tosi-product-section scroll="100">
 <div class="media">
@@ -66,10 +66,12 @@ canvas — instant, frame-perfect seeking driven by scroll.</p>
 <li><strong><code>data-scroll-animate</code></strong> — marks it as a scroll-driven animator for its section.</li>
 </ul>
 <h2>Making a mosaic</h2>
-<p>The <code>tosi-mosaic</code> CLI (needs <code>ffmpeg</code>) converts a video to a grid:</p>
+<p>The <code>tosi-mosaic</code> CLI converts a video to a grid. It needs <strong><code>ffmpeg</code> and <code>ffprobe</code> on your PATH</strong>
+(macOS: <code>brew install ffmpeg</code>) — they are not bundled:</p>
 <pre><code class="language-bash">bunx tosi-mosaic my-video.mp4 --frames 100 --width 1280
 </code></pre>
 <p>Produces <code>my-video_10x10_100.webp</code>. A grid (not one long strip) keeps within the browser&#39;s max image size while delivering every frame in a single request.</p>
+<p><code>--format jpg</code> (or <code>png</code>) if your ffmpeg was built without the webp encoder — <code>&lt;tosi-filmstrip&gt;</code> reads all three. <code>--fps</code> supplies the source frame rate for a container that misreports it; when a file reports neither a frame count nor a duration, the CLI counts frames itself and says so. It exits non-zero on failure, so <code>tosi-mosaic … &amp;&amp; deploy</code> is safe.</p>
 <h2>Editable example</h2>
 <pre><code class="language-html">&lt;tosi-product&gt;
   &lt;tosi-product-section scroll=&quot;150&quot;&gt;
@@ -82,15 +84,15 @@ canvas — instant, frame-perfect seeking driven by scroll.</p>
   </article>
   <nav class="doc-nav" aria-label="Documentation">
   <ul>
-    <li><a class="doc-link" href="/">tosijs-product</a></li>
-    <li><a class="doc-link current" href="/tosi-filmstrip/" aria-current="page">&lt;tosi-filmstrip&gt;</a></li>
-    <li><a class="doc-link" href="/tosi-interpolator/">&lt;tosi-interpolator&gt;</a></li>
-    <li><a class="doc-link" href="/tosi-prism/">&lt;tosi-prism&gt;</a></li>
-    <li><a class="doc-link" href="/tosi-product/">&lt;tosi-product&gt;</a></li>
-    <li><a class="doc-link" href="/tosi-b3d-scroll/">&lt;tosi-scroll-camera&gt; · &lt;tosi-scroll-time&gt; · &lt;tosi-scroll-animation&gt;</a></li>
-    <li><a class="doc-link" href="/tosi-scroll-map/">&lt;tosi-scroll-map&gt;</a></li>
-    <li><a class="doc-link" href="/components/">Component Reference</a></li>
-    <li><a class="doc-link" href="/getting-started/">Getting Started</a></li>
+    <li><a class="doc-link" href="../">tosijs-product</a></li>
+    <li><a class="doc-link current" href="../tosi-filmstrip/" aria-current="page">&lt;tosi-filmstrip&gt;</a></li>
+    <li><a class="doc-link" href="../tosi-interpolator/">&lt;tosi-interpolator&gt;</a></li>
+    <li><a class="doc-link" href="../tosi-prism/">&lt;tosi-prism&gt;</a></li>
+    <li><a class="doc-link" href="../tosi-product/">&lt;tosi-product&gt;</a></li>
+    <li><a class="doc-link" href="../tosi-b3d-scroll/">&lt;tosi-scroll-camera&gt; · &lt;tosi-scroll-time&gt; · &lt;tosi-scroll-animation&gt;</a></li>
+    <li><a class="doc-link" href="../tosi-scroll-map/">&lt;tosi-scroll-map&gt;</a></li>
+    <li><a class="doc-link" href="../components/">Component Reference</a></li>
+    <li><a class="doc-link" href="../getting-started/">Getting Started</a></li>
   </ul>
   </nav>
   <ul class="doc-navbar">
@@ -101,6 +103,6 @@ canvas — instant, frame-perfect seeking driven by scroll.</p>
     <li><a href="https://www.npmjs.com/package/tosijs-product" data-icon="npm">npmjs</a></li>
   </ul>
   </tosi-doc-system>
-  <script type="module" src="/hydrate.js"></script>
+  <script type="module" src="../hydrate.js"></script>
 </body>
 </html>

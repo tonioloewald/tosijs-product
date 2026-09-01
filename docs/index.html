@@ -28,7 +28,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="/doc-system.css" data-tosi-doc-system />
+  <link rel="stylesheet" href="doc-system.css" data-tosi-doc-system />
   <title>tosijs-product — cinematic, scroll-driven product pages in HTML</title>
   <meta name="description" content="Build Apple-style, scroll-linked product stories with declarative web components. tosijs-product pins sections and drives Lottie, video (WebP mosaics), BabylonJS 3D, and CSS interpolation from scroll position — authored in plain HTML." />
   <meta name="keywords" content="scrollytelling, scroll animation, product page, web components, custom elements, tosijs, lottie, webp mosaic, babylonjs, scroll-linked animation, cinematic landing page, apple-style scrolling" />
@@ -40,27 +40,27 @@
   <meta property="og:url" content="https://product.tosijs.net/" />
   <meta name="twitter:card" content="summary" />
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"tosijs-product","description":"Build Apple-style, scroll-linked product stories with declarative web components. tosijs-product pins sections and drives Lottie, video (WebP mosaics), BabylonJS 3D, and CSS interpolation from scroll position — authored in plain HTML.","url":"https://product.tosijs.net/","inLanguage":"en","isPartOf":{"@type":"WebSite","name":"tosijs-product","url":"https://product.tosijs.net"}}</script>
-  <link rel="icon" href="/favicon.svg" />
+  <link rel="icon" href="favicon.svg" />
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="/docs.json" config="{&quot;projectName&quot;:&quot;tosijs-product&quot;,&quot;projectLinks&quot;:{&quot;tosijs&quot;:&quot;https://tosijs.net&quot;,&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs-product&quot;}}">
+  <tosi-doc-system docs="docs.json" config="{&quot;projectName&quot;:&quot;tosijs-product&quot;,&quot;projectLinks&quot;:{&quot;tosijs&quot;:&quot;https://tosijs.net&quot;,&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs-product&quot;}}" data-layout="full-width">
   <article class="doc-content">
 <h1>tosijs-product</h1>
-<!--{ "pin": "top", "order": 1, "headTitle": "tosijs-product — cinematic, scroll-driven product pages in HTML", "description": "Build Apple-style, scroll-linked product stories with declarative web components. tosijs-product pins sections and drives Lottie, video (WebP mosaics), BabylonJS 3D, and CSS interpolation from scroll position — authored in plain HTML.", "keywords": ["scrollytelling", "scroll animation", "product page", "web components", "custom elements", "tosijs", "lottie", "webp mosaic", "babylonjs", "scroll-linked animation", "cinematic landing page", "apple-style scrolling"] }-->
+<!--{ "pin": "top", "order": 1, "layout": "full-width", "headTitle": "tosijs-product — cinematic, scroll-driven product pages in HTML", "description": "Build Apple-style, scroll-linked product stories with declarative web components. tosijs-product pins sections and drives Lottie, video (WebP mosaics), BabylonJS 3D, and CSS interpolation from scroll position — authored in plain HTML.", "keywords": ["scrollytelling", "scroll animation", "product page", "web components", "custom elements", "tosijs", "lottie", "webp mosaic", "babylonjs", "scroll-linked animation", "cinematic landing page", "apple-style scrolling"] }-->
 
 <p>A cinematic product page component library for <code>tosijs</code>.</p>
 <p><code>tosijs-product</code> provides high-performance, scroll-linked animation components designed to create immersive, &quot;Apple-style&quot; product stories with minimal code. It unifies Lottie, video, BabylonJS 3D, Mapbox flights, themes, and declarative CSS interpolation under a single scroll engine.</p>
 <p><em>This page is the demo.</em> Scroll — the hero below is a live <code>&lt;tosi-product&gt;</code> engine pinned to this doc&#39;s scroll container, authored entirely in the Markdown you&#39;re reading.</p>
 <style>
-.doc-content:has(.tp-hero) { overflow: visible !important; max-width: none !important; padding: 0 !important; }
-.doc-content:has(.tp-hero) > :not(.tp-hero):not(style) { max-width: 44em; margin-inline: auto; padding-inline: 1.25rem; box-sizing: border-box; }
+.doc-content:has(.tp-hero) { --doc-content-padding: 0; overflow: visible !important; }
+.doc-content:has(.tp-hero) > :not(.tp-hero):not(style) { max-width: 44rem; margin-inline: auto; padding-inline: 1.25rem; box-sizing: border-box; }
 .tp-hero h1, .tp-hero h2, .tp-hero h3 { color:var(--fg); border:none; line-height:1.08; letter-spacing:-.01em; }
 .tp-hero .media-overlay h1, .tp-hero .media-overlay h2 { color:#fff; }
 .doc-content:has(.tp-hero) > h1, .doc-content:has(.tp-hero) > h2, .doc-content:has(.tp-hero) > h3 { color:var(--text-color); border:none; letter-spacing:-.01em; margin:1.6em 0 .4em; }
 .tp-hero { --bg:var(--background,#08081a); --fg:var(--text-color,#f0f0f5); --muted:color-mix(in srgb, var(--text-color,#f0f0f5) 62%, var(--background,#08081a)); --accent:var(--brand-color,#9be7ff); --surface:color-mix(in srgb, var(--text-color,#f0f0f5) 8%, transparent); --border:color-mix(in srgb, var(--text-color,#f0f0f5) 16%, transparent); }
 .tp-hero .scene { padding: clamp(4rem, 15vh, 11rem) 2rem; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; background:var(--bg); color:var(--fg); }
-.tp-hero .scene h1 { font-size: clamp(2.5rem, 9vw, 6rem); margin:0 0 .2em; font-weight:800; letter-spacing:-.02em; }
+.tp-hero .scene h1 { font-size: clamp(2.5rem, 9vw, 6rem); margin:0 0 .6em; font-weight:800; letter-spacing:-.02em; }
 .tp-hero .scene h2 { font-size: clamp(2rem, 6vw, 4rem); margin:0 0 .4em; font-weight:800; }
 .tp-hero .scene p { font-size: clamp(1rem, 1.6vw, 1.25rem); color:var(--muted); max-width:580px; margin:0; }
 .tp-hero .pill { display:inline-block; margin-top:1.5em; background:var(--surface); border:1px solid var(--border); color:var(--accent); font-family:monospace; font-size:.85rem; padding:.5em 1.2em; border-radius:999px; }
@@ -69,6 +69,7 @@
 .tp-hero .feature-row { font-size:1.05rem; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:.7em 1.1em; margin-top:.3em; font-family:monospace; color:var(--fg); }
 .tp-hero .media-scene { position:relative; height:var(--tosi-view-size, 100vh); overflow:hidden; background:#0a0a12; }
 .tp-hero .media-scene > video, .tp-hero .media-scene > tosi-filmstrip, .tp-hero .media-scene > tosi-3d, .tp-hero .media-scene > tosi-map { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block; }
+.tp-hero .media-scene > tosi-filmstrip::part(canvas) { object-fit:cover; }
 .tp-hero .media-scene > tosi-map { pointer-events:none; }
 .tp-hero .media-scene.lottie { background:radial-gradient(ellipse at center, #14142a 0%, #0a0a12 100%); }
 .tp-hero .media-scene > tosi-lottie { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:min(70vh,60vw); height:min(70vh,60vw); }
@@ -82,7 +83,7 @@
 <div class="scene">
 <tosi-interpolator data-scroll-animate easing="ease-in-out">
 <tosi-waypoint progress="0" style="transform: scale(1) translateY(0px)"></tosi-waypoint>
-<tosi-waypoint progress="1" style="transform: scale(1.4) translateY(20px)"></tosi-waypoint>
+<tosi-waypoint progress="1" style="transform: scale(1.4) translateY(0.2em)"></tosi-waypoint>
 <h1>tosijs-product</h1>
 </tosi-interpolator>
 <p>Build cinematic product pages with HTML.</p>
@@ -344,7 +345,7 @@ app.defaultTheme = &quot;midnight&quot;;
 </code></pre>
 <p>The transition section interpolates its CSS variables (color values use <code>color-mix(in srgb, …)</code>) over its pin progress, and writes them to <code>document.documentElement</code>. Anything cascading from <code>:root</code> — including a <code>&lt;tosi-product-header&gt;</code> overlay outside the engine — re-themes in unison.</p>
 <h2>Frame-based animation</h2>
-<p>Standard video scrubbing (<code>video.currentTime</code>) often stutters because decoders aren&#39;t designed for random-access seeking. The <code>tosi-mosaic</code> CLI converts a video to a single WebP mosaic grid, and <code>&lt;tosi-filmstrip&gt;</code> scrubs through it using a hardware-accelerated canvas.</p>
+<p>Standard video scrubbing (<code>video.currentTime</code>) often stutters because decoders aren&#39;t designed for random-access seeking. The <code>tosi-mosaic</code> CLI converts a video to a single WebP mosaic grid, and <code>&lt;tosi-filmstrip&gt;</code> scrubs through it using a hardware-accelerated canvas. (The CLI needs <code>ffmpeg</code> and <code>ffprobe</code> on your PATH — macOS: <code>brew install ffmpeg</code>.)</p>
 <pre><code class="language-bash">bunx tosi-mosaic my-video.mp4 --frames 100 --width 1280
 </code></pre>
 <p>Produces <code>my-video_10x10_100.webp</code> (the filename encodes grid + total frames):</p>
@@ -360,15 +361,15 @@ app.defaultTheme = &quot;midnight&quot;;
   </article>
   <nav class="doc-nav" aria-label="Documentation">
   <ul>
-    <li><a class="doc-link current" href="/" aria-current="page">tosijs-product</a></li>
-    <li><a class="doc-link" href="/tosi-filmstrip/">&lt;tosi-filmstrip&gt;</a></li>
-    <li><a class="doc-link" href="/tosi-interpolator/">&lt;tosi-interpolator&gt;</a></li>
-    <li><a class="doc-link" href="/tosi-prism/">&lt;tosi-prism&gt;</a></li>
-    <li><a class="doc-link" href="/tosi-product/">&lt;tosi-product&gt;</a></li>
-    <li><a class="doc-link" href="/tosi-b3d-scroll/">&lt;tosi-scroll-camera&gt; · &lt;tosi-scroll-time&gt; · &lt;tosi-scroll-animation&gt;</a></li>
-    <li><a class="doc-link" href="/tosi-scroll-map/">&lt;tosi-scroll-map&gt;</a></li>
-    <li><a class="doc-link" href="/components/">Component Reference</a></li>
-    <li><a class="doc-link" href="/getting-started/">Getting Started</a></li>
+    <li><a class="doc-link current" href="./" aria-current="page">tosijs-product</a></li>
+    <li><a class="doc-link" href="tosi-filmstrip/">&lt;tosi-filmstrip&gt;</a></li>
+    <li><a class="doc-link" href="tosi-interpolator/">&lt;tosi-interpolator&gt;</a></li>
+    <li><a class="doc-link" href="tosi-prism/">&lt;tosi-prism&gt;</a></li>
+    <li><a class="doc-link" href="tosi-product/">&lt;tosi-product&gt;</a></li>
+    <li><a class="doc-link" href="tosi-b3d-scroll/">&lt;tosi-scroll-camera&gt; · &lt;tosi-scroll-time&gt; · &lt;tosi-scroll-animation&gt;</a></li>
+    <li><a class="doc-link" href="tosi-scroll-map/">&lt;tosi-scroll-map&gt;</a></li>
+    <li><a class="doc-link" href="components/">Component Reference</a></li>
+    <li><a class="doc-link" href="getting-started/">Getting Started</a></li>
   </ul>
   </nav>
   <ul class="doc-navbar">
@@ -379,6 +380,6 @@ app.defaultTheme = &quot;midnight&quot;;
     <li><a href="https://www.npmjs.com/package/tosijs-product" data-icon="npm">npmjs</a></li>
   </ul>
   </tosi-doc-system>
-  <script type="module" src="/hydrate.js"></script>
+  <script type="module" src="hydrate.js"></script>
 </body>
 </html>

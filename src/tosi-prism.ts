@@ -34,7 +34,22 @@ See also [`<tosi-product>`](/tosi-product/).
 
 import { Component } from "tosijs";
 
-const PRISM_VERSION = "1";
+/*
+Pinned exactly, not to the floating `1` it used to be. A floating major means
+jsDelivr may serve a different Prism on any page load, so highlighting could
+change — or break — with no change on our side and nothing to bisect.
+
+No SRI, deliberately. `loadPrism(['javascript', 'css', …])` builds a URL per
+language on demand, so integrity hashes would need a build-time manifest
+covering every language a caller might ask for; a missing or stale entry there
+fails CLOSED, silently dropping highlighting. That is a real design change, not
+a one-line hardening — tracked in TODO.md rather than half-done here.
+
+**This is a runtime CDN dependency.** A consumer with a strict CSP must allow
+`https://cdn.jsdelivr.net` in `script-src` and `style-src`, or skip
+`<tosi-prism>`; nothing else in this library loads anything at runtime.
+*/
+const PRISM_VERSION = "1.30.0";
 const CDN = `https://cdn.jsdelivr.net/npm/prismjs@${PRISM_VERSION}`;
 
 const loaded = new Map<string, Promise<void>>();

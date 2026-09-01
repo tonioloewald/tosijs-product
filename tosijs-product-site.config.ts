@@ -62,6 +62,11 @@ export default defineSiteConfig({
   // only (writes confined to the repo root). See tosijs-ui/site dev-server.
   editableSources: true,
 
+  // Give the coding agent eyes+hands on the running dev page via haltija: the
+  // dev server injects a localhost-gated loader into served HTML (never bundled,
+  // never in the built output) so `hj` can drive https://localhost:8788.
+  haltijaDev: true,
+
   // We do the library build (dist/index.js IIFE + dist/module.js ESM +
   // dist/*.d.ts) ourselves in bin/site.ts — see the note in that file about
   // why this can't just be `emitLibrary: true`.

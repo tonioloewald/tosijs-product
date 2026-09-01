@@ -1,3 +1,4 @@
+/*{ "layout": "full-width" }*/
 /*#
 # `<tosi-product>`
 
@@ -6,7 +7,7 @@ The scroll engine. A `<tosi-product>` owns the scrollable region it lives in: it
 translates the stack as you scroll. Each section **pins** (holds still while its animators run),
 then **exits** (scrolls out 1:1). Drop it into HTML — no orchestration code.
 
-<style>.doc-content:has(.doc-demo){overflow:visible !important}.doc-demo .scene{height:var(--tosi-view-size,70vh);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#f0f0f5;border-radius:12px;text-align:center;padding:2rem}.doc-demo h2{font-size:clamp(1.8rem,6vw,3rem);margin:0;font-weight:800}</style>
+<style>.doc-content:has(.doc-demo){--doc-content-padding:0;overflow:visible !important}.doc-content:has(.doc-demo)>:not(.doc-demo):not(style){max-width:44rem;margin-inline:auto;padding-inline:1.25rem;box-sizing:border-box}.doc-demo .scene{height:var(--tosi-view-size,70vh);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#f0f0f5;text-align:center;padding:2rem}.doc-demo h2{font-size:clamp(1.8rem,6vw,3rem);margin:0;font-weight:800}</style>
 <tosi-product class="doc-demo">
 <tosi-product-section scroll="70">
 <div class="scene" style="background:#08081a">
@@ -49,6 +50,7 @@ See also [`<tosi-interpolator>`](/tosi-interpolator/) and [`<tosi-filmstrip>`](/
 */
 
 import { Component, elements } from "tosijs";
+import { interpolateThemeValue, isColor } from "./waypoints";
 
 const { div, slot } = elements;
 
@@ -60,65 +62,6 @@ export type ThemeRegistry = Record<string, ThemeMap>;
  * `color()`, and a small set of named colors. Used to decide whether two theme values should be
  * blended with `color-mix()` or interpolated numerically.
  */
-export function isColor(s: string): boolean {
-  const t = s.trim();
-  return (
-    t.startsWith("#") ||
-    t.startsWith("rgb") ||
-    t.startsWith("hsl") ||
-    t.startsWith("color(") ||
-    [
-      "red",
-      "blue",
-      "green",
-      "white",
-      "black",
-      "transparent",
-      "currentColor",
-    ].includes(t)
-  );
-}
-
-/** Format a float for CSS: fixed precision, no trailing zeros (0.7*100 -> "70", not "70.000000000001"). */
-function trimNum(v: number): string {
-  return v.toFixed(4).replace(/0+$/, "").replace(/\.$/, "");
-}
-
-/**
- * Blend one theme value into another at `t` (0→1).
- *
- * Colors blend through `color-mix(in srgb, …)`. Values containing matching runs of numbers
- * (`0.5rem 1rem`, `translateY(20px)`) interpolate per-number. Anything else steps at the
- * midpoint, since there's no meaningful in-between for e.g. a font-family.
- */
-export function interpolateThemeValue(from: string, to: string, t: number): string {
-  if (from === to || t <= 0) return from;
-  if (t >= 1) return to;
-  if (isColor(from) && isColor(to)) {
-    return `color-mix(in srgb, ${from} ${trimNum((1 - t) * 100)}%, ${to})`;
-  }
-  // Fallback: numeric interpolation if both contain matching numbers,
-  // otherwise step at midpoint.
-  const numRegex = /-?\d+(?:\.\d+)?/g;
-  const aNums = Array.from(from.matchAll(numRegex));
-  const bNums = Array.from(to.matchAll(numRegex));
-  if (aNums.length > 0 && aNums.length === bNums.length) {
-    let result = "";
-    let lastIndex = 0;
-    for (let i = 0; i < aNums.length; i++) {
-      const am = aNums[i];
-      const bm = bNums[i];
-      result += from.substring(lastIndex, am.index);
-      const v = parseFloat(am[0]) + (parseFloat(bm[0]) - parseFloat(am[0])) * t;
-      result += trimNum(v);
-      lastIndex = am.index! + am[0].length;
-    }
-    result += from.substring(lastIndex);
-    return result;
-  }
-  return t < 0.5 ? from : to;
-}
-
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
 function getScrollParent(el: HTMLElement): EventTarget {
@@ -174,8 +117,38 @@ export function nearestEnclosingProduct(el: HTMLElement | null): HTMLElement | n
  * Map a section's 0→1 pin progress onto an animator's `data-scroll-range="start,end"`
  * sub-range, clamped to 0→1. A degenerate range (end <= start) acts as a step at `end`.
  */
+let warnedRanges: Set<string> | null = null;
+
 export function rangeProgress(progress: number, rangeStr: string | null): number {
-  const [start, end] = (rangeStr || "0,1").split(",").map(Number);
+  /*
+  Split into exactly two non-empty parts before reading numbers. `Number("")` is
+  0, not NaN, so a trailing comma (`"0.5,"`) would otherwise parse as
+  `start=0.5, end=0` — a backwards range that silently pins the animator at 1.
+  That is worse than the NaN case, because nothing about it looks wrong.
+  */
+  const parts = (rangeStr || "0,1").split(",");
+  const [start, end] =
+    parts.length === 2 && parts.every((p) => p.trim() !== "")
+      ? parts.map(Number)
+      : [NaN, NaN];
+  /*
+  A malformed `data-scroll-range` — `"0.5"` with no comma, or anything
+  unparseable — used to yield NaN here, and NaN survives both the clamp and every
+  arithmetic step downstream. The animator then froze at its first waypoint with
+  nothing logged anywhere, which reads as "the library is broken" rather than as
+  a typo in the attribute. Fall back to the full range, and say so once.
+  */
+  if (!Number.isFinite(start) || !Number.isFinite(end)) {
+    const key = String(rangeStr);
+    warnedRanges ??= new Set();
+    if (!warnedRanges.has(key)) {
+      warnedRanges.add(key);
+      console.warn(
+        `tosi-product: ignoring malformed data-scroll-range=${JSON.stringify(rangeStr)} — expected "start,end", e.g. "0,0.5". Using the full range.`
+      );
+    }
+    return progress;
+  }
   const range = end - start;
   if (range <= 0) return progress >= end ? 1 : 0;
   return Math.max(0, Math.min(1, (progress - start) / range));
@@ -375,7 +348,7 @@ export class TosiProduct extends Component {
     this._mutationObserver.observe(this, {
       childList: true,
       attributes: true,
-      attributeFilter: ["scroll"],
+      attributeFilter: ["scroll", "debug"],
     });
 
     this._resizeObserver = new ResizeObserver(() => this._relayout());
@@ -597,7 +570,12 @@ export class TosiProduct extends Component {
     this._applyTheme(activeIdx, activeProgress);
 
     if (this._debugPanel) {
-      const showDebug = this.getAttribute("debug") === "true";
+      // `this.debug` is the initAttributes-backed property, so this follows the
+      // standard boolean-attribute rule (presence is true) that the docs, and
+      // every other tosijs component, already promise. The old
+      // `getAttribute("debug") === "true"` meant the documented `<tosi-product
+      // debug>` set the property and did nothing to the overlay.
+      const showDebug = this.debug;
       this._debugPanel.hidden = !showDebug;
       if (showDebug) {
         this._debugPanel.textContent =
@@ -757,7 +735,10 @@ export class TosiProductHeader extends Component {
   }
 
   private _update() {
-    const threshold = Number(this.getAttribute("threshold")) || 50;
+    // `|| 50` treated an explicit `threshold="0"` — pin the header from the very
+    // top — as absent. Only a missing or unparseable value should take the default.
+    const parsed = Number(this.getAttribute("threshold"));
+    const threshold = Number.isFinite(parsed) ? parsed : 50;
     this.dataset.visible = window.scrollY > threshold ? "true" : "false";
   }
 }

@@ -75,7 +75,10 @@ The doc-system renders `README.md` as the home page. `marked` runs with **no san
 - **Assets at web root:** `staticDirs: ["demo/assets"]` flattens files to `/` — reference `/agent-owl.mp4`, `/macbook_neo.glb`, etc., not `assets/…`.
 - **Scene height:** use `var(--tosi-view-size, 100vh)` (the engine's measured viewport in the doc scroll container), not `100vh`.
 - **Per-page SEO** via a single-line JSON HTML comment after the H1: `<!--{ "headTitle": "…", "description": "…", "keywords": [ … ] }-->`.
+- **`"layout": "full-width"`** in that same metadata comment drops the 44em reading column for the page (`tosijs-ui@1.12.2+`). The README and every component page with a demo use it, so the hero and the demo panels are full-bleed; each then restores a measure on its own non-demo children. `"full-screen"` also hides the nav and navbar — we don't use it. **Use `44rem`, never `44em`, for that restored measure:** `em` resolves against the *element's* font-size, so an `<h1>` at 2× body text would get an 88em column.
+- **`overflow: visible !important` is still needed** on a `.doc-content` hosting the engine: the doc-browser sets `overflow: hidden` inline with no variable to route around it, and that kills `position: sticky`. Filed upstream ([tosijs-ui#119](https://github.com/tonioloewald/tosijs-ui/issues/119)); `max-width` and `padding` no longer need forcing.
 - **`editableSources: true`** enables the dev "Edit page source → Save/Download" flow.
+- **`haltijaDev: true`** makes the dev server inject a localhost-gated haltija loader into served HTML, so `hj` can drive https://localhost:8788 without launching haltija against the page yourself. Never bundled, never in `docs/`. Note the injected `component.js` is haltija's own tosijs build — its `elementCreator` deprecation warnings in the console are its, not ours.
 
 Plan (in progress): README = full declarative narrative demo; `src/docs/*` = per-component pages with small maximizable live-example demos.
 
@@ -157,10 +160,28 @@ Color values blend through `color-mix(in srgb, ...)`. Numeric strings interpolat
 - **Progress is always 0→1**: pin progress maps to this range; exit phase pins at 1.
 - **Mosaic filenames encode grid info**: `name_COLSxROWS_TOTAL.webp` — `TosiFilmstrip` auto-parses this.
 - **IIFE build** (`dist/index.js`) is self-contained (bundles tosijs + tosijs-ui) and exposes `globalThis.tosijs`, `globalThis.tosijsUi`, and `globalThis.tosijsProduct`. Entry point: `src/index-iife.ts`.
-- **Peer dependencies**: `tosijs` (^1.6.8) and `tosijs-ui` (^1.6.22) are required. `tosijs-ui` also supplies the doc-site build system (`tosijs-ui/site`), so it's a build dependency too — it is installed **from the registry**, not `file:`-linked to the sibling `../tosijs-ui` checkout (which tracks an unreleased beta; don't assume the two agree).
-- **`tjs-lang` tracks `tosijs-ui`**: when you bump the `tosijs-ui` peer, bump the `tjs-lang` devDependency to match, or the IIFE build breaks. (1.6.22 wants `tjs-lang ^0.9.0`; 1.6.19 wanted `^0.8.7`.)
+- **Peer dependencies**: `tosijs` (^1.8.1) and `tosijs-ui` (^1.12.7) are required. `tosijs-ui` also supplies the doc-site build system (`tosijs-ui/site`), so it's a build dependency too — it is installed **from the registry**, not `file:`-linked to the sibling `../tosijs-ui` checkout (which tracks an unreleased beta; don't assume the two agree).
+- **`tjs-lang` tracks `tosijs-ui`**: when you bump the `tosijs-ui` peer, bump the `tjs-lang` devDependency to match, or the IIFE build breaks. (1.12.7 wants `tjs-lang ^0.13.1`; 1.6.22 wanted `^0.9.0`.)
 - **Bumping the peers is awkward in bun**: they're peer deps, so `bun install` / `bun update` will *not* pull a newer copy into `node_modules` — it just warns `incorrect peer dependency` and, worse, `bun update` rewrites your peer ranges back down to whatever is installed. Use `bun add -d tosijs@latest tosijs-ui@latest`, which installs the new versions **and** raises the peer ranges.
+- **`chokidar` is a devDependency, not optional in practice.** It's an optional peer of `tosijs-ui`, but the dev server's watcher imports it and refuses to start without it. `@resvg/resvg-js` is the other optional peer; it's only for the ePub build, which we don't use.
+- **Don't run `bun run build` while the dev server is up.** Since `tosijs-ui@1.12.5` a build lock refuses the second builder by name and pid rather than letting the two `rm -rf docs/` on each other.
 - **Never run the dev server on `tosijs-ui` < 1.6.22.** `buildSite()` called `Bun.build()` in-process and Bun's bundler never returns its native arena, so RSS grew monotonically per rebuild (invisible to `Bun.gc()` and to heap profilers — the JS heap stays flat). A multi-day watch session reached **136GB RSS**. 1.6.22 moves the bundle to a child process and adds an RSS watchdog (`memoryLimitMb`, default 4096).
+- **Review reports live at `reviews/<version>-<slug>.md` at the repo ROOT** — never `docs/reviews/`.
+  In this project that path is doubly wrong: `buildSite` does `rm -rf docs/` on every build (the
+  report is deleted), and `docs/` is the published GitHub Pages root (it would also be public).
+  Follow-ups get routed out of the report into `TODO.md` (ours) or `UPSTREAM.md` + a filed issue.
+- **Build publishable artifacts from a clean dependency install.** `rm -rf node_modules && bun
+  install --frozen-lockfile` first. A `node_modules` mutated by a few `bun add`/`bun remove`
+  cycles leaves **nested duplicate copies of hoisted transitives** — six sibling `@codemirror`
+  packages each got their own — and the IIFE bundles every copy: same lockfile, **625kB larger
+  bundle**, nothing in the build output saying so. From a clean install the build is
+  byte-reproducible.
+- **Verify a release from a clean tree, not your working copy.** A stale `node_modules` has twice
+  produced a red suite that was not a code defect. Recipe: `pkill -f "bun bin/site.ts"` (the build
+  lock refuses a concurrent build), refresh `bun.lock` with `bun install` after ANY `package.json`
+  edit, then copy `git ls-files` into a scratch dir and run `bun install --frozen-lockfile`,
+  `bun x tsc --noEmit`, `bun test`, `bun run build` there. Check the tarball separately with
+  `npm pack --dry-run` — `files` is an allowlist and has silently dropped `.d.ts` files before.
 - **Changelog**: user-visible changes go in `CHANGELOG.md` under `## [Unreleased]` ([Keep a Changelog](https://keepachangelog.com/en/1.1.0/)), per the shared coding practices.
 - **Upstream issues**: rough edges in `tosijs-ui` are **filed as GitHub issues on that repo**, then mirrored in `UPSTREAM.md` with the issue link — "file, don't fix". An `UPSTREAM.md` entry with no filed issue is a complaint nobody will read.
 
@@ -174,10 +195,10 @@ bunx tosi-mosaic <video-file> [-f frames] [-w width] [-q quality] [-r fps]
 
 ## Source layout
 
-- `src/tosi-product.ts` — `TosiProduct`, `TosiProductSection`, `TosiProductHeader`, theme system, `interpolateThemeValue`
+- `src/tosi-product.ts` — `TosiProduct`, `TosiProductSection`, `TosiProductHeader`, theme system
 - `src/tosi-filmstrip.ts` — `TosiFilmstrip` (canvas mosaic renderer)
-- `src/tosi-interpolator.ts` — `TosiInterpolator`, `TosiWaypoint`, `interpolateStrings`
-- `src/waypoints.ts` — `interpolateWaypoints` helper (numeric interpolation with easeInOutQuad)
+- `src/tosi-interpolator.ts` — `TosiInterpolator`, `TosiWaypoint`
+- `src/waypoints.ts` — **the interpolation kernels**: `interpolateStrings` (= `interpolateThemeValue`), `isColor`, `rangeT`, `interpolateWaypoints`. The interpolator and the theme system both blend "a CSS value at t"; they each owned a copy until 0.7.0 and the copies drifted (see CHANGELOG). One implementation lives here — don't add a second.
 - `src/tosi-b3d-scroll.ts` — `TosiScrollCamera`, `TosiScrollTime`, `TosiScrollAnimation` (B3d scroll controllers; use `<tosi-waypoint>` children for camera keyframes)
 - `src/tosi-scroll-map.ts` — `TosiScrollMap` (Mapbox scroll controller; finds an enclosing/sibling `<tosi-map>`, flies between `<tosi-waypoint coords="lat,lng,zoom">` keyframes)
 - `src/tosi-prism.ts` — `TosiPrism` component + reusable `loadPrism(languages?)` and `highlightCodeBlocks(root)` helpers (Prism loads lazily from jsDelivr CDN). Renamed from `tosi-code` in v0.6.x to avoid clashing with tosijs-ui's `<tosi-code>` (ace-based editor).

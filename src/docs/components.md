@@ -56,7 +56,7 @@ app.defaultTheme = "midnight";
 
 Sections then declare which theme is in force as they pin:
 
-```html
+```markup
 <tosi-product-section theme="midnight">…</tosi-product-section>
 <tosi-product-section theme-from="midnight" theme-to="paper">…</tosi-product-section>
 ```
@@ -108,9 +108,9 @@ useful if you're building your own animator or debugging why a scene isn't behav
 | Function                                             | Returns                | Description                                                                                     |
 | ---------------------------------------------------- | ---------------------- | ----------------------------------------------------------------------------------------------- |
 | `rangeProgress(progress, rangeStr)`                  | `number`               | Maps a section's 0→1 progress onto a `data-scroll-range="start,end"` slice, clamped to 0→1.     |
-| `interpolateStrings(a, b, t)`                        | `string`               | Interpolates the numbers inside two CSS strings — how `<tosi-interpolator>` blends keyframes.   |
+| `interpolateStrings(a, b, t)`                        | `string`               | Blends two CSS values at `t` — colors via `color-mix`, matching number runs per-number, anything else stepped at the midpoint. The one kernel `<tosi-interpolator>` and the theme system share. |
 | `interpolateWaypoints(progress, waypoints)`          | `number`               | Numeric interpolation across waypoints, with easeInOutQuad.                                     |
-| `interpolateThemeValue(from, to, t)`                 | `string`               | Blends one theme value into another (colors via `color-mix`, numbers per-number, else steps).   |
+| `interpolateThemeValue(from, to, t)`                 | `string`               | Alias of `interpolateStrings` — the name the theme system uses for the same kernel.              |
 | `isColor(s)`                                         | `boolean`              | Whether a CSS value is a color, and so should be blended rather than stepped.                   |
 | `resolveThemeSource(items, activeIdx, progress, defaultTheme)` | `ThemeSource` | Which theme(s) are in force at a point on the runway, and how far between them.                 |
 | `findEnclosingSection(el)`                           | `HTMLElement \| null`  | The nearest ancestor `<tosi-product-section>`.                                                   |

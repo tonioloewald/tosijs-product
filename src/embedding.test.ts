@@ -164,3 +164,36 @@ describe("rangeProgress", () => {
     expect(rangeProgress(0.9, "0.8,0.2")).toBe(1);
   });
 });
+
+describe("rangeProgress with a malformed range", () => {
+  /*
+  NaN survives the clamp — `Math.max(0, Math.min(1, NaN))` is NaN — and every
+  arithmetic step downstream, so a single typo froze the animator at its first
+  waypoint with nothing logged. Falling back to the full range keeps the element
+  animating, and the one-time warning names the attribute that is wrong.
+  */
+  const cases: Array<[string, string | null]> = [
+    ["no comma", "0.5"],
+    ["non-numeric", "a,b"],
+    ["trailing comma", "0.5,"],
+    ["empty", ""],
+  ];
+  for (const [label, range] of cases) {
+    test(`${label} falls back to the full range instead of NaN`, () => {
+      const p = rangeProgress(0.42, range);
+      expect(Number.isNaN(p)).toBe(false);
+      expect(p).toBe(0.42);
+    });
+  }
+
+  test("a well-formed range still maps to its sub-range", () => {
+    expect(rangeProgress(0.5, "0,1")).toBe(0.5);
+    expect(rangeProgress(0.5, "0.25,0.75")).toBe(0.5);
+    expect(rangeProgress(0.25, "0.25,0.75")).toBe(0);
+    expect(rangeProgress(0.75, "0.25,0.75")).toBe(1);
+  });
+
+  test("an explicit 0 start is honoured, not treated as missing", () => {
+    expect(rangeProgress(0.5, "0,0.5")).toBe(1);
+  });
+});

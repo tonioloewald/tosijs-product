@@ -1,20 +1,6 @@
 import { Component } from "tosijs";
 export type ThemeMap = Record<string, string>;
 export type ThemeRegistry = Record<string, ThemeMap>;
-/**
- * Does this CSS value look like a color? Recognises `#hex`, `rgb()`/`rgba()`, `hsl()`/`hsla()`,
- * `color()`, and a small set of named colors. Used to decide whether two theme values should be
- * blended with `color-mix()` or interpolated numerically.
- */
-export declare function isColor(s: string): boolean;
-/**
- * Blend one theme value into another at `t` (0→1).
- *
- * Colors blend through `color-mix(in srgb, …)`. Values containing matching runs of numbers
- * (`0.5rem 1rem`, `translateY(20px)`) interpolate per-number. Anything else steps at the
- * midpoint, since there's no meaningful in-between for e.g. a font-family.
- */
-export declare function interpolateThemeValue(from: string, to: string, t: number): string;
 /** The nearest ancestor `<tosi-product-section>`, or `null` if this element isn't inside one. */
 export declare function findEnclosingSection(el: HTMLElement): HTMLElement | null;
 /**
@@ -24,10 +10,6 @@ export declare function findEnclosingSection(el: HTMLElement): HTMLElement | nul
  * the animators inside it, so the outer engine must skip them rather than drive them twice.
  */
 export declare function nearestEnclosingProduct(el: HTMLElement | null): HTMLElement | null;
-/**
- * Map a section's 0→1 pin progress onto an animator's `data-scroll-range="start,end"`
- * sub-range, clamped to 0→1. A degenerate range (end <= start) acts as a step at `end`.
- */
 export declare function rangeProgress(progress: number, rangeStr: string | null): number;
 export interface ThemeSource {
     fromName: string;

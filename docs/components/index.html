@@ -28,7 +28,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="/doc-system.css" data-tosi-doc-system />
+  <link rel="stylesheet" href="../doc-system.css" data-tosi-doc-system />
   <title>tosijs-product — component &amp; API reference</title>
   <meta name="description" content="Every element and exported function in tosijs-product: the scroll engine, the animators, the theme system, and the JavaScript API." />
   <meta name="keywords" content="reference, api, components, themes" />
@@ -40,11 +40,11 @@
   <meta property="og:url" content="https://product.tosijs.net/components/" />
   <meta name="twitter:card" content="summary" />
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Component Reference","description":"Every element and exported function in tosijs-product: the scroll engine, the animators, the theme system, and the JavaScript API.","url":"https://product.tosijs.net/components/","inLanguage":"en","isPartOf":{"@type":"WebSite","name":"tosijs-product","url":"https://product.tosijs.net"}}</script>
-  <link rel="icon" href="/favicon.svg" />
+  <link rel="icon" href="../favicon.svg" />
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="/docs.json" config="{&quot;projectName&quot;:&quot;tosijs-product&quot;,&quot;projectLinks&quot;:{&quot;tosijs&quot;:&quot;https://tosijs.net&quot;,&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs-product&quot;}}">
+  <tosi-doc-system docs="../docs.json" config="{&quot;projectName&quot;:&quot;tosijs-product&quot;,&quot;projectLinks&quot;:{&quot;tosijs&quot;:&quot;https://tosijs.net&quot;,&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs-product&quot;}}">
   <article class="doc-content">
 <h1>Component Reference</h1>
 <!--{ "headTitle": "tosijs-product — component & API reference", "description": "Every element and exported function in tosijs-product: the scroll engine, the animators, the theme system, and the JavaScript API.", "keywords": [ "reference", "api", "components", "themes" ] }-->
@@ -131,7 +131,7 @@ app.themes = {
 app.defaultTheme = &quot;midnight&quot;;
 </code></pre>
 <p>Sections then declare which theme is in force as they pin:</p>
-<pre><code class="language-html">&lt;tosi-product-section theme=&quot;midnight&quot;&gt;…&lt;/tosi-product-section&gt;
+<pre><code class="language-markup">&lt;tosi-product-section theme=&quot;midnight&quot;&gt;…&lt;/tosi-product-section&gt;
 &lt;tosi-product-section theme-from=&quot;midnight&quot; theme-to=&quot;paper&quot;&gt;…&lt;/tosi-product-section&gt;
 </code></pre>
 <p><code>theme</code> holds a theme constant for the whole pin. <code>theme-from</code>/<code>theme-to</code> <strong>interpolates</strong> between
@@ -207,7 +207,7 @@ useful if you&#39;re building your own animator or debugging why a scene isn&#39
 <tr>
 <td><code>interpolateStrings(a, b, t)</code></td>
 <td><code>string</code></td>
-<td>Interpolates the numbers inside two CSS strings — how <code>&lt;tosi-interpolator&gt;</code> blends keyframes.</td>
+<td>Blends two CSS values at <code>t</code> — colors via <code>color-mix</code>, matching number runs per-number, anything else stepped at the midpoint. The one kernel <code>&lt;tosi-interpolator&gt;</code> and the theme system share.</td>
 </tr>
 <tr>
 <td><code>interpolateWaypoints(progress, waypoints)</code></td>
@@ -217,7 +217,7 @@ useful if you&#39;re building your own animator or debugging why a scene isn&#39
 <tr>
 <td><code>interpolateThemeValue(from, to, t)</code></td>
 <td><code>string</code></td>
-<td>Blends one theme value into another (colors via <code>color-mix</code>, numbers per-number, else steps).</td>
+<td>Alias of <code>interpolateStrings</code> — the name the theme system uses for the same kernel.</td>
 </tr>
 <tr>
 <td><code>isColor(s)</code></td>
@@ -254,15 +254,15 @@ interface ThemeSource {
   </article>
   <nav class="doc-nav" aria-label="Documentation">
   <ul>
-    <li><a class="doc-link" href="/">tosijs-product</a></li>
-    <li><a class="doc-link" href="/tosi-filmstrip/">&lt;tosi-filmstrip&gt;</a></li>
-    <li><a class="doc-link" href="/tosi-interpolator/">&lt;tosi-interpolator&gt;</a></li>
-    <li><a class="doc-link" href="/tosi-prism/">&lt;tosi-prism&gt;</a></li>
-    <li><a class="doc-link" href="/tosi-product/">&lt;tosi-product&gt;</a></li>
-    <li><a class="doc-link" href="/tosi-b3d-scroll/">&lt;tosi-scroll-camera&gt; · &lt;tosi-scroll-time&gt; · &lt;tosi-scroll-animation&gt;</a></li>
-    <li><a class="doc-link" href="/tosi-scroll-map/">&lt;tosi-scroll-map&gt;</a></li>
-    <li><a class="doc-link current" href="/components/" aria-current="page">Component Reference</a></li>
-    <li><a class="doc-link" href="/getting-started/">Getting Started</a></li>
+    <li><a class="doc-link" href="../">tosijs-product</a></li>
+    <li><a class="doc-link" href="../tosi-filmstrip/">&lt;tosi-filmstrip&gt;</a></li>
+    <li><a class="doc-link" href="../tosi-interpolator/">&lt;tosi-interpolator&gt;</a></li>
+    <li><a class="doc-link" href="../tosi-prism/">&lt;tosi-prism&gt;</a></li>
+    <li><a class="doc-link" href="../tosi-product/">&lt;tosi-product&gt;</a></li>
+    <li><a class="doc-link" href="../tosi-b3d-scroll/">&lt;tosi-scroll-camera&gt; · &lt;tosi-scroll-time&gt; · &lt;tosi-scroll-animation&gt;</a></li>
+    <li><a class="doc-link" href="../tosi-scroll-map/">&lt;tosi-scroll-map&gt;</a></li>
+    <li><a class="doc-link current" href="../components/" aria-current="page">Component Reference</a></li>
+    <li><a class="doc-link" href="../getting-started/">Getting Started</a></li>
   </ul>
   </nav>
   <ul class="doc-navbar">
@@ -273,6 +273,6 @@ interface ThemeSource {
     <li><a href="https://www.npmjs.com/package/tosijs-product" data-icon="npm">npmjs</a></li>
   </ul>
   </tosi-doc-system>
-  <script type="module" src="/hydrate.js"></script>
+  <script type="module" src="../hydrate.js"></script>
 </body>
 </html>

@@ -1,3 +1,4 @@
+/*{ "layout": "full-width" }*/
 import { Component, elements } from "tosijs";
 
 const { slot } = elements;
@@ -56,7 +57,7 @@ becomes a keyframe; as the section pins, the map flies between them — pure dec
 scroll callbacks. Latitude, longitude and zoom interpolate independently, so a low-zoom mid-flight
 waypoint gives a dramatic zoom-out-then-in.
 
-<style>.doc-content:has(.doc-demo){overflow:visible !important}.doc-demo .media{height:var(--tosi-view-size,70vh);position:relative;overflow:hidden;border-radius:12px;background:#0a0a12}.doc-demo .media>tosi-map{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}</style>
+<style>.doc-content:has(.doc-demo){--doc-content-padding:0;overflow:visible !important}.doc-content:has(.doc-demo)>:not(.doc-demo):not(style){max-width:44rem;margin-inline:auto;padding-inline:1.25rem;box-sizing:border-box}.doc-demo .media{height:var(--tosi-view-size,70vh);position:relative;overflow:hidden;background:#0a0a12}.doc-demo .media>tosi-map{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}</style>
 <tosi-product class="doc-demo">
 <tosi-product-section scroll="150">
 <div class="media">

@@ -1,3 +1,4 @@
+/*{ "layout": "full-width" }*/
 /*#
 # `<tosi-scroll-camera>` · `<tosi-scroll-time>` · `<tosi-scroll-animation>`
 
@@ -5,7 +6,7 @@ Scroll controllers for a tosijs-ui [`<tosi-3d>`](https://ui.tosijs.net/babylon-3
 Place them inside a `<tosi-3d>` within a section; each reads scroll progress and drives one aspect
 of the scene — camera, time-of-day, or an animation — declaratively via `<tosi-waypoint>` children.
 
-<style>.doc-content:has(.doc-demo){overflow:visible !important}.doc-demo .media{height:var(--tosi-view-size,70vh);position:relative;overflow:hidden;border-radius:12px;background:#0a0a12}.doc-demo .media>tosi-3d{position:absolute;inset:0;width:100%;height:100%}</style>
+<style>.doc-content:has(.doc-demo){--doc-content-padding:0;overflow:visible !important}.doc-content:has(.doc-demo)>:not(.doc-demo):not(style){max-width:44rem;margin-inline:auto;padding-inline:1.25rem;box-sizing:border-box}.doc-demo .media{height:var(--tosi-view-size,70vh);position:relative;overflow:hidden;background:#0a0a12}.doc-demo .media>tosi-3d{position:absolute;inset:0;width:100%;height:100%}</style>
 <tosi-product class="doc-demo">
 <tosi-product-section scroll="150">
 <div class="media">
@@ -47,6 +48,12 @@ See also [`<tosi-scroll-map>`](/tosi-scroll-map/) and [`<tosi-product>`](/tosi-p
 */
 
 import { Component, elements } from "tosijs";
+
+/** Parse an attribute to a number, falling back only when it is missing or unparseable — an explicit `0` is a value. */
+function num(attr: string | null, fallback: number): number {
+  const n = Number(attr);
+  return attr !== null && attr !== "" && Number.isFinite(n) ? n : fallback;
+}
 
 const { slot } = elements;
 
@@ -213,8 +220,9 @@ export class TosiScrollTime extends Component {
     const owner = findScene(this);
     if (!owner) return;
 
-    const from = Number(this.getAttribute("from")) || 0;
-    const to = Number(this.getAttribute("to")) || 24;
+    // `|| 24` read `to="0"` — midnight, a perfectly ordinary end hour — as absent.
+    const from = num(this.getAttribute("from"), 0);
+    const to = num(this.getAttribute("to"), 24);
     const time = from + (to - from) * progress;
 
     const skybox = owner.querySelector("tosi-b3d-skybox") as any;

@@ -28,7 +28,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="/doc-system.css" data-tosi-doc-system />
+  <link rel="stylesheet" href="../doc-system.css" data-tosi-doc-system />
   <title>&lt;tosi-product&gt; — tosijs-product</title>
   <meta name="description" content="The scroll engine. A &lt;tosi-product&gt; owns the scrollable region it lives in: it measures a runway from its &lt;tosi-product-section&gt; children, hosts a sticky…" />
   <link rel="canonical" href="https://product.tosijs.net/tosi-product/" />
@@ -39,18 +39,18 @@
   <meta property="og:url" content="https://product.tosijs.net/tosi-product/" />
   <meta name="twitter:card" content="summary" />
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"\u003ctosi-product>","description":"The scroll engine. A \u003ctosi-product> owns the scrollable region it lives in: it measures a runway from its \u003ctosi-product-section> children, hosts a sticky…","url":"https://product.tosijs.net/tosi-product/","inLanguage":"en","isPartOf":{"@type":"WebSite","name":"tosijs-product","url":"https://product.tosijs.net"}}</script>
-  <link rel="icon" href="/favicon.svg" />
+  <link rel="icon" href="../favicon.svg" />
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="/docs.json" config="{&quot;projectName&quot;:&quot;tosijs-product&quot;,&quot;projectLinks&quot;:{&quot;tosijs&quot;:&quot;https://tosijs.net&quot;,&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs-product&quot;}}">
+  <tosi-doc-system docs="../docs.json" config="{&quot;projectName&quot;:&quot;tosijs-product&quot;,&quot;projectLinks&quot;:{&quot;tosijs&quot;:&quot;https://tosijs.net&quot;,&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs-product&quot;}}" data-layout="full-width">
   <article class="doc-content">
 <h1><code>&lt;tosi-product&gt;</code></h1>
 <p>The scroll engine. A <code>&lt;tosi-product&gt;</code> owns the scrollable region it lives in: it measures a
 <strong>runway</strong> from its <code>&lt;tosi-product-section&gt;</code> children, hosts a sticky viewport-sized window, and
 translates the stack as you scroll. Each section <strong>pins</strong> (holds still while its animators run),
 then <strong>exits</strong> (scrolls out 1:1). Drop it into HTML — no orchestration code.</p>
-<style>.doc-content:has(.doc-demo){overflow:visible !important}.doc-demo .scene{height:var(--tosi-view-size,70vh);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#f0f0f5;border-radius:12px;text-align:center;padding:2rem}.doc-demo h2{font-size:clamp(1.8rem,6vw,3rem);margin:0;font-weight:800}</style>
+<style>.doc-content:has(.doc-demo){--doc-content-padding:0;overflow:visible !important}.doc-content:has(.doc-demo)>:not(.doc-demo):not(style){max-width:44rem;margin-inline:auto;padding-inline:1.25rem;box-sizing:border-box}.doc-demo .scene{height:var(--tosi-view-size,70vh);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#f0f0f5;text-align:center;padding:2rem}.doc-demo h2{font-size:clamp(1.8rem,6vw,3rem);margin:0;font-weight:800}</style>
 <tosi-product class="doc-demo">
 <tosi-product-section scroll="70">
 <div class="scene" style="background:#08081a">
@@ -89,15 +89,15 @@ second pins. It&#39;s the HTML shown here — read it in <strong>Source</strong>
   </article>
   <nav class="doc-nav" aria-label="Documentation">
   <ul>
-    <li><a class="doc-link" href="/">tosijs-product</a></li>
-    <li><a class="doc-link" href="/tosi-filmstrip/">&lt;tosi-filmstrip&gt;</a></li>
-    <li><a class="doc-link" href="/tosi-interpolator/">&lt;tosi-interpolator&gt;</a></li>
-    <li><a class="doc-link" href="/tosi-prism/">&lt;tosi-prism&gt;</a></li>
-    <li><a class="doc-link current" href="/tosi-product/" aria-current="page">&lt;tosi-product&gt;</a></li>
-    <li><a class="doc-link" href="/tosi-b3d-scroll/">&lt;tosi-scroll-camera&gt; · &lt;tosi-scroll-time&gt; · &lt;tosi-scroll-animation&gt;</a></li>
-    <li><a class="doc-link" href="/tosi-scroll-map/">&lt;tosi-scroll-map&gt;</a></li>
-    <li><a class="doc-link" href="/components/">Component Reference</a></li>
-    <li><a class="doc-link" href="/getting-started/">Getting Started</a></li>
+    <li><a class="doc-link" href="../">tosijs-product</a></li>
+    <li><a class="doc-link" href="../tosi-filmstrip/">&lt;tosi-filmstrip&gt;</a></li>
+    <li><a class="doc-link" href="../tosi-interpolator/">&lt;tosi-interpolator&gt;</a></li>
+    <li><a class="doc-link" href="../tosi-prism/">&lt;tosi-prism&gt;</a></li>
+    <li><a class="doc-link current" href="../tosi-product/" aria-current="page">&lt;tosi-product&gt;</a></li>
+    <li><a class="doc-link" href="../tosi-b3d-scroll/">&lt;tosi-scroll-camera&gt; · &lt;tosi-scroll-time&gt; · &lt;tosi-scroll-animation&gt;</a></li>
+    <li><a class="doc-link" href="../tosi-scroll-map/">&lt;tosi-scroll-map&gt;</a></li>
+    <li><a class="doc-link" href="../components/">Component Reference</a></li>
+    <li><a class="doc-link" href="../getting-started/">Getting Started</a></li>
   </ul>
   </nav>
   <ul class="doc-navbar">
@@ -108,6 +108,6 @@ second pins. It&#39;s the HTML shown here — read it in <strong>Source</strong>
     <li><a href="https://www.npmjs.com/package/tosijs-product" data-icon="npm">npmjs</a></li>
   </ul>
   </tosi-doc-system>
-  <script type="module" src="/hydrate.js"></script>
+  <script type="module" src="../hydrate.js"></script>
 </body>
 </html>

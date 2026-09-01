@@ -1,9 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import {
-  interpolateThemeValue,
-  isColor,
-  resolveThemeSource,
-} from "./tosi-product";
+import { interpolateThemeValue, isColor } from "./waypoints";
+import { resolveThemeSource } from "./tosi-product";
 
 // Coverage for the theme system — the behaviour the old demo/theme.html
 // exercised by eye. Two deterministic seams: how a single CSS custom-property

@@ -1,25 +1,26 @@
 {
   "name": "tosijs-product",
-  "version": "0.6.5",
+  "version": "0.7.0",
   "description": "Scroll-linked animation components for tosijs",
   "source": "src/index.ts",
   "type": "module",
   "types": "dist/index.d.ts",
-  "main": "./dist/index.js",
+  "main": "./dist/module.js",
   "module": "./dist/module.js",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/module.js",
-      "browser": "./dist/index.js",
       "default": "./dist/module.js"
-    }
+    },
+    "./iife": "./dist/index.js",
+    "./dist/index.js": "./dist/index.js",
+    "./package.json": "./package.json"
   },
   "files": [
     "dist/index.js",
     "dist/module.js",
-    "dist/index.d.ts",
-    "dist/tosi-product.d.ts",
+    "dist/*.d.ts",
     "bin/tosi-mosaic.ts",
     "README.md",
     "LICENSE"
@@ -31,20 +32,29 @@
     "start": "bun bin/site.ts",
     "format": "bun eslint src demo --ext .ts --fix && bun prettier --write .",
     "test": "bun test",
+    "typecheck": "tsc --noEmit",
     "build": "bun bin/site.ts --build"
   },
   "author": "Tonio Loewald",
   "license": "Apache-2.0",
   "peerDependencies": {
-    "tosijs": "^1.7.5",
-    "tosijs-ui": "^1.7.1"
+    "tosijs": "^1.8.1",
+    "tosijs-ui": "^1.12.7"
+  },
+  "_comment_peerDependenciesMeta": "tosijs-ui is OPTIONAL for consumers: the shipped ESM (dist/module.js) imports only tosijs. It stays declared because <tosi-scroll-map> and the b3d controllers querySelector for tosijs-ui elements rather than importing them — a real pairing that is not an import. It is ALSO a devDependency, because this repo's own doc-site build (tosijs-ui/site) and IIFE bundle do need it.",
+  "peerDependenciesMeta": {
+    "tosijs-ui": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@happy-dom/global-registrator": "^20.8.9",
     "bun-types": "^1.3.0",
+    "chokidar": "^4.0.3",
     "happy-dom": "^20.7.0",
-    "marked": "^16.4.2",
-    "tjs-lang": "^0.12.0",
+    "marked": "^16.4.2 || ^17.0.0 || ^18.0.0",
+    "tjs-lang": "^0.13.6",
+    "tosijs-ui": "^1.12.7",
     "typescript": "^5.9.3"
   }
 }

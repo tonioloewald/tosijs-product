@@ -1,3 +1,4 @@
+/*{ "layout": "full-width" }*/
 /*#
 # `<tosi-interpolator>`
 
@@ -9,7 +10,7 @@ progress runs 0 → 1.
 The panel below is a live `<tosi-interpolator>` — scroll it, then read its markup in **Source**
 view (top-right). No JavaScript; it is the HTML shown here.
 
-<style>.doc-content:has(.ti-demo){overflow:visible !important}.ti-demo .scene{height:var(--tosi-view-size,70vh);display:flex;align-items:center;justify-content:center;background:#08081a;border-radius:12px}.ti-demo h2{font-size:clamp(2rem,7vw,3.5rem);margin:0;font-weight:800}</style>
+<style>.doc-content:has(.ti-demo){--doc-content-padding:0;overflow:visible !important}.doc-content:has(.ti-demo)>:not(.ti-demo):not(style){max-width:44rem;margin-inline:auto;padding-inline:1.25rem;box-sizing:border-box}.ti-demo .scene{height:var(--tosi-view-size,70vh);display:flex;align-items:center;justify-content:center;background:#08081a;border-radius:12px}.ti-demo h2{font-size:clamp(2rem,7vw,3.5rem);margin:0;font-weight:800}</style>
 <tosi-product class="ti-demo">
 <tosi-product-section scroll="120">
 <div class="scene">
@@ -50,47 +51,7 @@ See also [`<tosi-product>`](/tosi-product/) and [`<tosi-filmstrip>`](/tosi-films
 */
 
 import { Component } from "tosijs";
-
-export const interpolateStrings = (a: string, b: string, t: number) => {
-  const numRegex = /-?\d+(?:\.\d+)?/g;
-  const aNums = Array.from(a.matchAll(numRegex));
-  const bNums = Array.from(b.matchAll(numRegex));
-
-  if (aNums.length > 0 && aNums.length === bNums.length) {
-    let result = "";
-    let lastIndex = 0;
-    for (let i = 0; i < aNums.length; i++) {
-      const aMatch = aNums[i];
-      const bMatch = bNums[i];
-      result += a.substring(lastIndex, aMatch.index);
-
-      const n1 = parseFloat(aMatch[0]);
-      const n2 = parseFloat(bMatch[0]);
-      const interpolated = n1 + (n2 - n1) * t;
-
-      let numStr = interpolated.toFixed(4);
-      if (numStr.includes(".")) {
-        numStr = numStr.replace(/0+$/, "").replace(/\.$/, "");
-      }
-      result += numStr;
-
-      lastIndex = aMatch.index! + aMatch[0].length;
-    }
-    result += a.substring(lastIndex);
-    return result;
-  }
-
-  const isColor = (s: string) =>
-    s.startsWith("#") ||
-    s.startsWith("rgb") ||
-    s.startsWith("hsl") ||
-    ["red", "blue", "white", "black", "transparent"].includes(s);
-  if (isColor(a) && isColor(b)) {
-    return `color-mix(in srgb, ${a} ${Math.round((1 - t) * 100)}%, ${b})`;
-  }
-
-  return t < 0.5 ? a : b;
-};
+import { interpolateStrings, rangeT } from "./waypoints";
 
 export class TosiInterpolator extends Component {
   static styleSpec = {
@@ -138,8 +99,7 @@ export class TosiInterpolator extends Component {
         ) {
           wp1 = waypoints[i];
           wp2 = waypoints[i + 1];
-          const rawT =
-            (progress - wp1.progress) / (wp2.progress - wp1.progress);
+          const rawT = rangeT(progress, wp1.progress, wp2.progress);
 
           const easing = this.getAttribute("easing");
           if (easing === "ease-in-out") {

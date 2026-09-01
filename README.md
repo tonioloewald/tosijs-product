@@ -1,6 +1,6 @@
 # tosijs-product
 
-<!--{ "pin": "top", "order": 1, "headTitle": "tosijs-product — cinematic, scroll-driven product pages in HTML", "description": "Build Apple-style, scroll-linked product stories with declarative web components. tosijs-product pins sections and drives Lottie, video (WebP mosaics), BabylonJS 3D, and CSS interpolation from scroll position — authored in plain HTML.", "keywords": ["scrollytelling", "scroll animation", "product page", "web components", "custom elements", "tosijs", "lottie", "webp mosaic", "babylonjs", "scroll-linked animation", "cinematic landing page", "apple-style scrolling"] }-->
+<!--{ "pin": "top", "order": 1, "layout": "full-width", "headTitle": "tosijs-product — cinematic, scroll-driven product pages in HTML", "description": "Build Apple-style, scroll-linked product stories with declarative web components. tosijs-product pins sections and drives Lottie, video (WebP mosaics), BabylonJS 3D, and CSS interpolation from scroll position — authored in plain HTML.", "keywords": ["scrollytelling", "scroll animation", "product page", "web components", "custom elements", "tosijs", "lottie", "webp mosaic", "babylonjs", "scroll-linked animation", "cinematic landing page", "apple-style scrolling"] }-->
 
 A cinematic product page component library for `tosijs`.
 
@@ -9,14 +9,14 @@ A cinematic product page component library for `tosijs`.
 _This page is the demo._ Scroll — the hero below is a live `<tosi-product>` engine pinned to this doc's scroll container, authored entirely in the Markdown you're reading.
 
 <style>
-.doc-content:has(.tp-hero) { overflow: visible !important; max-width: none !important; padding: 0 !important; }
-.doc-content:has(.tp-hero) > :not(.tp-hero):not(style) { max-width: 44em; margin-inline: auto; padding-inline: 1.25rem; box-sizing: border-box; }
+.doc-content:has(.tp-hero) { --doc-content-padding: 0; overflow: visible !important; }
+.doc-content:has(.tp-hero) > :not(.tp-hero):not(style) { max-width: 44rem; margin-inline: auto; padding-inline: 1.25rem; box-sizing: border-box; }
 .tp-hero h1, .tp-hero h2, .tp-hero h3 { color:var(--fg); border:none; line-height:1.08; letter-spacing:-.01em; }
 .tp-hero .media-overlay h1, .tp-hero .media-overlay h2 { color:#fff; }
 .doc-content:has(.tp-hero) > h1, .doc-content:has(.tp-hero) > h2, .doc-content:has(.tp-hero) > h3 { color:var(--text-color); border:none; letter-spacing:-.01em; margin:1.6em 0 .4em; }
 .tp-hero { --bg:var(--background,#08081a); --fg:var(--text-color,#f0f0f5); --muted:color-mix(in srgb, var(--text-color,#f0f0f5) 62%, var(--background,#08081a)); --accent:var(--brand-color,#9be7ff); --surface:color-mix(in srgb, var(--text-color,#f0f0f5) 8%, transparent); --border:color-mix(in srgb, var(--text-color,#f0f0f5) 16%, transparent); }
 .tp-hero .scene { padding: clamp(4rem, 15vh, 11rem) 2rem; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; background:var(--bg); color:var(--fg); }
-.tp-hero .scene h1 { font-size: clamp(2.5rem, 9vw, 6rem); margin:0 0 .2em; font-weight:800; letter-spacing:-.02em; }
+.tp-hero .scene h1 { font-size: clamp(2.5rem, 9vw, 6rem); margin:0 0 .6em; font-weight:800; letter-spacing:-.02em; }
 .tp-hero .scene h2 { font-size: clamp(2rem, 6vw, 4rem); margin:0 0 .4em; font-weight:800; }
 .tp-hero .scene p { font-size: clamp(1rem, 1.6vw, 1.25rem); color:var(--muted); max-width:580px; margin:0; }
 .tp-hero .pill { display:inline-block; margin-top:1.5em; background:var(--surface); border:1px solid var(--border); color:var(--accent); font-family:monospace; font-size:.85rem; padding:.5em 1.2em; border-radius:999px; }
@@ -25,6 +25,7 @@ _This page is the demo._ Scroll — the hero below is a live `<tosi-product>` en
 .tp-hero .feature-row { font-size:1.05rem; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:.7em 1.1em; margin-top:.3em; font-family:monospace; color:var(--fg); }
 .tp-hero .media-scene { position:relative; height:var(--tosi-view-size, 100vh); overflow:hidden; background:#0a0a12; }
 .tp-hero .media-scene > video, .tp-hero .media-scene > tosi-filmstrip, .tp-hero .media-scene > tosi-3d, .tp-hero .media-scene > tosi-map { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block; }
+.tp-hero .media-scene > tosi-filmstrip::part(canvas) { object-fit:cover; }
 .tp-hero .media-scene > tosi-map { pointer-events:none; }
 .tp-hero .media-scene.lottie { background:radial-gradient(ellipse at center, #14142a 0%, #0a0a12 100%); }
 .tp-hero .media-scene > tosi-lottie { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:min(70vh,60vw); height:min(70vh,60vw); }
@@ -38,7 +39,7 @@ _This page is the demo._ Scroll — the hero below is a live `<tosi-product>` en
 <div class="scene">
 <tosi-interpolator data-scroll-animate easing="ease-in-out">
 <tosi-waypoint progress="0" style="transform: scale(1) translateY(0px)"></tosi-waypoint>
-<tosi-waypoint progress="1" style="transform: scale(1.4) translateY(20px)"></tosi-waypoint>
+<tosi-waypoint progress="1" style="transform: scale(1.4) translateY(0.2em)"></tosi-waypoint>
 <h1>tosijs-product</h1>
 </tosi-interpolator>
 <p>Build cinematic product pages with HTML.</p>
@@ -323,7 +324,7 @@ The transition section interpolates its CSS variables (color values use `color-m
 
 ## Frame-based animation
 
-Standard video scrubbing (`video.currentTime`) often stutters because decoders aren't designed for random-access seeking. The `tosi-mosaic` CLI converts a video to a single WebP mosaic grid, and `<tosi-filmstrip>` scrubs through it using a hardware-accelerated canvas.
+Standard video scrubbing (`video.currentTime`) often stutters because decoders aren't designed for random-access seeking. The `tosi-mosaic` CLI converts a video to a single WebP mosaic grid, and `<tosi-filmstrip>` scrubs through it using a hardware-accelerated canvas. (The CLI needs `ffmpeg` and `ffprobe` on your PATH — macOS: `brew install ffmpeg`.)
 
 ```bash
 bunx tosi-mosaic my-video.mp4 --frames 100 --width 1280

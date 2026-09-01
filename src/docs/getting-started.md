@@ -6,7 +6,7 @@
 
 A single script tag gives you everything — tosijs, tosijs-ui, and tosijs-product with all custom elements registered:
 
-```html
+```markup
 <script src="https://cdn.jsdelivr.net/npm/tosijs-product/dist/index.js"></script>
 ```
 
@@ -78,7 +78,7 @@ The `scroll` attribute is a **viewport-relative percentage**, not pixels:
 
 Use `data-scroll-range` to constrain a child's animation to part of the section:
 
-```html
+```markup
 <tosi-product-section scroll="300">
   <!-- First half -->
   <tosi-interpolator data-scroll-range="0,0.5" easing="ease-in-out">
@@ -102,7 +102,7 @@ Use `data-scroll-range` to constrain a child's animation to part of the section:
 
 Add `data-scroll-animate="currentTime"` to any `<video>` element:
 
-```html
+```markup
 <tosi-product-section scroll="300">
   <video
     src="clip.mp4"
@@ -118,7 +118,7 @@ For smoother results, convert the video to a filmstrip mosaic (see [`<tosi-films
 
 ## Lottie animations
 
-```html
+```markup
 <tosi-product-section scroll="200">
   <tosi-lottie src="animation.json" data-scroll-animate="lottie"></tosi-lottie>
 </tosi-product-section>
@@ -129,7 +129,7 @@ For smoother results, convert the video to a filmstrip mosaic (see [`<tosi-films
 The engine detects the scroll container it lives in, so a `<tosi-product>` works inside any
 scrollable element, not just the page:
 
-```html
+```markup
 <div style="height: 60vh; overflow-y: auto;">
   <tosi-product>
     <tosi-product-section scroll="200">...</tosi-product-section>
@@ -144,7 +144,7 @@ you nest a whole sub-story inside one scene of a bigger one.
 For horizontal scrolling, set `direction="horizontal"` on the **`<tosi-product>`** — it's an engine
 attribute, not a section one, because the engine is what lays the runway out:
 
-```html
+```markup
 <tosi-product direction="horizontal">
   <tosi-product-section scroll="200">...</tosi-product-section>
 </tosi-product>

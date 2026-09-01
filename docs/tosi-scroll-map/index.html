@@ -28,7 +28,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="/doc-system.css" data-tosi-doc-system />
+  <link rel="stylesheet" href="../doc-system.css" data-tosi-doc-system />
   <title>&lt;tosi-scroll-map&gt; — tosijs-product</title>
   <meta name="description" content="Waypoint-driven scroll controller for a tosijs-ui &lt;tosi-map&gt; (Mapbox). Inside a &lt;tosi-map&gt; within a section, each &lt;tosi-waypoint coords=&quot;lat,lng,zoom&quot;&gt;" />
   <link rel="canonical" href="https://product.tosijs.net/tosi-scroll-map/" />
@@ -39,11 +39,11 @@
   <meta property="og:url" content="https://product.tosijs.net/tosi-scroll-map/" />
   <meta name="twitter:card" content="summary" />
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"\u003ctosi-scroll-map>","description":"Waypoint-driven scroll controller for a tosijs-ui \u003ctosi-map> (Mapbox). Inside a \u003ctosi-map> within a section, each \u003ctosi-waypoint coords=\"lat,lng,zoom\">","url":"https://product.tosijs.net/tosi-scroll-map/","inLanguage":"en","isPartOf":{"@type":"WebSite","name":"tosijs-product","url":"https://product.tosijs.net"}}</script>
-  <link rel="icon" href="/favicon.svg" />
+  <link rel="icon" href="../favicon.svg" />
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="/docs.json" config="{&quot;projectName&quot;:&quot;tosijs-product&quot;,&quot;projectLinks&quot;:{&quot;tosijs&quot;:&quot;https://tosijs.net&quot;,&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs-product&quot;}}">
+  <tosi-doc-system docs="../docs.json" config="{&quot;projectName&quot;:&quot;tosijs-product&quot;,&quot;projectLinks&quot;:{&quot;tosijs&quot;:&quot;https://tosijs.net&quot;,&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs-product&quot;}}" data-layout="full-width">
   <article class="doc-content">
 <h1><code>&lt;tosi-scroll-map&gt;</code></h1>
 <p>Waypoint-driven scroll controller for a tosijs-ui <a href="https://ui.tosijs.net/mapbox"><code>&lt;tosi-map&gt;</code></a>
@@ -51,7 +51,7 @@
 becomes a keyframe; as the section pins, the map flies between them — pure declarative HTML, no
 scroll callbacks. Latitude, longitude and zoom interpolate independently, so a low-zoom mid-flight
 waypoint gives a dramatic zoom-out-then-in.</p>
-<style>.doc-content:has(.doc-demo){overflow:visible !important}.doc-demo .media{height:var(--tosi-view-size,70vh);position:relative;overflow:hidden;border-radius:12px;background:#0a0a12}.doc-demo .media>tosi-map{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}</style>
+<style>.doc-content:has(.doc-demo){--doc-content-padding:0;overflow:visible !important}.doc-content:has(.doc-demo)>:not(.doc-demo):not(style){max-width:44rem;margin-inline:auto;padding-inline:1.25rem;box-sizing:border-box}.doc-demo .media{height:var(--tosi-view-size,70vh);position:relative;overflow:hidden;background:#0a0a12}.doc-demo .media>tosi-map{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}</style>
 <tosi-product class="doc-demo">
 <tosi-product-section scroll="150">
 <div class="media">
@@ -81,15 +81,15 @@ waypoint gives a dramatic zoom-out-then-in.</p>
   </article>
   <nav class="doc-nav" aria-label="Documentation">
   <ul>
-    <li><a class="doc-link" href="/">tosijs-product</a></li>
-    <li><a class="doc-link" href="/tosi-filmstrip/">&lt;tosi-filmstrip&gt;</a></li>
-    <li><a class="doc-link" href="/tosi-interpolator/">&lt;tosi-interpolator&gt;</a></li>
-    <li><a class="doc-link" href="/tosi-prism/">&lt;tosi-prism&gt;</a></li>
-    <li><a class="doc-link" href="/tosi-product/">&lt;tosi-product&gt;</a></li>
-    <li><a class="doc-link" href="/tosi-b3d-scroll/">&lt;tosi-scroll-camera&gt; · &lt;tosi-scroll-time&gt; · &lt;tosi-scroll-animation&gt;</a></li>
-    <li><a class="doc-link current" href="/tosi-scroll-map/" aria-current="page">&lt;tosi-scroll-map&gt;</a></li>
-    <li><a class="doc-link" href="/components/">Component Reference</a></li>
-    <li><a class="doc-link" href="/getting-started/">Getting Started</a></li>
+    <li><a class="doc-link" href="../">tosijs-product</a></li>
+    <li><a class="doc-link" href="../tosi-filmstrip/">&lt;tosi-filmstrip&gt;</a></li>
+    <li><a class="doc-link" href="../tosi-interpolator/">&lt;tosi-interpolator&gt;</a></li>
+    <li><a class="doc-link" href="../tosi-prism/">&lt;tosi-prism&gt;</a></li>
+    <li><a class="doc-link" href="../tosi-product/">&lt;tosi-product&gt;</a></li>
+    <li><a class="doc-link" href="../tosi-b3d-scroll/">&lt;tosi-scroll-camera&gt; · &lt;tosi-scroll-time&gt; · &lt;tosi-scroll-animation&gt;</a></li>
+    <li><a class="doc-link current" href="../tosi-scroll-map/" aria-current="page">&lt;tosi-scroll-map&gt;</a></li>
+    <li><a class="doc-link" href="../components/">Component Reference</a></li>
+    <li><a class="doc-link" href="../getting-started/">Getting Started</a></li>
   </ul>
   </nav>
   <ul class="doc-navbar">
@@ -100,6 +100,6 @@ waypoint gives a dramatic zoom-out-then-in.</p>
     <li><a href="https://www.npmjs.com/package/tosijs-product" data-icon="npm">npmjs</a></li>
   </ul>
   </tosi-doc-system>
-  <script type="module" src="/hydrate.js"></script>
+  <script type="module" src="../hydrate.js"></script>
 </body>
 </html>

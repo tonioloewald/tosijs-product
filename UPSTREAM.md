@@ -43,6 +43,48 @@ narrative-landing capability.
 
 -->
 
+## The `tosijs-ui` barrel puts CodeMirror in every IIFE — 94% of our CDN bundle
+
+**Issue:** https://github.com/tonioloewald/tosijs-ui/issues/120 (filed 2026-09-01, `tosijs-ui@1.12.7`)
+
+**Context.** `tosijs-ui`'s `.` entry statically reaches CodeMirror, and an IIFE cannot code-split,
+so `dist/index.js` inlines the whole editor for every CDN consumer. Measured on 1.12.7 with
+minification on, from a clean `bun install --frozen-lockfile`: 1,839,671 raw / 577,813 gzip with
+the barrel, versus 137,507 / 47,904 for the identical bundle with tosijs-ui removed — **the barrel
+is 92% of the gzipped payload**. The ESM build is unaffected (tosijs-ui stays external, 7.3kB
+gzip).
+
+(The issue's original figures were ~625kB higher and claimed the bundle was *growing*. Both were
+artifacts of a `node_modules` carrying nested duplicate `@codemirror` copies from incremental
+`bun add`/`bun remove` cycles — the IIFE bundled each copy. Corrected in a comment on the issue;
+release-over-release the bundle actually shrank 11%. Build release artifacts from a clean install.)
+
+**Suggestion.** An editor-free entry — `tosijs-ui/components`, or narrow `.` so `code-editor` /
+`live-example` / `doc-browser` are reachable only via the subpaths they already have. If importing
+components individually through the `./*` wildcard is the supported way to avoid this, documenting
+that is most of the fix.
+
+---
+
+## `.doc-content`'s inline `overflow: hidden` has no variable, so `layout: "full-screen"` can't scroll
+
+**Issue:** https://github.com/tonioloewald/tosijs-ui/issues/119 (filed 2026-09-01, `tosijs-ui@1.12.7`)
+
+**Context.** The doc-browser sets `.doc-content`'s `max-width`, `padding` and `overflow` as inline
+styles. The first two are routed through `--doc-content-max-width` / `--doc-content-padding` so a
+stylesheet can reach them; `overflow` is not. Two effects. `layout: "full-screen"` declares
+`overflow: auto` on `.doc-content` in `doc-system-styles.ts`, which loses to the inline `hidden`
+every time — so a full-screen page taller than its box is clipped and unscrollable, though its
+`height: 100%` does land. And `overflow: hidden` on an ancestor disables `position: sticky`, which
+is the whole mechanism `<tosi-product>` runs on, so every page here that hosts the engine still
+carries `overflow: visible !important`. Adopting `layout: full-width` removed the other two
+`!important`s from that rule and left this one.
+
+**Suggestion.** `overflow: 'var(--doc-content-overflow, hidden)'`, with the `full-screen` rule
+setting `_docContentOverflow` rather than `overflow`.
+
+---
+
 ## `<tosi-map>` builds one `mapboxgl.Map` per render while `mapbox-gl.js` is still loading
 
 **Issue:** https://github.com/tonioloewald/tosijs-ui/issues/13 (filed 2026-07-14, `tosijs-ui@1.6.22`)

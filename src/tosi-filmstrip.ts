@@ -10,7 +10,7 @@ canvas — instant, frame-perfect seeking driven by scroll.
 <tosi-product class="doc-demo">
 <tosi-product-section scroll="100">
 <div class="media">
-<tosi-filmstrip src="/agent-owl_10x10_100.jpg" cols="10" rows="10" total="100" data-scroll-animate></tosi-filmstrip>
+<tosi-filmstrip src="/agent-owl_10x10_96.jpg" cols="10" rows="10" total="96" data-scroll-animate></tosi-filmstrip>
 <div class="cap">100 frames from one image</div>
 </div>
 </tosi-product-section>
@@ -40,7 +40,7 @@ Produces `my-video_10x10_100.webp`. A grid (not one long strip) keeps within the
 ```html
 <tosi-product>
   <tosi-product-section scroll="150">
-    <tosi-filmstrip src="/agent-owl_10x10_100.jpg" cols="10" rows="10" total="100" data-scroll-animate></tosi-filmstrip>
+    <tosi-filmstrip src="/agent-owl_10x10_96.jpg" cols="10" rows="10" total="96" data-scroll-animate></tosi-filmstrip>
   </tosi-product-section>
 </tosi-product>
 ```

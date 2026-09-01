@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { interpolateStrings, interpolateWaypoints, numAttr, rangeT } from "./waypoints";
+import { interpolateStrings, interpolateWaypoints, isColor, numAttr, rangeT } from "./waypoints";
 
 describe("interpolateStrings", () => {
   test("interpolates single numeric value", () => {
@@ -221,5 +221,38 @@ describe("interpolateStrings on rgb()/hsl()", () => {
   test("endpoints are returned verbatim, so t=0/1 need no color-mix support", () => {
     expect(interpolateStrings("rgb(0,0,0)", "rgb(255,255,255)", 0)).toBe("rgb(0,0,0)");
     expect(interpolateStrings("rgb(0,0,0)", "rgb(255,255,255)", 1)).toBe("rgb(255,255,255)");
+  });
+});
+
+describe("isColor matches whole values only", () => {
+  /*
+  A prefix test (`startsWith("rgb")`) also matches every shorthand that BEGINS with a
+  color and keeps going. Wrapping one of those in color-mix() yields
+  `color-mix(in srgb, rgb(0,0,0) 0 0 10px 50%, …)` — not a color and not valid CSS, so
+  the browser drops the declaration and the shadow disappears for the whole pin interior,
+  reappearing at t=0 and t=1 where the early-outs return the raw values.
+  */
+  for (const v of [
+    "#fff", "#08081a", "rgb(0,0,0)", "rgba(0,0,0,.5)", "hsl(200 50% 50%)",
+    "color(display-p3 1 0 0)", "oklch(0.7 0.1 200)", "transparent", "currentColor",
+  ]) {
+    test(`${v} is a color`, () => expect(isColor(v)).toBe(true));
+  }
+
+  for (const v of [
+    "rgb(0,0,0) 0 0 10px",       // box-shadow
+    "hsl(0,0%,0%) 10px",
+    "#fff 1px solid",            // border
+    "rgb(0,0,0) 0 0 calc(1px)",  // trailing paren must not fool the scan
+    "1px solid black",
+    "block",
+  ]) {
+    test(`${v} is NOT a color`, () => expect(isColor(v)).toBe(false));
+  }
+
+  test("a box-shadow pair interpolates per-number, not through color-mix", () => {
+    const r = interpolateStrings("rgb(0,0,0) 0 0 10px", "rgb(0,0,0) 0 0 20px", 0.5);
+    expect(r).not.toContain("color-mix");
+    expect(r).toBe("rgb(0,0,0) 0 0 15px");
   });
 });

@@ -109,7 +109,7 @@ _This page is the demo._ Scroll — the hero below is a live `<tosi-product>` en
 </tosi-product-section>
 <tosi-product-section scroll="300">
 <div class="media-scene">
-<tosi-filmstrip src="/agent-owl_10x10_100.jpg" cols="10" rows="10" total="100" data-scroll-animate></tosi-filmstrip>
+<tosi-filmstrip src="/agent-owl_10x10_96.jpg" cols="10" rows="10" total="96" data-scroll-animate></tosi-filmstrip>
 <tosi-interpolator data-scroll-animate data-scroll-range="0,0.4" easing="ease-in-out">
 <tosi-waypoint progress="0" style="opacity:0; transform:translateY(20px)"></tosi-waypoint>
 <tosi-waypoint progress="0.5" style="opacity:1; transform:translateY(0px)"></tosi-waypoint>

@@ -182,6 +182,12 @@ Color values blend through `color-mix(in srgb, ...)`. Numeric strings interpolat
   edit, then copy `git ls-files` into a scratch dir and run `bun install --frozen-lockfile`,
   `bun x tsc --noEmit`, `bun test`, `bun run build` there. Check the tarball separately with
   `npm pack --dry-run` — `files` is an allowlist and has silently dropped `.d.ts` files before.
+- **`docs/version.json` will always name the PARENT commit — this is settled, don't re-open it.**
+  `tosijs-ui/site` stamps `git rev-parse --short HEAD` at *build* time, so inside the commit that
+  carries the rebuild, the stamp is necessarily one commit behind. No build→commit cycle can
+  converge; the previous release did exactly the same thing. We **accept the lag**: gitignoring it
+  would break the deployed site's version endpoint, and the tag is not knowable at build time.
+  Don't add it to a release checklist.
 - **Changelog**: user-visible changes go in `CHANGELOG.md` under `## [Unreleased]` ([Keep a Changelog](https://keepachangelog.com/en/1.1.0/)), per the shared coding practices.
 - **Upstream issues**: rough edges in `tosijs-ui` are **filed as GitHub issues on that repo**, then mirrored in `UPSTREAM.md` with the issue link — "file, don't fix". An `UPSTREAM.md` entry with no filed issue is a complaint nobody will read.
 

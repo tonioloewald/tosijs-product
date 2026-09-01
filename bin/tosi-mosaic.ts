@@ -34,7 +34,8 @@ if (!input) {
   console.log("Options:");
   console.log("  -f, --frames   Total frames to extract (default: 60)");
   console.log("  -w, --width    Width of each frame (default: 1280)");
-  console.log("  -q, --quality  Quality 0-100, higher is better (default: 75); mapped per encoder");
+  console.log("  -q, --quality  Quality 0-100, higher is better (default: 75). webp and jpg only;");
+  console.log("                 png is lossless, so the flag is ignored there.");
   console.log(
     "  -r, --fps      Source FPS, when the container misreports it (optional)"
   );
@@ -183,7 +184,11 @@ try {
       ? ["-q:v", String(q)]
       : format === "jpg"
         ? ["-q:v", String(Math.min(31, Math.max(2, Math.round(31 - (q / 100) * 29))))]
-        : ["-compression_level", String(Math.min(9, Math.max(0, Math.round(9 - (q / 100) * 9))))];
+        : // PNG is LOSSLESS: `--quality` has no meaning here and is ignored. Mapping it to
+          // `-compression_level` was worse than ignoring it — it ran backwards, so a user
+          // following the help text ("higher is better") got `-q 100` -> level 0, the
+          // LARGEST file, for byte-identical decoded pixels.
+          [];
 
   console.log(`🎬 Creating mosaic: ${cols}x${rows} (${total} frames total)`);
   console.log(`📦 Output: ${output}`);

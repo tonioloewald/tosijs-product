@@ -28,24 +28,43 @@ export function numAttr(attr: string | null, fallback: number): number {
   return Number.isFinite(n) ? n : fallback;
 }
 
-/** Does this value name a color? Checked BEFORE any numeric reading — see below. */
+const NAMED_COLORS = [
+  "red",
+  "blue",
+  "green",
+  "white",
+  "black",
+  "transparent",
+  "currentColor",
+];
+
+/**
+ * Does this value name a color, and nothing but a color? Checked BEFORE any numeric
+ * reading — see {@link interpolateStrings}.
+ *
+ * The whole value has to be the color. A `startsWith("rgb")` prefix test also matches
+ * `box-shadow: rgb(0,0,0) 0 0 10px`, and wrapping that in `color-mix()` produces
+ * `color-mix(in srgb, rgb(0,0,0) 0 0 10px 50%, …)` — not a color, not valid CSS, so the
+ * declaration is dropped and the shadow vanishes for the whole pin. Any property whose
+ * value *begins* with a color and continues (box-shadow, text-shadow, border, background,
+ * outline) hit this.
+ */
 export function isColor(s: string): boolean {
   const t = s.trim();
-  return (
-    t.startsWith("#") ||
-    t.startsWith("rgb") ||
-    t.startsWith("hsl") ||
-    t.startsWith("color(") ||
-    [
-      "red",
-      "blue",
-      "green",
-      "white",
-      "black",
-      "transparent",
-      "currentColor",
-    ].includes(t)
-  );
+  if (NAMED_COLORS.includes(t)) return true;
+  if (/^#[0-9a-fA-F]{3,8}$/.test(t)) return true;
+  if (!/^(rgba?|hsla?|hwb|lab|lch|oklab|oklch|color)\(/.test(t)) return false;
+  // One function call spanning the entire value: the `(` that opens it must be closed by
+  // the LAST character, with nothing after it.
+  let depth = 0;
+  for (let i = 0; i < t.length; i++) {
+    if (t[i] === "(") depth++;
+    else if (t[i] === ")") {
+      depth--;
+      if (depth === 0) return i === t.length - 1;
+    }
+  }
+  return false;
 }
 
 /** Format a float for CSS: fixed precision, no trailing zeros (0.7*100 -> "70", not "70.000000000001"). */

@@ -10,7 +10,17 @@
  * not an idiom each caller re-derives.
  */
 export declare function numAttr(attr: string | null, fallback: number): number;
-/** Does this value name a color? Checked BEFORE any numeric reading — see below. */
+/**
+ * Does this value name a color, and nothing but a color? Checked BEFORE any numeric
+ * reading — see {@link interpolateStrings}.
+ *
+ * The whole value has to be the color. A `startsWith("rgb")` prefix test also matches
+ * `box-shadow: rgb(0,0,0) 0 0 10px`, and wrapping that in `color-mix()` produces
+ * `color-mix(in srgb, rgb(0,0,0) 0 0 10px 50%, …)` — not a color, not valid CSS, so the
+ * declaration is dropped and the shadow vanishes for the whole pin. Any property whose
+ * value *begins* with a color and continues (box-shadow, text-shadow, border, background,
+ * outline) hit this.
+ */
 export declare function isColor(s: string): boolean;
 /**
  * Blend one CSS value into another at `t` (0→1).

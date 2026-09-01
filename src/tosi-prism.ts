@@ -94,14 +94,24 @@ const LOAD_TIMEOUT_MS = 10000;
 function loadScript(path: string): Promise<void> {
   let p = loaded.get(path);
   if (p) return p;
+  /*
+  Fail CLOSED. `if (integrity) { … }` meant a path with no table entry loaded with no
+  integrity attribute at all — so the one way to reach an unhashed URL was also the one
+  way to skip the check. Refuse instead: a URL we cannot verify is one we do not fetch.
+  */
+  const integrity = SUBRESOURCE_INTEGRITY[path];
+  if (!integrity) {
+    return Promise.reject(
+      new Error(
+        `tosi-prism: refusing to load ${path} — no integrity hash. Add one to SUBRESOURCE_INTEGRITY.`
+      )
+    );
+  }
   p = new Promise((resolve, reject) => {
     const s = document.createElement("script");
     s.src = `${CDN}/${path}`;
-    const integrity = SUBRESOURCE_INTEGRITY[path];
-    if (integrity) {
-      s.integrity = integrity;
-      s.crossOrigin = "anonymous";
-    }
+    s.integrity = integrity;
+    s.crossOrigin = "anonymous";
     const timer = setTimeout(
       () => reject(new Error(`Timed out loading ${s.src}`)),
       LOAD_TIMEOUT_MS
@@ -115,6 +125,15 @@ function loadScript(path: string): Promise<void> {
       reject(new Error(`Failed to load ${s.src}`));
     };
     document.head.appendChild(s);
+  });
+  /*
+  A rejection must not latch. The cache exists to dedupe concurrent loads, but caching a
+  REJECTED promise means one transient failure — the new timeout makes those reachable —
+  disables highlighting for the life of the page, with every retry replaying the old
+  error. Forget the failure so a later call can try again.
+  */
+  p.catch(() => {
+    if (loaded.get(path) === p) loaded.delete(path);
   });
   loaded.set(path, p);
   return p;
@@ -195,8 +214,15 @@ export async function loadPrism(
   const wanted = new Set<string>();
   const visit = (lang: string) => {
     if (wanted.has(lang)) return;
+    /*
+    `Object.hasOwn`, not a truthiness test: `LANGUAGE_DEPS["constructor"]` (and `toString`,
+    `valueOf`, `__proto__`) inherits a truthy value from Object.prototype, so the old
+    `if (!deps) return` let those through the allowlist and on to a
+    `prism-constructor.min.js` fetch. This map is the boundary that keeps the URL set
+    closed and the SRI table complete; it has to answer about its OWN keys.
+    */
+    if (!Object.hasOwn(LANGUAGE_DEPS, lang)) return; // unknown language — skip silently
     const deps = LANGUAGE_DEPS[lang];
-    if (!deps) return; // unknown language — skip silently
     for (const d of deps) visit(d);
     wanted.add(lang);
   };

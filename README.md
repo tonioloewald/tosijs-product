@@ -1,6 +1,6 @@
 # tosijs-product
 
-<!--{ "pin": "top", "order": 1, "layout": "full-width", "headTitle": "tosijs-product — cinematic, scroll-driven product pages in HTML", "description": "Build Apple-style, scroll-linked product stories with declarative web components. tosijs-product pins sections and drives Lottie, video (WebP mosaics), BabylonJS 3D, and CSS interpolation from scroll position — authored in plain HTML.", "keywords": ["scrollytelling", "scroll animation", "product page", "web components", "custom elements", "tosijs", "lottie", "webp mosaic", "babylonjs", "scroll-linked animation", "cinematic landing page", "apple-style scrolling"] }-->
+<!--{ "pin": "top", "order": 1, "layout": "full-screen", "headTitle": "tosijs-product — cinematic, scroll-driven product pages in HTML", "description": "Build Apple-style, scroll-linked product stories with declarative web components. tosijs-product pins sections and drives Lottie, video (WebP mosaics), BabylonJS 3D, and CSS interpolation from scroll position — authored in plain HTML.", "keywords": ["scrollytelling", "scroll animation", "product page", "web components", "custom elements", "tosijs", "lottie", "webp mosaic", "babylonjs", "scroll-linked animation", "cinematic landing page", "apple-style scrolling"] }-->
 
 A cinematic product page component library for `tosijs`.
 

@@ -54,8 +54,11 @@ BLOCKed the candidate. Everything below the "Breaking" heading is a consequence 
 
 ### Added
 
-- **The doc site declares `layout: "full-width"`** (new in `tosijs-ui@1.12.2`) on the README
-  landing page and on every component page that carries a demo. The hero and the demo panels are
+- **The doc site declares a page `layout`** (new in `tosijs-ui@1.12.2`). The README landing page
+  uses **`full-screen`** — no reading column, no gutter and no nav column, so the cinematic hero
+  gets the whole window, with a hamburger that brings the nav back and keeps it offered. Every
+  component page that carries a demo uses **`full-width`**, which drops the measure but keeps
+  the nav, since those are prose pages with one full-bleed band in the middle. The hero and the demo panels are
   now genuinely full-bleed instead of forcing their way out of the 44em reading column with
   `max-width`/`padding` `!important` overrides, and prose keeps its measure. Component demos went
   from a 704px panel to the full window width.

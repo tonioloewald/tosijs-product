@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { interpolateStrings, interpolateWaypoints, rangeT } from "./waypoints";
+import { interpolateStrings, interpolateWaypoints, numAttr, rangeT } from "./waypoints";
 
 describe("interpolateStrings", () => {
   test("interpolates single numeric value", () => {
@@ -161,5 +161,65 @@ describe("rangeT", () => {
   test("a zero-width span resolves to its far end, not NaN", () => {
     expect(rangeT(0.5, 0.5, 0.5)).toBe(1);
     expect(Number.isNaN(rangeT(0.5, 0.5, 0.5))).toBe(false);
+  });
+});
+
+describe("numAttr", () => {
+  /*
+  This is the test 0.7.0 shipped without, and it is why a regression got in.
+  `Number(attr) || fallback` swallows an explicit 0; the repair that replaced it,
+  `Number.isFinite(Number(attr)) ? … : fallback`, swallows the fallback instead —
+  `Number(null)` is 0 and 0 is finite, so `<tosi-product-header>` with no
+  `threshold` resolved to 0 and slid in at the first pixel of scroll. Both
+  directions are asserted here, because fixing one by breaking the other is
+  exactly what happened.
+  */
+  test("an absent attribute takes the fallback", () => {
+    expect(numAttr(null, 50)).toBe(50);
+  });
+
+  test("an empty attribute takes the fallback", () => {
+    expect(numAttr("", 50)).toBe(50);
+    expect(numAttr("   ", 50)).toBe(50);
+  });
+
+  test("an explicit zero is a value, not a missing attribute", () => {
+    expect(numAttr("0", 50)).toBe(0);
+    expect(numAttr("0", 24)).toBe(0);
+  });
+
+  test("an unparseable attribute takes the fallback", () => {
+    expect(numAttr("banana", 50)).toBe(50);
+    expect(numAttr("NaN", 50)).toBe(50);
+    expect(numAttr("Infinity", 50)).toBe(50);
+  });
+
+  test("ordinary values pass through, negatives included", () => {
+    expect(numAttr("120", 50)).toBe(120);
+    expect(numAttr("-3.5", 0)).toBe(-3.5);
+  });
+});
+
+describe("interpolateStrings on rgb()/hsl()", () => {
+  /*
+  Unifying the kernel hoisted the color test above the numeric branch, so these
+  now blend as colors rather than per-channel numbers. That is the correct and
+  consistent behaviour — per-channel hsl interpolation takes the long way round
+  the hue wheel — but it is a behaviour CHANGE, and it went out undocumented in
+  the first cut of 0.7.0. Pinned here so it cannot drift back silently.
+  */
+  test("rgb() blends through color-mix", () => {
+    const r = interpolateStrings("rgb(0,0,0)", "rgb(255,255,255)", 0.5);
+    expect(r).toBe("color-mix(in srgb, rgb(0,0,0) 50%, rgb(255,255,255))");
+  });
+
+  test("hsl() blends through color-mix", () => {
+    const r = interpolateStrings("hsl(0,0%,0%)", "hsl(200,50%,50%)", 0.25);
+    expect(r).toContain("color-mix(in srgb, hsl(0,0%,0%) 75%");
+  });
+
+  test("endpoints are returned verbatim, so t=0/1 need no color-mix support", () => {
+    expect(interpolateStrings("rgb(0,0,0)", "rgb(255,255,255)", 0)).toBe("rgb(0,0,0)");
+    expect(interpolateStrings("rgb(0,0,0)", "rgb(255,255,255)", 1)).toBe("rgb(255,255,255)");
   });
 });

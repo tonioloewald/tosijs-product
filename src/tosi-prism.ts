@@ -35,15 +35,27 @@ See also [`<tosi-product>`](/tosi-product/).
 import { Component } from "tosijs";
 
 /*
-Pinned exactly, not to the floating `1` it used to be. A floating major means
-jsDelivr may serve a different Prism on any page load, so highlighting could
-change — or break — with no change on our side and nothing to bisect.
+Pinned exactly, not to the floating `1` it used to be, and integrity-checked.
 
-No SRI, deliberately. `loadPrism(['javascript', 'css', …])` builds a URL per
-language on demand, so integrity hashes would need a build-time manifest
-covering every language a caller might ask for; a missing or stale entry there
-fails CLOSED, silently dropping highlighting. That is a real design change, not
-a one-line hardening — tracked in TODO.md rather than half-done here.
+An earlier version of this comment claimed SRI was impractical here because
+`loadPrism([...])` builds "a URL per language on demand" and would need a
+build-time manifest. That was wrong, and the pre-release review caught it:
+`visit()` returns early for any language absent from `LANGUAGE_DEPS`, so the
+reachable set is closed — core, seven grammars and one theme, **nine fixed URLs
+at a pinned version**. A nine-entry constant, not a manifest.
+
+`LANGUAGE_DEPS` is therefore a security boundary, not just dependency ordering:
+it is the allowlist that keeps the URL set closed, and `SUBRESOURCE_INTEGRITY`
+below is keyed to exactly those URLs. Widening it — the obvious feature request
+is "support any Prism language" — means either adding the hash alongside, or
+knowingly giving up integrity checking. Bumping PRISM_VERSION means regenerating
+every hash:
+
+  for u in components/prism-{core,markup,css,clike,javascript,typescript,bash,json}.min.js \
+           themes/prism-tomorrow.min.css; do
+    curl -sfL "https://cdn.jsdelivr.net/npm/prismjs@$VER/$u" |
+      openssl dgst -sha384 -binary | openssl base64 -A
+  done
 
 **This is a runtime CDN dependency.** A consumer with a strict CSP must allow
 `https://cdn.jsdelivr.net` in `script-src` and `style-src`, or skip
@@ -52,34 +64,93 @@ a one-line hardening — tracked in TODO.md rather than half-done here.
 const PRISM_VERSION = "1.30.0";
 const CDN = `https://cdn.jsdelivr.net/npm/prismjs@${PRISM_VERSION}`;
 
+/** sha384 for every URL this module can reach, keyed by path under `CDN`. */
+const SUBRESOURCE_INTEGRITY: Record<string, string> = {
+  "components/prism-core.min.js":
+    "sha384-zLRFO4dwowZvh8kzutOb5AWhH7f39HeJp+N7PtHF1SQtTBnifRx0AtmvTYs3F4YV",
+  "components/prism-markup.min.js":
+    "sha384-HkMr0bZB9kBW4iVtXn6nd35kO/L/dQtkkUBkL9swzTEDMdIe5ExJChVDSnC79aNA",
+  "components/prism-css.min.js":
+    "sha384-0mV13Neu0xhJFylI+HV43C+XiR13bGSeL7D0/7e6hK7sJgvyvK6HVjeQwmvXTstY",
+  "components/prism-clike.min.js":
+    "sha384-7LHwxHIDSHTBleLmgDWZbC/IMJsfYfFVOihKhvsrxYW4j47YQcRwZja4ToFE3bA8",
+  "components/prism-javascript.min.js":
+    "sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp",
+  "components/prism-typescript.min.js":
+    "sha384-PeOqKNW/piETaCg8rqKFy+Pm6KEk7e36/5YZE5XO/OaFdO+/Aw3O8qZ9qDPKVUgx",
+  "components/prism-bash.min.js":
+    "sha384-9WmlN8ABpoFSSHvBGGjhvB3E/D8UkNB9HpLJjBQFC2VSQsM1odiQDv4NbEo+7l15",
+  "components/prism-json.min.js":
+    "sha384-RhrmFFMb0ZCHImjFMpR/UE3VEtIVTCtNrtKQqXCzqXZNJala02N3UbVhi+qzw3CY",
+  "themes/prism-tomorrow.min.css":
+    "sha384-wFjoQjtV1y5jVHbt0p35Ui8aV8GVpEZkyF99OXWqP/eNJDU93D3Ugxkoyh6Y2I4A",
+};
+
 const loaded = new Map<string, Promise<void>>();
 
-function loadScript(src: string): Promise<void> {
-  let p = loaded.get(src);
+/** Fail an outstanding load after `ms` rather than hanging on it forever. */
+const LOAD_TIMEOUT_MS = 10000;
+
+function loadScript(path: string): Promise<void> {
+  let p = loaded.get(path);
   if (p) return p;
   p = new Promise((resolve, reject) => {
     const s = document.createElement("script");
-    s.src = src;
-    s.onload = () => resolve();
-    s.onerror = () => reject(new Error(`Failed to load ${src}`));
+    s.src = `${CDN}/${path}`;
+    const integrity = SUBRESOURCE_INTEGRITY[path];
+    if (integrity) {
+      s.integrity = integrity;
+      s.crossOrigin = "anonymous";
+    }
+    const timer = setTimeout(
+      () => reject(new Error(`Timed out loading ${s.src}`)),
+      LOAD_TIMEOUT_MS
+    );
+    s.onload = () => {
+      clearTimeout(timer);
+      resolve();
+    };
+    s.onerror = () => {
+      clearTimeout(timer);
+      reject(new Error(`Failed to load ${s.src}`));
+    };
     document.head.appendChild(s);
   });
-  loaded.set(src, p);
+  loaded.set(path, p);
   return p;
 }
 
+/*
+The theme RESOLVES on failure rather than rejecting, and is bounded by a timeout.
+It only had `onload`, so under a strict CSP — exactly the consumer the note above
+addresses — or offline, or during a CDN outage, the promise never settled and
+`await loadPrism(...)` hung forever: the documented two-line usage silently
+stopped at line one. A missing theme costs colors, not function, so failing it
+open is right; a missing grammar rejects, because there is nothing to show.
+*/
 function loadTheme(): Promise<void> {
-  const key = "theme";
-  let p = loaded.get(key);
+  const path = "themes/prism-tomorrow.min.css";
+  let p = loaded.get(path);
   if (p) return p;
   p = new Promise((resolve) => {
     const link = document.createElement("link");
     link.rel = "stylesheet";
-    link.href = `${CDN}/themes/prism-tomorrow.min.css`;
-    link.onload = () => resolve();
+    link.href = `${CDN}/${path}`;
+    const integrity = SUBRESOURCE_INTEGRITY[path];
+    if (integrity) {
+      link.integrity = integrity;
+      link.crossOrigin = "anonymous";
+    }
+    const done = () => {
+      clearTimeout(timer);
+      resolve();
+    };
+    const timer = setTimeout(done, LOAD_TIMEOUT_MS);
+    link.onload = done;
+    link.onerror = done;
     document.head.appendChild(link);
   });
-  loaded.set(key, p);
+  loaded.set(path, p);
   return p;
 }
 
@@ -120,7 +191,7 @@ export async function loadPrism(
   languages: string[] = ["markup"]
 ): Promise<void> {
   await loadTheme();
-  await loadScript(`${CDN}/components/prism-core.min.js`);
+  await loadScript("components/prism-core.min.js");
   const wanted = new Set<string>();
   const visit = (lang: string) => {
     if (wanted.has(lang)) return;
@@ -132,7 +203,7 @@ export async function loadPrism(
   for (const lang of languages) visit(lang);
   // Load in dependency order.
   for (const lang of wanted) {
-    await loadScript(`${CDN}/components/prism-${lang}.min.js`);
+    await loadScript(`components/prism-${lang}.min.js`);
   }
 }
 

@@ -48,12 +48,7 @@ See also [`<tosi-scroll-map>`](/tosi-scroll-map/) and [`<tosi-product>`](/tosi-p
 */
 
 import { Component, elements } from "tosijs";
-
-/** Parse an attribute to a number, falling back only when it is missing or unparseable — an explicit `0` is a value. */
-function num(attr: string | null, fallback: number): number {
-  const n = Number(attr);
-  return attr !== null && attr !== "" && Number.isFinite(n) ? n : fallback;
-}
+import { numAttr } from "./waypoints";
 
 const { slot } = elements;
 
@@ -221,8 +216,8 @@ export class TosiScrollTime extends Component {
     if (!owner) return;
 
     // `|| 24` read `to="0"` — midnight, a perfectly ordinary end hour — as absent.
-    const from = num(this.getAttribute("from"), 0);
-    const to = num(this.getAttribute("to"), 24);
+    const from = numAttr(this.getAttribute("from"), 0);
+    const to = numAttr(this.getAttribute("to"), 24);
     const time = from + (to - from) * progress;
 
     const skybox = owner.querySelector("tosi-b3d-skybox") as any;

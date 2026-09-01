@@ -1,3 +1,15 @@
+/**
+ * Read a numeric attribute, falling back only when it is genuinely absent or unparseable.
+ *
+ * `Number(attr) || fallback` cannot tell an explicit `0` from a missing attribute, so
+ * `threshold="0"` and `to="0"` both silently became their defaults. The obvious repair —
+ * `Number.isFinite(Number(attr)) ? … : fallback` — is worse, and shipped briefly in 0.7.0:
+ * `getAttribute` returns `null` for an absent attribute, `Number(null)` is `0`, and `0` is
+ * finite, so the fallback became unreachable and every default collapsed to zero. `""` has the
+ * same trap. Both cases have to be excluded explicitly, which is why this is one function and
+ * not an idiom each caller re-derives.
+ */
+export declare function numAttr(attr: string | null, fallback: number): number;
 /** Does this value name a color? Checked BEFORE any numeric reading — see below. */
 export declare function isColor(s: string): boolean;
 /**

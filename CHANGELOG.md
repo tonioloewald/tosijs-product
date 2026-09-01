@@ -25,6 +25,24 @@ BLOCKed the candidate. Everything below the "Breaking" heading is a consequence 
   `<tosi-scroll-map>` and the b3d controllers do target tosijs-ui elements — they `querySelector`
   for `<tosi-map>` / `<tosi-3d>` rather than importing them — so the pairing is real at app level
   even though it is not an import. **If you use those components, keep tosijs-ui installed.**
+- **`rgb()` and `hsl()` waypoint values now blend through `color-mix()`.** Unifying the
+  interpolator on the theme kernel put the color test above the numeric branch, so these join
+  hex and named colors instead of interpolating per channel:
+  `interpolateStrings("rgb(0,0,0)", "rgb(255,255,255)", 0.5)` was `rgb(127.5, 127.5, 127.5)`
+  and is now `color-mix(in srgb, rgb(0,0,0) 50%, rgb(255,255,255))`. This is the consistent
+  behaviour and it fixes hsl, where per-channel interpolation takes the long way round the hue
+  wheel — but it raises a floor: **`color-mix()` is Baseline mid-2023** (Chrome 111, Safari
+  16.2, Firefox 113). On anything older the declaration is dropped and the element flashes to
+  its unstyled value, which is the same failure this release fixes for hex. If you must support
+  older engines, interpolate a custom property yourself and compose the color in CSS. The
+  endpoints are returned verbatim, so `t=0` and `t=1` never need `color-mix` support.
+- **`isColor` and `interpolateThemeValue` are no longer declared in
+  `dist/tosi-product.d.ts`** — they moved to `dist/waypoints.d.ts` with the kernel. The package
+  barrel is unchanged, so `import { isColor } from "tosijs-product"` still works and is the
+  supported form. Only a *type-only deep import* of `tosijs-product/dist/tosi-product` breaks;
+  switch it to the barrel, or to `tosijs-product/dist/waypoints`. (0.6.5 shipped only two
+  declaration files, which made that deep path more plausible than it should have been — see
+  the tarball fix below.)
 - **No module condition resolves to the IIFE any more.** `main` and the `browser` export
   condition both pointed at `dist/index.js`, which is an IIFE with no exports — so a
   browser-condition bundler or a legacy resolver got 5.4MB of dead weight and no exports.
@@ -47,6 +65,36 @@ BLOCKed the candidate. Everything below the "Breaking" heading is a consequence 
 
 ### Changed
 
+- **`tosi-mosaic --format jpg|png` was emitting worst-possible output.** `--quality` is a 0–100
+  scale and only webp reads it that way: mjpeg's `-q:v` is a 1–31 *qscale* where lower is
+  better and anything past 31 clamps, so `-q 75` (the default) and `-q 90` produced
+  byte-identical, maximally-compressed JPEGs — and PNG ignores `-q:v` entirely. Quality is now
+  mapped per encoder, verified monotonic (q30/75/95 → 1.9MB/3.4MB/6.6MB). The escape hatch
+  added earlier in this release shipped broken; the pre-release review caught it.
+- **`tosi-mosaic` truncated the mosaic to the front of the clip.** The grid was sized from the
+  *requested* frame count while `select` emitted a different number, so a 192-frame source at
+  `-f 60` built an 8×8 grid, filled 64 tiles, dropped the rest — and wrote `_60` in the
+  filename, so `<tosi-filmstrip>` scrubbed a subset and called it the whole video. The grid is
+  now derived from what `select` actually emits; the count lands on a multiple of the stride
+  and says so.
+- **The README hero's scale-and-shift did not shift.** `interpolateStrings` substitutes numbers
+  and keeps the *from* value's unit text, so the `translateY(0px)` → `translateY(0.2em)` pair
+  introduced earlier in this release animated 0 → 0.2 **px** for the whole pin and then snapped
+  ~19px on the single frame where the `t >= 1` early-out returns the raw *to* value. Both ends
+  are `em` now. The claim that the reservation was "font-relative at every clamp size" was true
+  for exactly one frame.
+- **PrismJS loads are now integrity-checked**, and the rationale for not doing it was wrong.
+  The earlier note claimed an open-ended URL set needing a build-time manifest; in fact
+  `visit()` returns early for any language outside a closed seven-entry map, so the reachable
+  set is core + 7 grammars + 1 theme = **nine fixed URLs at a pinned version**. All nine now
+  carry `integrity` + `crossorigin`, verified against the live CDN and in a browser.
+  `LANGUAGE_DEPS` is documented as the security boundary it is, since widening it widens the
+  URL set.
+- **`loadPrism()` could hang forever.** `loadTheme()` attached only `onload` — no `onerror`, no
+  timeout — so under a strict CSP (exactly the consumer the CDN note addresses), offline, or a
+  CDN outage, the first `await` never returned and the documented two-line usage silently
+  stopped at line one. The theme now resolves on failure (missing colors, not missing
+  function); grammars still reject; both are bounded by a timeout.
 - **`tosi-mosaic` gained `--format webp|jpg|png`** (default `webp`). `<tosi-filmstrip>` has
   always parsed all three out of the `_COLSxROWS_TOTAL.ext` filename; plenty of ffmpeg builds
   ship without a webp encoder, and there was no way out. Its prerequisites (`ffmpeg` +
@@ -73,6 +121,17 @@ BLOCKed the candidate. Everything below the "Breaking" heading is a consequence 
   same bundle built without tosijs-ui is 138kB raw / 47.9kB gzip, so **the barrel is 92% of the
   gzipped payload**. Filed upstream with these numbers
   ([tosijs-ui#120](https://github.com/tonioloewald/tosijs-ui/issues/120)); tracked in `TODO.md`.
+- **`buildLibrary()` cleans `dist/` first**, and `prepublishOnly` runs typecheck + tests +
+  build. `files` ships `dist/*.d.ts` as a glob over a directory nothing cleaned, so a
+  declaration for a deleted module would have been swept into the tarball — this repo has
+  already renamed `tosi-code.ts` → `tosi-prism.ts` once. Latent, not live, and now impossible.
+- **The documented CDN URLs are pinned to `@0.7.0`.** `README.md` and `getting-started.md` both
+  told consumers to load an unversioned jsDelivr URL — the exact hazard this release pinned
+  PrismJS to avoid, one layer out. Pages on that URL would have swapped builds with nobody
+  deploying anything.
+- **`haltija` added as a devDependency.** `haltijaDev: true` spawns a channel on every
+  `bun run start`; with no devDependency the resolver falls through to `bunx haltija@^1.12.6`,
+  which caches per range-string and pins you to whatever it first resolved.
 - **Release artifacts are now built from a clean dependency install.** An incrementally-mutated
   `node_modules` — the normal result of a few `bun add` / `bun remove` cycles — left **nested
   duplicate `@codemirror` copies** under six sibling packages, which the IIFE then bundled once
@@ -117,8 +176,14 @@ BLOCKed the candidate. Everything below the "Breaking" heading is a consequence 
   in the MutationObserver's `attributeFilter` now, so it can be toggled live like `scroll`.
 - **`threshold="0"` and `to="0"` were read as missing.** `Number(attr) || default` cannot tell
   an explicit zero from an absent attribute, so `<tosi-product-header threshold="0">` (pin from
-  the very top) got 50, and `<tosi-scroll-time to="0">` (midnight) got 24. Both now fall back
-  only on a missing or unparseable value.
+  the very top) got 50, and `<tosi-scroll-time to="0">` (midnight) got 24. Both now route
+  through one exported helper, `numAttr(attr, fallback)`, rather than an idiom each caller
+  re-derives — because the obvious repair is worse than the bug and this release very nearly
+  shipped it: `Number.isFinite(Number(attr)) ? … : fallback` looks right, but `getAttribute`
+  returns `null` for an absent attribute, `Number(null)` is `0`, and `0` is finite, so the
+  fallback becomes unreachable and *every* default collapses to zero. That version was caught
+  by the pre-release review, not by the test suite, which is why `numAttr` now has tests
+  asserting both directions.
 - **A malformed `data-scroll-range` froze the animator silently.** `data-scroll-range="0.5"` —
   a missing comma — produced NaN, which survives the clamp and every step downstream, so the
   element stuck at its first waypoint with nothing logged. It now falls back to the full range

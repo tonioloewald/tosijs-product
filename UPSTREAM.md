@@ -43,7 +43,46 @@ narrative-landing capability.
 
 -->
 
-## The `tosijs-ui` barrel puts CodeMirror in every IIFE — 94% of our CDN bundle
+## Dev-server source-write endpoint authorizes on peer address alone (drive-by file write)
+
+**Issue:** https://github.com/tonioloewald/tosijs-ui/issues/121 (filed 2026-09-01, `tosijs-ui@1.12.7`)
+
+**Context.** `POST /__docstore/source` — the endpoint `editableSources: true` turns on here —
+gates only on `isLoopbackAddressForAuth(peer)`, with no Origin or `Sec-Fetch-Site` check, on a
+server that binds all interfaces. `await request.json()` ignores Content-Type, so a
+CORS-safelisted `text/plain` simple request needs no preflight; containment is `resolveInRepo`,
+which includes `bunfig.toml`, `bin/site.ts`, `package.json` scripts and `.git/hooks/*`. So any
+page visited while `bun run start` is running can write files that execute on the next ordinary
+command. The code's own comments claim SameSite covers this — true of the tunnel path, which
+requires a cookie; the direct path consults no session at all. Pre-existing and dev-machine only,
+but `haltijaDev` put a second capability behind the same check (`mayDriveWithAgent` delegates to
+`mayWriteSource`), and Firefox and Safari do not implement PNA.
+
+**Suggestion.** Require `Sec-Fetch-Site: same-origin` (or a matching Origin) on the direct path
+in addition to the loopback test. A browser cannot forge either.
+
+**Interim, here:** don't leave `bun run start` running while browsing untrusted sites, or set
+`editableSources: false` when not editing page source.
+
+---
+
+## `layout: "full-width"` offers no way to put the reading measure back
+
+**Filed with:** the [#119](https://github.com/tonioloewald/tosijs-ui/issues/119) write-up (the
+other half of the same gap)
+
+**Context.** `full-width` drops the reading column and supplies nothing to restore it on the
+children that still want it, so every adopter hand-rolls
+`.doc-content:has(.X) > :not(.X):not(style){max-width:44rem;margin-inline:auto;…}` once per page.
+This repo now carries **six** copies of that block, all of which had to be edited together when
+the `44em → 44rem` bug was fixed (an `<h1>` at 2× body text got an 88em column), and `CLAUDE.md`
+carries a hand-written rule whose only job is to stop copy number seven reintroducing it.
+
+**Suggestion.** A class, or a `--doc-content-max-width` that children can opt back into.
+
+---
+
+## The `tosijs-ui` barrel puts CodeMirror in every IIFE — 92% of our CDN bundle
 
 **Issue:** https://github.com/tonioloewald/tosijs-ui/issues/120 (filed 2026-09-01, `tosijs-ui@1.12.7`)
 

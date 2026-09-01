@@ -30,6 +30,73 @@ on failure, dead `--fps`, the `nb_frames=N/A` invalid expression, the mod-by-zer
 `--format` escape hatch and stderr that actually reaches the user. PrismJS pinned to an exact
 version; `marked` range aligned with upstream. See CHANGELOG 0.7.0.
 
+### From the 0.7.0 remediation re-review (`reviews/0.7.0-remediation-re-review.md`, 2026-09-01)
+
+Blockers (B1 `threshold` default, B2 undocumented breaking changes) were fixed before tagging.
+Also fixed from that report: the mosaic quality mapping and grid truncation, the README hero's
+unit mismatch, PrismJS SRI (the earlier "needs a manifest" rationale was wrong — the set is nine
+fixed URLs), `loadPrism()` hanging on a failed theme load, the CDN pins in the docs, the haltija
+devDependency, `rm -rf dist` + `prepublishOnly`, and the capped `warnedRanges`. What is left:
+
+- [ ] **Harden `interpolateStrings` against silent unit drops.** It substitutes numbers and keeps
+      the *from* value's unit text, so a `0px → 0.2em` waypoint pair animates in px and snaps on
+      the last frame — which is exactly the bug that shipped in the README hero this release.
+      Compare the non-numeric segments between number runs and step at the midpoint when they
+      differ, the way non-matching values already do, so the slip is visible instead of silent.
+- [ ] **Dev-server watch rebuilds re-run `buildLibrary()` on every save** (`bin/site.ts`),
+      calling `Bun.build()` in-process — the arena-retention pattern CLAUDE.md already documents
+      and that tosijs-ui fixed on its own side by moving to a child process. Reported at 12MB →
+      372MB RSS over 25 rebuilds; **sanity-check that measurement first.** `buildLibrary()` only
+      writes `dist/`, which the dev server never serves, so the watch hook can be
+      `{ build: () => buildSite(siteConfig) }` with `buildAll` kept for the initial/`--build`
+      path.
+- [ ] **Cut the IIFE with tosijs-ui's per-component subpaths.** `tosijs-ui/babylon-3d`,
+      `/mapbox`, `/bodymovin-player` exist in 1.12.7; a drop-in build using them is reported at
+      72kB gzip against 578kB, still covering every element the docs use declaratively. This
+      unblocks the tracked option 2 below and answers its open question. **Re-measure before
+      committing to the number**, and land it as a named breaking change — it narrows the
+      `globalThis.tosijsUi` surface.
+- [ ] **`<tosi-filmstrip>` downloads its whole mosaic in `connectedCallback`.** Four scenes at
+      the documented `--frames 100 --width 1280` recipe start four multi-MB downloads at page
+      load. Gate on `IntersectionObserver` or defer to the first `setScrollProgress`, with a
+      `loading="eager"` escape hatch.
+- [ ] **The landing page is ~18MB of media on first load.** `/agent-owl.mp4` is 10.3MB with
+      `preload="auto"`, `/agent-owl_10x10_100.jpg` is 4.9MB fetched eagerly — the same 100 frames
+      downloaded twice by design — plus a 2.5MB glb. Cheapest first: `preload="metadata"`,
+      regenerate the mosaic smaller (tiles are only 640×360), trim the clip. This is the page
+      adopters copy.
+- [ ] **`docs/iife.js` (1.32MB) is committed and served but referenced by nothing** — grepping
+      `docs/` finds no built HTML that loads it. Confirm against the dev server, then stop
+      emitting it or `rm` it in `buildLibrary()`. If `buildSite` emits it unconditionally, that
+      is an UPSTREAM entry instead.
+- [ ] **Six copies of the reading-measure CSS** (`src/tosi-*.ts` doc blocks + `README.md`). All
+      consistent today, but the `44em → 44rem` fix had to be applied to every one in the same
+      commit, and CLAUDE.md now carries a rule whose only job is to stop copy seven. Hoist to one
+      stylesheet under `demo/assets/` or a shared string in `demo/site.ts`. The upstream half is
+      filed in `UPSTREAM.md`.
+- [ ] **`tosi-prism` has no tests, and `LANGUAGE_DEPS` is now load-bearing.** It is the allowlist
+      that keeps the SRI URL set closed; the obvious feature request ("support any Prism
+      language") deletes the guard in one line with every test still green, because there are
+      none. Add two: the exact URL set for `['javascript']`, and that `['../../evil/x']` loads
+      nothing.
+- [ ] **`marked` was widened to `^16 || ^17 || ^18` with only one version ever resolved.**
+      Asserted-safe, never built against 17 or 18. Test-build against the range ends or narrow
+      it back.
+- [ ] **Coverage debt on the tosijs-ui 1.7 → 1.12 jump.** `<tosi-scroll-map>` and the three b3d
+      controllers reach into tosijs-ui elements by `querySelector` (`tosi-map`, `tosi-3d`,
+      `tosi-b3d-skybox`) rather than by import, so a renamed element or changed DOM shape fails
+      silently at runtime with no build or type signal. Five minor lines were crossed and only
+      the doc-site demos exercise that coupling.
+- [ ] **`<tosi-product>` internals have no test seam.** `debug` and `threshold` are both
+      untestable under the current harness (appending a `<tosi-product>` hangs `bun test`), and
+      B1 is the proof it matters — the untested half of that pair is the one that broke.
+      Extract the decisions into pure exported functions, the way ownership and interpolation
+      already are.
+- [ ] **Decide whether `docs/**.map` should ship at all.** `docs/iife.js.map` is 4.6MB and
+      `hydrate.js.map` 1.9MB, both served by GitHub Pages. They also carry haltija source text
+      (from tosijs-ui's own `haltijaDev` implementation — no token, no endpoint, and the emitted
+      JS is clean), which is the only wrinkle in this release's "never in `docs/`" claim.
+
 ### Still open — deferred deliberately, with the reason
 
 - [ ] **`TosiProductHeader` only listens to window scroll.** It never appears inside an

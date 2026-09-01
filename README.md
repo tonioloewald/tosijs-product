@@ -38,7 +38,7 @@ _This page is the demo._ Scroll — the hero below is a live `<tosi-product>` en
 <tosi-product-section scroll="60">
 <div class="scene">
 <tosi-interpolator data-scroll-animate easing="ease-in-out">
-<tosi-waypoint progress="0" style="transform: scale(1) translateY(0px)"></tosi-waypoint>
+<tosi-waypoint progress="0" style="transform: scale(1) translateY(0em)"></tosi-waypoint>
 <tosi-waypoint progress="1" style="transform: scale(1.4) translateY(0.2em)"></tosi-waypoint>
 <h1>tosijs-product</h1>
 </tosi-interpolator>
@@ -230,7 +230,7 @@ The IIFE build is self-contained — a single script tag gives you `tosijs`, `to
         margin: 0;
       }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/tosijs-product/dist/index.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tosijs-product@0.7.0/dist/index.js"></script>
   </head>
   <body>
     <tosi-product>

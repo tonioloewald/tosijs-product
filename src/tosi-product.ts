@@ -50,7 +50,7 @@ See also [`<tosi-interpolator>`](/tosi-interpolator/) and [`<tosi-filmstrip>`](/
 */
 
 import { Component, elements } from "tosijs";
-import { interpolateThemeValue, isColor } from "./waypoints";
+import { interpolateThemeValue, isColor, numAttr } from "./waypoints";
 
 const { div, slot } = elements;
 
@@ -141,6 +141,10 @@ export function rangeProgress(progress: number, rangeStr: string | null): number
   if (!Number.isFinite(start) || !Number.isFinite(end)) {
     const key = String(rangeStr);
     warnedRanges ??= new Set();
+    // Bounded: the keys are raw attribute values, and a long-lived app templating
+    // user data into `data-scroll-range` would otherwise grow this without limit.
+    // Past the cap we stop deduping rather than stop warning.
+    if (warnedRanges.size > 50) warnedRanges.clear();
     if (!warnedRanges.has(key)) {
       warnedRanges.add(key);
       console.warn(
@@ -735,10 +739,7 @@ export class TosiProductHeader extends Component {
   }
 
   private _update() {
-    // `|| 50` treated an explicit `threshold="0"` — pin the header from the very
-    // top — as absent. Only a missing or unparseable value should take the default.
-    const parsed = Number(this.getAttribute("threshold"));
-    const threshold = Number.isFinite(parsed) ? parsed : 50;
+    const threshold = numAttr(this.getAttribute("threshold"), 50);
     this.dataset.visible = window.scrollY > threshold ? "true" : "false";
   }
 }

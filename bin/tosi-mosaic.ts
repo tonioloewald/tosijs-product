@@ -34,7 +34,7 @@ if (!input) {
   console.log("Options:");
   console.log("  -f, --frames   Total frames to extract (default: 60)");
   console.log("  -w, --width    Width of each frame (default: 1280)");
-  console.log("  -q, --quality  WebP quality (default: 75)");
+  console.log("  -q, --quality  Quality 0-100, higher is better (default: 75); mapped per encoder");
   console.log(
     "  -r, --fps      Source FPS, when the container misreports it (optional)"
   );
@@ -137,10 +137,20 @@ try {
   // 3. Take every Nth frame. Never less than 1 — a source with fewer frames
   //    than requested yields all of them, which is the best available answer.
   const stride = Math.max(1, Math.floor(sourceFrames / targetFrames));
-  const total = Math.min(targetFrames, Math.ceil(sourceFrames / stride));
-  if (total < targetFrames) {
+  /*
+  The grid is sized from what `select` will actually EMIT, not from what was
+  requested. Sizing it from `targetFrames` truncates the clip: at 90 source
+  frames and `-f 60` the stride is 1, so select emits all 90, an 8x8 grid takes
+  the first 64, `-frames:v 1` drops the rest — and the filename still claims 60,
+  so <tosi-filmstrip> scrubs the front two-thirds of the video and calls it the
+  whole thing. `select` can only take every Nth frame, so the count lands on a
+  multiple of the stride rather than exactly on the request; overshooting by a
+  few frames is right, silently losing the end of the clip is not.
+  */
+  const total = Math.ceil(sourceFrames / stride);
+  if (total !== targetFrames) {
     console.warn(
-      `⚠️  ${input} has ${sourceFrames} frames; ${targetFrames} were requested. Using all ${total}.`
+      `⚠️  ${input} has ${sourceFrames} frames; every ${stride}${stride === 1 ? "" : stride === 2 ? "nd" : stride === 3 ? "rd" : "th"} frame gives ${total}, not the ${targetFrames} requested. Using ${total} so the whole clip is covered.`
     );
   }
 
@@ -158,11 +168,28 @@ try {
   const output =
     input.replace(/\.[^.]+$/, "") + `_${cols}x${rows}_${total}.${format}`;
 
+  /*
+  `--quality` is a 0-100 scale, and only webp reads it that way. mjpeg's `-q:v`
+  is a 1-31 qscale where LOWER is better and anything past 31 clamps, so passing
+  75 or 90 straight through produced byte-identical, worst-possible JPEGs (same
+  md5 at -q 75 and -q 90; only <=31 moves at all). PNG ignores `-q:v` entirely
+  and wants `-compression_level` (0-9), where the trade is size against encode
+  time, not fidelity.
+  */
+  const qRaw = Number(values.quality);
+  const q = Number.isFinite(qRaw) ? Math.min(100, Math.max(0, qRaw)) : 75;
+  const encoderArgs =
+    format === "webp"
+      ? ["-q:v", String(q)]
+      : format === "jpg"
+        ? ["-q:v", String(Math.min(31, Math.max(2, Math.round(31 - (q / 100) * 29))))]
+        : ["-compression_level", String(Math.min(9, Math.max(0, Math.round(9 - (q / 100) * 9))))];
+
   console.log(`🎬 Creating mosaic: ${cols}x${rows} (${total} frames total)`);
   console.log(`📦 Output: ${output}`);
 
   const run =
-    await $`ffmpeg -v error -i ${input} -vf ${`select='not(mod(n\\,${stride}))',scale=${values.width}:-1,tile=${cols}x${rows}`} -frames:v 1 -q:v ${values.quality} -y ${output}`
+    await $`ffmpeg -v error -i ${input} -vf ${`select='not(mod(n\\,${stride}))',scale=${values.width}:-1,tile=${cols}x${rows}`} -frames:v 1 ${encoderArgs} -y ${output}`
       .nothrow()
       .quiet();
 

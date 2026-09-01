@@ -7,7 +7,7 @@
 A single script tag gives you everything — tosijs, tosijs-ui, and tosijs-product with all custom elements registered:
 
 ```markup
-<script src="https://cdn.jsdelivr.net/npm/tosijs-product/dist/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tosijs-product@0.7.0/dist/index.js"></script>
 ```
 
 ### ESM (bundled apps)

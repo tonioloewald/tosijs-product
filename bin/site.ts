@@ -23,6 +23,14 @@ declare global {
 }
 
 async function buildLibrary() {
+  /*
+  Clean first. `files` ships `dist/*.d.ts` as a glob, and nothing here ever
+  removed a declaration for a module that no longer exists — this repo has
+  already renamed `tosi-code.ts` to `tosi-prism.ts` once, and a leftover
+  `dist/tosi-code.d.ts` would be swept into the tarball and typecheck green
+  against an export `dist/module.js` does not have.
+  */
+  await $`rm -rf dist`.nothrow();
   // Types: emit declarations only (the JS bundles come from Bun.build below).
   await $`bun tsc --declaration --emitDeclarationOnly --target es2022 --outDir dist`.nothrow();
   // tsc writes under dist/src/...; flatten EVERY module up to dist/ so the

@@ -33,7 +33,8 @@
     "format": "bun eslint src demo --ext .ts --fix && bun prettier --write .",
     "test": "bun test",
     "typecheck": "tsc --noEmit",
-    "build": "bun bin/site.ts --build"
+    "build": "bun bin/site.ts --build",
+    "prepublishOnly": "bun run typecheck && bun test && bun run build"
   },
   "author": "Tonio Loewald",
   "license": "Apache-2.0",
@@ -41,7 +42,6 @@
     "tosijs": "^1.8.1",
     "tosijs-ui": "^1.12.7"
   },
-  "_comment_peerDependenciesMeta": "tosijs-ui is OPTIONAL for consumers: the shipped ESM (dist/module.js) imports only tosijs. It stays declared because <tosi-scroll-map> and the b3d controllers querySelector for tosijs-ui elements rather than importing them — a real pairing that is not an import. It is ALSO a devDependency, because this repo's own doc-site build (tosijs-ui/site) and IIFE bundle do need it.",
   "peerDependenciesMeta": {
     "tosijs-ui": {
       "optional": true
@@ -53,6 +53,7 @@
     "chokidar": "^4.0.3",
     "happy-dom": "^20.7.0",
     "marked": "^16.4.2 || ^17.0.0 || ^18.0.0",
+    "haltija": "^1.12.6",
     "tjs-lang": "^0.13.6",
     "tosijs-ui": "^1.12.7",
     "typescript": "^5.9.3"

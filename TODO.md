@@ -97,6 +97,28 @@ devDependency, `rm -rf dist` + `prepublishOnly`, and the capped `warnedRanges`. 
       (from tosijs-ui's own `haltijaDev` implementation — no token, no endpoint, and the emitted
       JS is clean), which is the only wrinkle in this release's "never in `docs/`" claim.
 
+### From the 0.7.0 narrow pass (`reviews/0.7.0-narrow-pass.md`) — GO_WITH_FOLLOWUPS
+
+Its two majors and the correctness cluster were fixed before tagging (isColor whole-value
+matching, the truncated demo mosaic, the Prism allowlist + fail-open SRI, the latched rejection,
+png `--quality`). `docs/version.json` is settled in CLAUDE.md. What is left:
+
+- [ ] **`rm -rf dist` traded a stale-declaration hazard for a missing-declaration one.** The
+      clean step and the three `mv`/`rm` steps after it are all `.nothrow()`, so a failure
+      anywhere in that chain produces a tarball missing declarations instead of one carrying
+      stale ones — quieter, and just as wrong. Assert the expected `.d.ts` set exists before
+      `Bun.build`, or drop `.nothrow()` where failure is not expected.
+- [ ] **The CHANGELOG's "verified monotonic (q30/75/95 → 1.9MB/3.4MB/6.6MB)" is a jpg
+      measurement** presented as covering the quality mapping generally. png cannot produce
+      those ratios. Say which encoder the numbers came from.
+- [ ] **`haltija` as a devDep demoted hoisted `tosijs-schema` 1.8.1 → 1.5.1.** Contributor
+      machines only — consumers never install devDeps — but worth a look before it surprises
+      someone.
+- [ ] **The `@0.7.0` CDN pins in `README.md` and `src/docs/getting-started.md` are
+      hand-maintained with nothing checking them.** They will go stale at the next release. The
+      shared `release-doctor` is the right home for that check — file it there rather than
+      adding another line to a human checklist.
+
 ### Still open — deferred deliberately, with the reason
 
 - [ ] **`TosiProductHeader` only listens to window scroll.** It never appears inside an

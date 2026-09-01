@@ -187,7 +187,9 @@ Color values blend through `color-mix(in srgb, ...)`. Numeric strings interpolat
   carries the rebuild, the stamp is necessarily one commit behind. No build→commit cycle can
   converge; the previous release did exactly the same thing. We **accept the lag**: gitignoring it
   would break the deployed site's version endpoint, and the tag is not knowable at build time.
-  Don't add it to a release checklist.
+  Don't add it to a release checklist. Filed upstream as
+  [tosijs-ui#122](https://github.com/tonioloewald/tosijs-ui/issues/122) — if that lands, this
+  note can go.
 - **Changelog**: user-visible changes go in `CHANGELOG.md` under `## [Unreleased]` ([Keep a Changelog](https://keepachangelog.com/en/1.1.0/)), per the shared coding practices.
 - **Upstream issues**: rough edges in `tosijs-ui` are **filed as GitHub issues on that repo**, then mirrored in `UPSTREAM.md` with the issue link — "file, don't fix". An `UPSTREAM.md` entry with no filed issue is a complaint nobody will read.
 

@@ -43,6 +43,30 @@ narrative-landing capability.
 
 -->
 
+## `version.json` restamps on every build, so a project that commits `docs/` is permanently dirty
+
+**Issue:** https://github.com/tonioloewald/tosijs-ui/issues/122 (filed 2026-09-01, `tosijs-ui@1.12.7`)
+
+**Context.** `build-stamp.ts` writes `git rev-parse --short HEAD` into `/version.json` on every
+build. We commit `docs/`, so: build at A stamps A, committing that produces B containing a stamp
+saying A, rebuilding at B stamps B, and the tree is dirty again. Every commit's `version.json`
+names its own **parent** — five for five across 0.7.0's commits — and no build→commit cycle
+converges. Cosmetic, but it lands on the release path where a clean tree is the thing being
+checked; two consecutive pre-release reviews flagged it as a must-clear item before the second
+worked out that committing cannot clear it.
+
+The module already avoids a wall-clock stamp for precisely this reason ("would churn the tree
+forever and train everyone to ignore it"). `HEAD` is not a clock, but in a repo that commits its
+output it moves on the same cadence.
+
+**Suggestion.** Compare the freshly generated output against what is on disk, excluding
+`version.json`; if everything else is byte-identical, don't restamp. That converges, and makes
+the stamp name the commit that last changed the *site* rather than the one that last ran a build.
+
+**Locally:** we accept the lag — see `CLAUDE.md`. Don't put it on a release checklist.
+
+---
+
 ## Dev-server source-write endpoint authorizes on peer address alone (drive-by file write)
 
 **Issue:** https://github.com/tonioloewald/tosijs-ui/issues/121 (filed 2026-09-01, `tosijs-ui@1.12.7`)

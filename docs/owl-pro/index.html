@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- NB: the body is NOT hidden until hydration. It used to be (body opacity 0 +
+       a 4s safety-net timeout), because an undefined custom element is
+       display:inline, so the pre-rendered page stacked as bare text and hydration
+       reflowed the whole thing. The cost was a blank screen for as long as the
+       bundle took — ~4.5s on a cheap phone, for content already in the HTML. The
+       tosi-doc-system:not(:defined) rules in the stylesheet now lay the static page
+       out as though the chrome were there, so hydration only ADDS the chrome and
+       nothing moves. Paint immediately; don't hide readable content. -->
+  <!-- Theme, applied BEFORE first paint. Now that we paint the static page rather
+       than hiding it, a dark-mode reader would otherwise get a flash of the light
+       theme until the bundle lands and sets body.darkmode. CSS alone can't do this:
+       an explicit theme choice lives in localStorage. Mirrors applyThemePrefs()
+       (doc-system.ts) — keep the two in step. Fails safe: any error leaves the
+       light default, exactly as before. -->
+  <script>
+    try {
+      var p = JSON.parse(localStorage.getItem('tosi-doc-system-prefs') || '{}')
+      var t = p.theme || 'system'
+      if (t === 'dark' || (t === 'system' && matchMedia('(prefers-color-scheme: dark)').matches))
+        document.documentElement.classList.add('darkmode')
+      if (p.highContrast) document.documentElement.classList.add('high-contrast')
+    } catch (e) {}
+  </script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="../doc-system.css" data-tosi-doc-system />
+  <title>Owl Pro — a scroll-driven product page built entirely in Markdown</title>
+  <meta name="description" content="An Apple-style product landing page — a hero that pins across five beats, word-by-word type, scrubbed video, a 3D model and a map flight — built with tosijs-product as declarative HTML inside a Markdown file. No JavaScript." />
+  <meta name="keywords" content="scrollytelling, apple style, product page, scroll animation, web components, tosijs, demo" />
+  <link rel="canonical" href="https://product.tosijs.net/owl-pro/" />
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="tosijs-product" />
+  <meta property="og:title" content="Owl Pro — a scroll-driven product page built entirely in Markdown" />
+  <meta property="og:description" content="An Apple-style product landing page — a hero that pins across five beats, word-by-word type, scrubbed video, a 3D model and a map flight — built with tosijs-product as declarative HTML inside a Markdown file. No JavaScript." />
+  <meta property="og:url" content="https://product.tosijs.net/owl-pro/" />
+  <meta name="twitter:card" content="summary" />
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Owl Pro","description":"An Apple-style product landing page — a hero that pins across five beats, word-by-word type, scrubbed video, a 3D model and a map flight — built with tosijs-product as declarative HTML inside a Markdown file. No JavaScript.","url":"https://product.tosijs.net/owl-pro/","inLanguage":"en","isPartOf":{"@type":"WebSite","name":"tosijs-product","url":"https://product.tosijs.net"}}</script>
+  <link rel="icon" href="../favicon.svg" />
+<script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
+</head>
+<body>
+  <tosi-doc-system docs="../docs.json" config="{&quot;projectName&quot;:&quot;tosijs-product&quot;,&quot;projectLinks&quot;:{&quot;tosijs&quot;:&quot;https://tosijs.net&quot;,&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs-product&quot;}}" data-layout="full-screen">
+  <article class="doc-content">
+<h1>Owl Pro</h1>
+<!--{ "layout": "full-screen", "order": 2, "headTitle": "Owl Pro — a scroll-driven product page built entirely in Markdown", "description": "An Apple-style product landing page — a hero that pins across five beats, word-by-word type, scrubbed video, a 3D model and a map flight — built with tosijs-product as declarative HTML inside a Markdown file. No JavaScript.", "keywords": [ "scrollytelling", "apple style", "product page", "scroll animation", "web components", "tosijs", "demo" ] }-->
+
+<style>
+/* `.doc-content` gets `overflow: hidden` inline from the doc-browser, which kills the
+   position:sticky the engine runs on — and under `full-screen` leaves the page with no
+   scroll container at all. The documented escape hatch until tosijs-ui#119 lands a
+   `--doc-content-overflow` variable. */
+.doc-content:has(.op) { --doc-content-padding: 0; overflow: visible !important; }
+/* The page H1 is the doc-system's title and the document's SEO heading, so it is CLIPPED,
+   not removed: `display:none` would take it out of the accessibility tree and let crawlers
+   discount it. The hero below carries the visible wordmark. */
+.doc-content:has(.op) > h1 { position:absolute; width:1px; height:1px; margin:-1px; padding:0; overflow:hidden; clip-path:inset(50%); white-space:nowrap; border:0; }
+/* Minimal chrome: a thin translucent bar instead of the brand slab, so the hero opens clean. */
+tosi-doc-system:has(.op) > div > header { background:rgba(0,0,0,.72) !important; backdrop-filter:saturate(180%) blur(20px); -webkit-backdrop-filter:saturate(180%) blur(20px); border-bottom:1px solid rgba(255,255,255,.09); min-height:44px; }
+tosi-doc-system:has(.op) > div > header * { color:rgba(245,245,247,.86) !important; fill:rgba(245,245,247,.86) !important; font-weight:500 !important; letter-spacing:.005em; }
+tosi-doc-system:has(.op) > div > header a, tosi-doc-system:has(.op) > div > header button { opacity:.82; }
+.op { --ink:#f5f5f7; --dim:#86868b; --paper:#f5f5f7; --slate:#1d1d1f; --link:#2997ff; --hair:rgba(255,255,255,.14); font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",Helvetica,Arial,sans-serif; -webkit-font-smoothing:antialiased; background:#000; color:var(--ink); }
+.op h1, .op h2, .op h3, .op p, .op code, .op span { margin:0; border:none; color:inherit; }
+.op .scene { position:relative; min-height:var(--tosi-view-size, 100vh); display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:clamp(3rem,8vh,7rem) clamp(1.25rem,5vw,3rem); box-sizing:border-box; overflow:hidden; }
+.op .kicker { font-size:clamp(.8rem,1.1vw,.95rem); font-weight:600; letter-spacing:.012em; color:var(--link); margin-bottom:.9em; }
+.op .display { font-size:clamp(3rem,10.5vw,8.5rem); font-weight:700; letter-spacing:-.025em; line-height:.98; }
+.op .title { font-size:clamp(2.1rem,6vw,4.5rem); font-weight:700; letter-spacing:-.02em; line-height:1.06; max-width:16ch; }
+.op .lede { font-size:clamp(1.05rem,1.9vw,1.6rem); font-weight:500; letter-spacing:.004em; line-height:1.4; color:var(--dim); max-width:34ch; margin-top:1.1em; }
+.op .grad { background:linear-gradient(92deg,#41d1ff,#a78bfa 42%,#ff8fb1); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.op .cue { margin-top:2.4em; font-size:.8rem; letter-spacing:.08em; text-transform:uppercase; color:var(--dim); }
+.op .stage { position:absolute; inset:0; }
+.op .stage > video, .op .stage > tosi-filmstrip, .op .stage > tosi-3d, .op .stage > tosi-map { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block; }
+.op .stage > tosi-filmstrip::part(canvas) { object-fit:cover; }
+.op .stage > tosi-map { pointer-events:none; }
+.op .scrim { position:absolute; inset:0; background:linear-gradient(180deg,rgba(0,0,0,.74) 0%,rgba(0,0,0,.12) 34%,rgba(0,0,0,.2) 60%,rgba(0,0,0,.84) 100%); }
+.op .beat { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:0 clamp(1.25rem,5vw,3rem); pointer-events:none; }
+.op .beat .title { filter:drop-shadow(0 2px 26px rgba(0,0,0,.75)); }
+.op .beat .lede { filter:drop-shadow(0 1px 12px rgba(0,0,0,.85)); }
+.op .over { position:relative; display:flex; flex-direction:column; align-items:center; text-align:center; }
+.op .words { display:flex; flex-wrap:wrap; justify-content:center; gap:0 .3em; max-width:22ch; }
+.op .w { display:inline-block; }
+.op .lottie-scene { background:radial-gradient(ellipse at 50% 45%,#151a2e 0%,#000 68%); }
+.op .lottie-scene > tosi-lottie { position:absolute; left:50%; top:46%; transform:translate(-50%,-50%); width:min(62vh,58vw); height:min(62vh,58vw); }
+.op .specs { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:clamp(2rem,5vw,5rem); width:min(1100px,92vw); }
+.op .spec .n { font-size:clamp(2.6rem,6vw,4.6rem); font-weight:700; letter-spacing:-.03em; line-height:1; }
+.op .spec .l { margin-top:.55em; font-size:.95rem; color:var(--dim); letter-spacing:.01em; }
+.op .paper { background:var(--paper); color:var(--slate); }
+.op .paper .lede, .op .paper .spec .l { color:#6e6e73; }
+.op .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:1.25rem; width:min(1180px,92vw); margin-top:2.6em; text-align:left; }
+.op .card { background:#fff; border-radius:22px; padding:clamp(1.6rem,2.6vw,2.4rem); box-shadow:0 1px 3px rgba(0,0,0,.06),0 12px 34px rgba(0,0,0,.07); height:100%; box-sizing:border-box; }
+.op .paper .card h3 { font-size:1.3rem; font-weight:700; letter-spacing:-.01em; }
+.op .paper .card p { margin-top:.6em; font-size:1rem; line-height:1.5; color:#6e6e73; }
+.op .card code { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.86em; background:#f0f0f2; padding:.15em .45em; border-radius:6px; }
+.op .rule { width:min(1100px,88vw); height:1px; background:var(--hair); margin:2.8em 0 2.4em; }
+</style>
+<div class="op">
+<tosi-product>
+<tosi-product-section scroll="80">
+<div class="scene">
+<tosi-interpolator data-scroll-animate easing="ease-in-out">
+<tosi-waypoint progress="0" style="opacity:1; transform: scale(1) translateY(0em)"></tosi-waypoint>
+<tosi-waypoint progress="1" style="opacity:0; transform: scale(1.16) translateY(-.1em)"></tosi-waypoint>
+<div class="over">
+<p class="kicker">Introducing</p>
+<p class="display">Owl&nbsp;Pro</p>
+<p class="lede">Nocturnal by design. Silent by default.</p>
+<p class="cue">Scroll ↓</p>
+</div>
+</tosi-interpolator>
+</div>
+</tosi-product-section>
+<tosi-product-section scroll="620">
+<div class="scene">
+<div class="stage">
+<tosi-filmstrip src="https://cdn.tosijs.net/tosijs-product/agent-owl_10x10_96.jpg" cols="10" rows="10" total="96" data-scroll-animate></tosi-filmstrip>
+<div class="scrim"></div>
+</div>
+<tosi-interpolator data-scroll-animate data-scroll-range="0.02,0.19" easing="ease-in-out">
+<tosi-waypoint progress="0" style="opacity:0; transform: translateY(1.2em)"></tosi-waypoint>
+<tosi-waypoint progress="0.5" style="opacity:1; transform: translateY(0em)"></tosi-waypoint>
+<tosi-waypoint progress="1" style="opacity:0; transform: translateY(-1.2em)"></tosi-waypoint>
+<div class="beat"><p class="title">Ninety-six frames.</p></div>
+</tosi-interpolator>
+<tosi-interpolator data-scroll-animate data-scroll-range="0.21,0.38" easing="ease-in-out">
+<tosi-waypoint progress="0" style="opacity:0; transform: translateY(1.2em)"></tosi-waypoint>
+<tosi-waypoint progress="0.5" style="opacity:1; transform: translateY(0em)"></tosi-waypoint>
+<tosi-waypoint progress="1" style="opacity:0; transform: translateY(-1.2em)"></tosi-waypoint>
+<div class="beat"><p class="title">One request.</p></div>
+</tosi-interpolator>
+<tosi-interpolator data-scroll-animate data-scroll-range="0.4,0.57" easing="ease-in-out">
+<tosi-waypoint progress="0" style="opacity:0; transform: translateY(1.2em)"></tosi-waypoint>
+<tosi-waypoint progress="0.5" style="opacity:1; transform: translateY(0em)"></tosi-waypoint>
+<tosi-waypoint progress="1" style="opacity:0; transform: translateY(-1.2em)"></tosi-waypoint>
+<div class="beat"><p class="title">No decoder. No seeking.</p></div>
+</tosi-interpolator>
+<tosi-interpolator data-scroll-animate data-scroll-range="0.59,0.76" easing="ease-in-out">
+<tosi-waypoint progress="0" style="opacity:0; transform: translateY(1.2em)"></tosi-waypoint>
+<tosi-waypoint progress="0.5" style="opacity:1; transform: translateY(0em)"></tosi-waypoint>
+<tosi-waypoint progress="1" style="opacity:0; transform: translateY(-1.2em)"></tosi-waypoint>
+<div class="beat"><p class="title">Just a canvas and a number.</p></div>
+</tosi-interpolator>
+<tosi-interpolator data-scroll-animate data-scroll-range="0.79,1" easing="ease-in-out">
+<tosi-waypoint progress="0" style="opacity:0; transform: translateY(1.2em) scale(.96)"></tosi-waypoint>
+<tosi-waypoint progress="0.55" style="opacity:1; transform: translateY(0em) scale(1)"></tosi-waypoint>
+<tosi-waypoint progress="1" style="opacity:1; transform: translateY(0em) scale(1)"></tosi-waypoint>
+<div class="beat"><p class="title"><span class="grad">Every frame, exactly where you left it.</span></p></div>
+</tosi-interpolator>
+</div>
+</tosi-product-section>
+<tosi-product-section scroll="240">
+<div class="scene">
+<div class="over">
+<p class="kicker">Staged</p>
+<div class="title words">
+<tosi-interpolator data-scroll-animate data-scroll-range="0.08,0.30" easing="ease-in-out">
+<tosi-waypoint progress="0" style="opacity:0; transform: translateY(.6em)"></tosi-waypoint>
+<tosi-waypoint progress="1" style="opacity:1; transform: translateY(0em)"></tosi-waypoint>
+<span class="w">Every</span>
+</tosi-interpolator>
+<tosi-interpolator data-scroll-animate data-scroll-range="0.19,0.41" easing="ease-in-out">
+<tosi-waypoint progress="0" style="opacity:0; transform: translateY(.6em)"></tosi-waypoint>
+<tosi-waypoint progress="1" style="opacity:1; transform: translateY(0em)"></tosi-waypoint>
+<span class="w">word</span>
+</tosi-interpolator>
+<tosi-interpolator data-scroll-animate data-scroll-range="0.30,0.52" easing="ease-in-out">
+<tosi-waypoint progress="0" style="opacity:0; transform: translateY(.6em)"></tosi-waypoint>
+<tosi-waypoint progress="1" style="opacity:1; transform: translateY(0em)"></tosi-waypoint>
+<span class="w">gets</span>
+</tosi-interpolator>
+<tosi-interpolator data-scroll-animate data-scroll-range="0.41,0.63" easing="ease-in-out">
+<tosi-waypoint progress="0" style="opacity:0; transform: translateY(.6em)"></tosi-waypoint>
+<tosi-waypoint progress="1" style="opacity:1; transform: translateY(0em)"></tosi-waypoint>
+<span class="w">its</span>
+</tosi-interpolator>
+<tosi-interpolator data-scroll-animate data-scroll-range="0.52,0.74" easing="ease-in-out">
+<tosi-waypoint progress="0" style="opacity:0; transform: translateY(.6em)"></tosi-waypoint>
+<tosi-waypoint progress="1" style="opacity:1; transform: translateY(0em)"></tosi-waypoint>
+<span class="w">own</span>
+</tosi-interpolator>
+<tosi-interpolator data-scroll-animate data-scroll-range="0.63,0.88" easing="ease-in-out">
+<tosi-waypoint progress="0" style="opacity:0; transform: translateY(.6em)"></tosi-waypoint>
+<tosi-waypoint progress="1" style="opacity:1; transform: translateY(0em)"></tosi-waypoint>
+<span class="w grad">slice.</span>
+</tosi-interpolator>
+</div>
+<tosi-interpolator data-scroll-animate data-scroll-range="0.80,1" easing="ease-in-out">
+<tosi-waypoint progress="0" style="opacity:0; transform: translateY(.8em)"></tosi-waypoint>
+<tosi-waypoint progress="1" style="opacity:1; transform: translateY(0em)"></tosi-waypoint>
+<p class="lede" style="max-width:40ch">Six words, six <code>data-scroll-range</code> windows, one section. The stagger is the attribute.</p>
+</tosi-interpolator>
+</div>
+</div>
+</tosi-product-section>
+<tosi-product-section scroll="200">
+<div class="scene">
+<div class="over">
+<p class="title">Sees in the dark.</p>
+<p class="lede">A scroll engine that pins, stages and releases — so a scene takes exactly as long as it needs.</p>
+</div>
+<div class="rule"></div>
+<div class="specs">
+<tosi-interpolator data-scroll-animate data-scroll-range="0.12,0.34" easing="ease-in-out">
+<tosi-waypoint progress="0" style="opacity:0; transform: translateY(.9em)"></tosi-waypoint>
+<tosi-waypoint progress="1" style="opacity:1; transform: translateY(0em)"></tosi-waypoint>
+<div class="spec"><p class="n">0→1</p><p class="l">Progress, every section, always</p></div>
+</tosi-interpolator>
+<tosi-interpolator data-scroll-animate data-scroll-range="0.26,0.48" easing="ease-in-out">
+<tosi-waypoint progress="0" style="opacity:0; transform: translateY(.9em)"></tosi-waypoint>
+<tosi-waypoint progress="1" style="opacity:1; transform: translateY(0em)"></tosi-waypoint>
+<div class="spec"><p class="n">1</p><p class="l">Sticky window, one host element</p></div>
+</tosi-interpolator>
+<tosi-interpolator data-scroll-animate data-scroll-range="0.4,0.62" easing="ease-in-out">
+<tosi-waypoint progress="0" style="opacity:0; transform: translateY(.9em)"></tosi-waypoint>
+<tosi-waypoint progress="1" style="opacity:1; transform: translateY(0em)"></tosi-waypoint>
+<div class="spec"><p class="n">0 kB</p><p class="l">JavaScript you have to write</p></div>
+</tosi-interpolator>
+</div>
+</div>
+</tosi-product-section>
+<tosi-product-section scroll="240">
+<div class="scene lottie-scene">
+<tosi-lottie src="https://cdn.tosijs.net/tosijs-product/tosi-platform.json" data-scroll-animate="lottie"></tosi-lottie>
+<tosi-interpolator data-scroll-animate data-scroll-range="0.1,0.42" easing="ease-in-out">
+<tosi-waypoint progress="0" style="opacity:0"></tosi-waypoint>
+<tosi-waypoint progress="1" style="opacity:1"></tosi-waypoint>
+<div class="beat" style="justify-content:flex-end; padding-bottom:8vh">
+<p class="title" style="font-size:clamp(1.7rem,4vw,3rem)">Vector, scrubbed.</p>
+<p class="lede">A Lottie timeline mapped straight onto pin progress.</p>
+</div>
+</tosi-interpolator>
+</div>
+</tosi-product-section>
+<tosi-product-section scroll="420">
+<div class="scene">
+<div class="stage">
+<tosi-3d src="https://cdn.tosijs.net/tosijs-product/macbook_neo.glb" hero-light fov="0.6" clear-color="transparent" data-scroll-animate>
+<tosi-scroll-camera data-scroll-animate easing="ease-in-out">
+<tosi-waypoint progress="0" alpha="-2.35" beta="1.32" radius="150" target-y="10"></tosi-waypoint>
+<tosi-waypoint progress="0.35" alpha="-1.2" beta="0.95" radius="72" target-y="10"></tosi-waypoint>
+<tosi-waypoint progress="0.7" alpha="0.35" beta="1.42" radius="64" target-y="10"></tosi-waypoint>
+<tosi-waypoint progress="1" alpha="1.55" beta="1.18" radius="104" target-y="10"></tosi-waypoint>
+</tosi-scroll-camera>
+</tosi-3d>
+</div>
+<tosi-interpolator data-scroll-animate data-scroll-range="0.02,0.24" easing="ease-in-out">
+<tosi-waypoint progress="0" style="opacity:0; transform: translateY(.8em)"></tosi-waypoint>
+<tosi-waypoint progress="0.6" style="opacity:1; transform: translateY(0em)"></tosi-waypoint>
+<tosi-waypoint progress="1" style="opacity:0; transform: translateY(-.8em)"></tosi-waypoint>
+<div class="beat" style="justify-content:flex-start; padding-top:10vh">
+<p class="kicker">Machined</p>
+<p class="title">Turn it over.</p>
+</div>
+</tosi-interpolator>
+<tosi-interpolator data-scroll-animate data-scroll-range="0.34,0.58" easing="ease-in-out">
+<tosi-waypoint progress="0" style="opacity:0; transform: translateY(.8em)"></tosi-waypoint>
+<tosi-waypoint progress="0.55" style="opacity:1; transform: translateY(0em)"></tosi-waypoint>
+<tosi-waypoint progress="1" style="opacity:0; transform: translateY(-.8em)"></tosi-waypoint>
+<div class="beat" style="justify-content:flex-start; padding-top:10vh">
+<p class="title" style="font-size:clamp(1.7rem,4vw,3rem)">Lit by where you are.</p>
+</div>
+</tosi-interpolator>
+<tosi-interpolator data-scroll-animate data-scroll-range="0.7,1" easing="ease-in-out">
+<tosi-waypoint progress="0" style="opacity:0; transform: translateY(.8em)"></tosi-waypoint>
+<tosi-waypoint progress="0.55" style="opacity:1; transform: translateY(0em)"></tosi-waypoint>
+<tosi-waypoint progress="1" style="opacity:1; transform: translateY(0em)"></tosi-waypoint>
+<div class="beat" style="justify-content:flex-end; padding-bottom:9vh">
+<p class="lede" style="max-width:44ch">A glTF model, framed entirely by how far you have scrolled. Four camera waypoints, no code.</p>
+</div>
+</tosi-interpolator>
+</div>
+</tosi-product-section>
+<tosi-product-section scroll="380">
+<div class="scene">
+<div class="stage">
+<tosi-3d src="https://cdn.tosijs.net/quaternius/UAL1_core.glb" hero-light fov="0.75" clear-color="transparent" data-scroll-animate>
+<tosi-scroll-animation data-scroll-animate name="ClimbLedge"></tosi-scroll-animation>
+<tosi-scroll-camera data-scroll-animate easing="ease-in-out">
+<tosi-waypoint progress="0" alpha="-1.9" beta="1.30" radius="5.4" target-y="1.0"></tosi-waypoint>
+<tosi-waypoint progress="0.5" alpha="-1.15" beta="1.16" radius="3.4" target-y="1.2"></tosi-waypoint>
+<tosi-waypoint progress="1" alpha="-0.5" beta="1.34" radius="4.6" target-y="1.0"></tosi-waypoint>
+</tosi-scroll-camera>
+</tosi-3d>
+</div>
+<tosi-interpolator data-scroll-animate data-scroll-range="0.03,0.28" easing="ease-in-out">
+<tosi-waypoint progress="0" style="opacity:0; transform: translateY(.8em)"></tosi-waypoint>
+<tosi-waypoint progress="0.6" style="opacity:1; transform: translateY(0em)"></tosi-waypoint>
+<tosi-waypoint progress="1" style="opacity:0; transform: translateY(-.8em)"></tosi-waypoint>
+<div class="beat" style="justify-content:flex-start; padding-top:10vh">
+<p class="kicker">Rigged</p>
+<p class="title">Scroll is the timeline.</p>
+</div>
+</tosi-interpolator>
+<tosi-interpolator data-scroll-animate data-scroll-range="0.62,1" easing="ease-in-out">
+<tosi-waypoint progress="0" style="opacity:0; transform: translateY(.8em)"></tosi-waypoint>
+<tosi-waypoint progress="0.5" style="opacity:1; transform: translateY(0em)"></tosi-waypoint>
+<tosi-waypoint progress="1" style="opacity:1; transform: translateY(0em)"></tosi-waypoint>
+<div class="beat" style="justify-content:flex-end; padding-bottom:9vh">
+<p class="lede" style="max-width:46ch">One named clip, scrubbed frame-by-frame by pin progress — <code>&lt;tosi-scroll-animation name="ClimbLedge"&gt;</code>. The model streams from <code>cdn.tosijs.net</code>; this repo ships none of it.</p>
+</div>
+</tosi-interpolator>
+</div>
+</tosi-product-section>
+<tosi-product-section scroll="200">
+<div class="scene paper">
+<div class="over">
+<p class="kicker">The whole story</p>
+<p class="title" style="max-width:20ch">Written in Markdown. Not in JavaScript.</p>
+<p class="lede">Every scene here is an element with attributes. Read the source — it is the page.</p>
+</div>
+<div class="cards">
+<tosi-interpolator data-scroll-animate data-scroll-range="0.14,0.34" easing="ease-in-out">
+<tosi-waypoint progress="0" style="opacity:0; transform: translateY(1.1em)"></tosi-waypoint>
+<tosi-waypoint progress="1" style="opacity:1; transform: translateY(0em)"></tosi-waypoint>
+<div class="card"><h3>Pin, then exit</h3><p><code>&lt;tosi-product-section scroll="620"&gt;</code> holds a scene for 6.2 screens, then lets it go.</p></div>
+</tosi-interpolator>
+<tosi-interpolator data-scroll-animate data-scroll-range="0.24,0.44" easing="ease-in-out">
+<tosi-waypoint progress="0" style="opacity:0; transform: translateY(1.1em)"></tosi-waypoint>
+<tosi-waypoint progress="1" style="opacity:1; transform: translateY(0em)"></tosi-waypoint>
+<div class="card"><h3>Stage the reveal</h3><p><code>data-scroll-range="0.4,0.57"</code> gives an animator its own slice of the section.</p></div>
+</tosi-interpolator>
+<tosi-interpolator data-scroll-animate data-scroll-range="0.34,0.54" easing="ease-in-out">
+<tosi-waypoint progress="0" style="opacity:0; transform: translateY(1.1em)"></tosi-waypoint>
+<tosi-waypoint progress="1" style="opacity:1; transform: translateY(0em)"></tosi-waypoint>
+<div class="card"><h3>Interpolate anything</h3><p><code>&lt;tosi-waypoint&gt;</code> blends the CSS you write — numbers per-number, colours through <code>color-mix()</code>.</p></div>
+</tosi-interpolator>
+</div>
+</div>
+</tosi-product-section>
+<tosi-product-section scroll="320">
+<div class="scene">
+<div class="stage">
+<tosi-map token="pk.eyJ1IjoicG9kcGVyc29uIiwiYSI6ImNqc2JlbWU0bjA1ZmY0YW5ycHZod3VhbWcifQ.arvqfpOqMgFYkKgQ35UScA" coords="37.4636,-122.4286,11" map-style="mapbox://styles/mapbox/satellite-streets-v12">
+<tosi-scroll-map data-scroll-animate easing="ease-in-out">
+<tosi-waypoint progress="0" coords="37.4636,-122.4286,10.6"></tosi-waypoint>
+<tosi-waypoint progress="0.42" coords="37.3349,-122.0090,13.2"></tosi-waypoint>
+<tosi-waypoint progress="0.72" coords="55.0000,10.0000,4.2"></tosi-waypoint>
+<tosi-waypoint progress="1" coords="65.0121,25.4651,9.4"></tosi-waypoint>
+</tosi-scroll-map>
+</tosi-map>
+<div class="scrim"></div>
+</div>
+<tosi-interpolator data-scroll-animate data-scroll-range="0.04,0.3" easing="ease-in-out">
+<tosi-waypoint progress="0" style="opacity:0"></tosi-waypoint>
+<tosi-waypoint progress="0.45" style="opacity:1"></tosi-waypoint>
+<tosi-waypoint progress="1" style="opacity:0"></tosi-waypoint>
+<div class="beat" style="justify-content:flex-end; padding-bottom:12vh"><p class="title" style="font-size:clamp(1.6rem,3.6vw,2.8rem)">Designed on a coastline.</p></div>
+</tosi-interpolator>
+<tosi-interpolator data-scroll-animate data-scroll-range="0.44,0.68" easing="ease-in-out">
+<tosi-waypoint progress="0" style="opacity:0"></tosi-waypoint>
+<tosi-waypoint progress="0.45" style="opacity:1"></tosi-waypoint>
+<tosi-waypoint progress="1" style="opacity:0"></tosi-waypoint>
+<div class="beat" style="justify-content:flex-end; padding-bottom:12vh"><p class="title" style="font-size:clamp(1.6rem,3.6vw,2.8rem)">Nine thousand kilometres.</p></div>
+</tosi-interpolator>
+<tosi-interpolator data-scroll-animate data-scroll-range="0.76,1" easing="ease-in-out">
+<tosi-waypoint progress="0" style="opacity:0"></tosi-waypoint>
+<tosi-waypoint progress="0.5" style="opacity:1"></tosi-waypoint>
+<tosi-waypoint progress="1" style="opacity:1"></tosi-waypoint>
+<div class="beat" style="justify-content:flex-end; padding-bottom:12vh"><p class="title" style="font-size:clamp(1.6rem,3.6vw,2.8rem)">Built somewhere colder.</p></div>
+</tosi-interpolator>
+</div>
+</tosi-product-section>
+<tosi-product-section scroll="110">
+<div class="scene">
+<tosi-interpolator data-scroll-animate easing="ease-in-out">
+<tosi-waypoint progress="0" style="opacity:0; transform: scale(.94)"></tosi-waypoint>
+<tosi-waypoint progress="0.5" style="opacity:1; transform: scale(1)"></tosi-waypoint>
+<tosi-waypoint progress="1" style="opacity:1; transform: scale(1)"></tosi-waypoint>
+<div class="over">
+<p class="display" style="font-size:clamp(2.4rem,8vw,6.5rem)">Owl&nbsp;Pro</p>
+<p class="lede" style="max-width:40ch">Available now, as a <code style="font-family:ui-monospace,monospace">&lt;script&gt;</code> tag.</p>
+<p class="cue" style="margin-top:1.8em">tosijs-product</p>
+</div>
+</tosi-interpolator>
+</div>
+</tosi-product-section>
+</tosi-product>
+</div>
+
+  </article>
+  <nav class="doc-nav" aria-label="Documentation">
+  <ul>
+    <li><a class="doc-link" href="../">tosijs-product</a></li>
+    <li><a class="doc-link current" href="../owl-pro/" aria-current="page">Owl Pro</a></li>
+    <li><a class="doc-link" href="../tosi-filmstrip/">&lt;tosi-filmstrip&gt;</a></li>
+    <li><a class="doc-link" href="../tosi-interpolator/">&lt;tosi-interpolator&gt;</a></li>
+    <li><a class="doc-link" href="../tosi-prism/">&lt;tosi-prism&gt;</a></li>
+    <li><a class="doc-link" href="../tosi-product/">&lt;tosi-product&gt;</a></li>
+    <li><a class="doc-link" href="../tosi-b3d-scroll/">&lt;tosi-scroll-camera&gt; · &lt;tosi-scroll-time&gt; · &lt;tosi-scroll-animation&gt;</a></li>
+    <li><a class="doc-link" href="../tosi-scroll-map/">&lt;tosi-scroll-map&gt;</a></li>
+    <li><a class="doc-link" href="../components/">Component Reference</a></li>
+    <li><a class="doc-link" href="../getting-started/">Getting Started</a></li>
+  </ul>
+  </nav>
+  <ul class="doc-navbar">
+    <li><a href="https://tosijs.net" data-icon="tosi">tosijs</a></li>
+    <li><a href="https://ui.tosijs.net" data-icon="tosi">tosijs-ui</a></li>
+    <li><a href="https://3d.tosijs.net" data-icon="tosi">tosijs-3d</a></li>
+    <li><a href="https://github.com/tonioloewald/tosijs-product" data-icon="github">github</a></li>
+    <li><a href="https://www.npmjs.com/package/tosijs-product" data-icon="npm">npmjs</a></li>
+  </ul>
+  </tosi-doc-system>
+  <script type="module" src="../hydrate.js"></script>
+</body>
+</html>

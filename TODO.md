@@ -60,7 +60,10 @@ devDependency, `rm -rf dist` + `prepublishOnly`, and the capped `warnedRanges`. 
       the documented `--frames 100 --width 1280` recipe start four multi-MB downloads at page
       load. Gate on `IntersectionObserver` or defer to the first `setScrollProgress`, with a
       `loading="eager"` escape hatch.
-- [ ] **The landing page is ~18MB of media on first load.** `/agent-owl.mp4` is 10.3MB with
+- [x] **Demo media moved to `cdn.tosijs.net/tosijs-product/`** (2026-09-04) — ~15.5MB out of
+      the git tree and out of the GitHub Pages payload, which it was carried in twice.
+- [ ] **The landing page is still heavy on first load** (the bytes moved host, they did not
+      shrink). Original note: `/agent-owl.mp4` is 10.3MB with
       `preload="auto"`, `/agent-owl_10x10_100.jpg` is 4.9MB fetched eagerly — the same 100 frames
       downloaded twice by design — plus a 2.5MB glb. Cheapest first: `preload="metadata"`,
       regenerate the mosaic smaller (tiles are only 640×360), trim the clip. This is the page

@@ -92,7 +92,7 @@ _This page is the demo._ Scroll — the hero below is a live `<tosi-product>` en
 </tosi-product-section>
 <tosi-product-section scroll="300">
 <div class="media-scene">
-<video src="/agent-owl.mp4" data-scroll-animate="currentTime" muted playsinline preload="auto"></video>
+<video src="https://cdn.tosijs.net/tosijs-product/agent-owl.mp4" data-scroll-animate="currentTime" muted playsinline preload="auto"></video>
 <tosi-interpolator data-scroll-animate data-scroll-range="0,0.4" easing="ease-in-out">
 <tosi-waypoint progress="0" style="opacity:0; transform:translateY(20px)"></tosi-waypoint>
 <tosi-waypoint progress="0.5" style="opacity:1; transform:translateY(0px)"></tosi-waypoint>
@@ -109,7 +109,7 @@ _This page is the demo._ Scroll — the hero below is a live `<tosi-product>` en
 </tosi-product-section>
 <tosi-product-section scroll="300">
 <div class="media-scene">
-<tosi-filmstrip src="/agent-owl_10x10_96.jpg" cols="10" rows="10" total="96" data-scroll-animate></tosi-filmstrip>
+<tosi-filmstrip src="https://cdn.tosijs.net/tosijs-product/agent-owl_10x10_96.jpg" cols="10" rows="10" total="96" data-scroll-animate></tosi-filmstrip>
 <tosi-interpolator data-scroll-animate data-scroll-range="0,0.4" easing="ease-in-out">
 <tosi-waypoint progress="0" style="opacity:0; transform:translateY(20px)"></tosi-waypoint>
 <tosi-waypoint progress="0.5" style="opacity:1; transform:translateY(0px)"></tosi-waypoint>
@@ -126,7 +126,7 @@ _This page is the demo._ Scroll — the hero below is a live `<tosi-product>` en
 </tosi-product-section>
 <tosi-product-section scroll="250">
 <div class="media-scene lottie">
-<tosi-lottie src="/tosi-platform.json" data-scroll-animate="lottie"></tosi-lottie>
+<tosi-lottie src="https://cdn.tosijs.net/tosijs-product/tosi-platform.json" data-scroll-animate="lottie"></tosi-lottie>
 <tosi-interpolator data-scroll-animate data-scroll-range="0,0.5" easing="ease-in-out">
 <tosi-waypoint progress="0" style="opacity:0; transform:translateY(20px)"></tosi-waypoint>
 <tosi-waypoint progress="0.5" style="opacity:1; transform:translateY(0px)"></tosi-waypoint>
@@ -143,7 +143,7 @@ _This page is the demo._ Scroll — the hero below is a live `<tosi-product>` en
 </tosi-product-section>
 <tosi-product-section scroll="350">
 <div class="media-scene">
-<tosi-3d src="/macbook_neo.glb" hero-light fov="0.6" clear-color="transparent" data-scroll-animate>
+<tosi-3d src="https://cdn.tosijs.net/tosijs-product/macbook_neo.glb" hero-light fov="0.6" clear-color="transparent" data-scroll-animate>
 <tosi-scroll-camera data-scroll-animate easing="ease-in-out">
 <tosi-waypoint progress="0" alpha="-1.57" beta="1.2" radius="110" target-y="10"></tosi-waypoint>
 <tosi-waypoint progress="0.5" alpha="0" beta="1.0" radius="70" target-y="10"></tosi-waypoint>

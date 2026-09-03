@@ -42,5 +42,7 @@ use it to inspect STATE; a painted-output check needs a real test lane.
   Every element and exported function in tosijs-product: the scroll engine, the animators, the theme system, and the JavaScript API.
 - https://product.tosijs.net/getting-started/ — Getting Started
   A single script tag gives you everything — tosijs, tosijs-ui, and tosijs-product with all custom elements registered:
+- https://product.tosijs.net/owl-pro/ — Owl Pro
+  An Apple-style product landing page — a hero that pins across five beats, word-by-word type, scrubbed video, a 3D model and a map flight — built with tosijs-product as declarative HTML inside a Markdown file. No JavaScript.
 - https://product.tosijs.net/ — tosijs-product
   Build Apple-style, scroll-linked product stories with declarative web components. tosijs-product pins sections and drives Lottie, video (WebP mosaics), BabylonJS 3D, and CSS interpolation from scroll position — authored in plain HTML.

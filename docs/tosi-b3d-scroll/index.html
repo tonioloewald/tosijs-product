@@ -30,15 +30,15 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="../doc-system.css" data-tosi-doc-system />
   <title>&lt;tosi-scroll-camera&gt; · &lt;tosi-scroll-time&gt; · &lt;tosi-scroll-animation&gt; — tosijs-product</title>
-  <meta name="description" content="Scroll controllers for a tosijs-ui &lt;tosi-3d&gt; BabylonJS scene. Place them inside a &lt;tosi-3d&gt; within a section; each reads scroll progress and drives one aspect" />
+  <meta name="description" content="Scroll controllers for a BabylonJS scene. Place them inside a scene element within a &lt;tosi-product-section&gt;; each reads scroll progress and drives one aspect…" />
   <link rel="canonical" href="https://product.tosijs.net/tosi-b3d-scroll/" />
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="tosijs-product" />
   <meta property="og:title" content="&lt;tosi-scroll-camera&gt; · &lt;tosi-scroll-time&gt; · &lt;tosi-scroll-animation&gt; — tosijs-product" />
-  <meta property="og:description" content="Scroll controllers for a tosijs-ui &lt;tosi-3d&gt; BabylonJS scene. Place them inside a &lt;tosi-3d&gt; within a section; each reads scroll progress and drives one aspect" />
+  <meta property="og:description" content="Scroll controllers for a BabylonJS scene. Place them inside a scene element within a &lt;tosi-product-section&gt;; each reads scroll progress and drives one aspect…" />
   <meta property="og:url" content="https://product.tosijs.net/tosi-b3d-scroll/" />
   <meta name="twitter:card" content="summary" />
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"\u003ctosi-scroll-camera> · \u003ctosi-scroll-time> · \u003ctosi-scroll-animation>","description":"Scroll controllers for a tosijs-ui \u003ctosi-3d> BabylonJS scene. Place them inside a \u003ctosi-3d> within a section; each reads scroll progress and drives one aspect","url":"https://product.tosijs.net/tosi-b3d-scroll/","inLanguage":"en","isPartOf":{"@type":"WebSite","name":"tosijs-product","url":"https://product.tosijs.net"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"\u003ctosi-scroll-camera> · \u003ctosi-scroll-time> · \u003ctosi-scroll-animation>","description":"Scroll controllers for a BabylonJS scene. Place them inside a scene element within a \u003ctosi-product-section>; each reads scroll progress and drives one aspect…","url":"https://product.tosijs.net/tosi-b3d-scroll/","inLanguage":"en","isPartOf":{"@type":"WebSite","name":"tosijs-product","url":"https://product.tosijs.net"}}</script>
   <link rel="icon" href="../favicon.svg" />
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
@@ -46,9 +46,23 @@
   <tosi-doc-system docs="../docs.json" config="{&quot;projectName&quot;:&quot;tosijs-product&quot;,&quot;projectLinks&quot;:{&quot;tosijs&quot;:&quot;https://tosijs.net&quot;,&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs-product&quot;}}" data-layout="full-width">
   <article class="doc-content">
 <h1><code>&lt;tosi-scroll-camera&gt;</code> · <code>&lt;tosi-scroll-time&gt;</code> · <code>&lt;tosi-scroll-animation&gt;</code></h1>
-<p>Scroll controllers for a tosijs-ui <a href="https://ui.tosijs.net/babylon-3d"><code>&lt;tosi-3d&gt;</code></a> BabylonJS scene.
-Place them inside a <code>&lt;tosi-3d&gt;</code> within a section; each reads scroll progress and drives one aspect
-of the scene — camera, time-of-day, or an animation — declaratively via <code>&lt;tosi-waypoint&gt;</code> children.</p>
+<p>Scroll controllers for a BabylonJS scene. Place them inside a scene element within a
+<code>&lt;tosi-product-section&gt;</code>; each reads scroll progress and drives one aspect of the scene — camera,
+time-of-day, or an animation — declaratively via <code>&lt;tosi-waypoint&gt;</code> children.</p>
+<p><strong>Use <a href="https://3d.tosijs.net"><code>&lt;tosi-b3d&gt;</code></a> (tosijs-3d).</strong> These controllers are <em>scene-agnostic</em>:
+they find their scene by duck-typing — the nearest ancestor or sibling with a <code>.scene</code> property —
+and then touch only Babylon-level API (<code>scene.activeCamera</code>, <code>scene.animationGroups</code>). So they work
+in any element that exposes a Babylon scene, and nothing here is bound to a particular host.</p>
+<p>tosijs-ui&#39;s <code>&lt;tosi-3d&gt;</code> still works and the demo below uses it, but it is <strong>the legacy path</strong> —
+tosijs-3d is where the 3D story is going, and it is not a bigger <code>&lt;tosi-3d&gt;</code> so much as a different
+category: terrain, water, skybox, clouds, particles, physics, lights, HUD and XR as composable
+elements, against <code>&lt;tosi-3d&gt;</code>&#39;s four attributes.</p>
+<blockquote>
+<p><strong><code>&lt;tosi-scroll-time&gt;</code> requires tosijs-3d and always has.</strong> It drives a
+<code>&lt;tosi-b3d-skybox&gt;</code> — a tosijs-3d element — so inside a tosijs-ui <code>&lt;tosi-3d&gt;</code> there is nothing
+for it to find and it silently does nothing. That was true from the day it shipped while this
+page said otherwise; see the CHANGELOG.</p>
+</blockquote>
 <style>.doc-content:has(.doc-demo){--doc-content-padding:0;overflow:visible !important}.doc-content:has(.doc-demo)>:not(.doc-demo):not(style){max-width:44rem;margin-inline:auto;padding-inline:1.25rem;box-sizing:border-box}.doc-demo .media{height:var(--tosi-view-size,70vh);position:relative;overflow:hidden;background:#0a0a12}.doc-demo .media>tosi-3d{position:absolute;inset:0;width:100%;height:100%}</style>
 <tosi-product class="doc-demo">
 <tosi-product-section scroll="150">
@@ -71,9 +85,14 @@ of the scene — camera, time-of-day, or an animation — declaratively via <cod
 <li><strong><code>easing=&quot;ease-in-out&quot;</code></strong> eases each segment.</li>
 </ul>
 <h2><code>&lt;tosi-scroll-time&gt;</code></h2>
-<p>Maps progress to a time-of-day on a sibling <code>&lt;tosi-b3d-skybox&gt;</code> — <strong><code>from</code></strong> / <strong><code>to</code></strong> hours. Set
+<p>Maps progress to a time-of-day on a <code>&lt;tosi-b3d-skybox&gt;</code> — <strong><code>from</code></strong> / <strong><code>to</code></strong> hours. Set
 <code>realtimeScale=&quot;0&quot;</code> on the skybox to stop auto-advance.</p>
-<pre><code class="language-html">&lt;tosi-scroll-time data-scroll-animate from=&quot;6&quot; to=&quot;18&quot;&gt;&lt;/tosi-scroll-time&gt;
+<p><strong>tosijs-3d only.</strong> The skybox it drives is a tosijs-3d element, so this one needs a
+<code>&lt;tosi-b3d&gt;</code> scene — there is no equivalent inside tosijs-ui&#39;s <code>&lt;tosi-3d&gt;</code>.</p>
+<pre><code class="language-markup">&lt;tosi-b3d&gt;
+  &lt;tosi-b3d-skybox realtime-scale=&quot;0&quot;&gt;&lt;/tosi-b3d-skybox&gt;
+  &lt;tosi-scroll-time data-scroll-animate from=&quot;6&quot; to=&quot;18&quot;&gt;&lt;/tosi-scroll-time&gt;
+&lt;/tosi-b3d&gt;
 </code></pre>
 <h2><code>&lt;tosi-scroll-animation&gt;</code></h2>
 <p>Scrubs a named BabylonJS <code>AnimationGroup</code> to the frame for the current progress — <strong><code>name</code></strong>.</p>

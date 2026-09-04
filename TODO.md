@@ -122,6 +122,22 @@ png `--quality`). `docs/version.json` is settled in CLAUDE.md. What is left:
       shared `release-doctor` is the right home for that check — file it there rather than
       adding another line to a human checklist.
 
+### 3D: migrate the demos onto tosijs-3d (filed 0.8.0)
+
+The controllers already port for free — they duck-type on `.scene`. What has NOT moved is the
+demos and the assumptions around them.
+
+- [ ] **Port the doc-page 3D demos from `<tosi-3d>` to `<tosi-b3d>`.** Both this page and the
+      README hero still mount tosijs-ui's element. Nothing breaks today, but the demos are what
+      readers copy, so they should show the recommended host.
+- [ ] **Give `<tosi-scroll-time>` a demo that actually has a skybox.** It has never had one, which
+      is exactly why it could be documented against a host that cannot satisfy it for its whole
+      life without anyone noticing. A demo with `<tosi-b3d>` + `<tosi-b3d-skybox realtime-scale="0">`
+      is the regression test this component's coupling needs.
+- [ ] **Blocked on [tosijs-3d#68](https://github.com/tonioloewald/tosijs-3d/issues/68)** — a plain
+      static prop element. Until that lands, the CDN's 5,108 kit models are unreachable from a page
+      that cannot run JavaScript, so demo 3D is limited to whatever ships as a single-root glb.
+
 ### Still open — deferred deliberately, with the reason
 
 - [ ] **`TosiProductHeader` only listens to window scroll.** It never appears inside an

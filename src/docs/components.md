@@ -18,7 +18,7 @@ several elements: the **theme system** and the **JavaScript API**.
 | [`<tosi-filmstrip>`](/tosi-filmstrip/)                   | Scrubs a WebP/PNG mosaic on a canvas — video without the decode.                            |
 | [`<tosi-scroll-map>`](/tosi-scroll-map/)                 | Flies a Mapbox `<tosi-map>` between `coords` waypoints.                                     |
 | [`<tosi-scroll-camera>`](/tosi-b3d-scroll/)              | Drives a BabylonJS camera (alpha/beta/radius/position/fov).                                 |
-| [`<tosi-scroll-time>`](/tosi-b3d-scroll/)                | Maps progress to a day/night cycle on a B3d skybox.                                         |
+| [`<tosi-scroll-time>`](/tosi-b3d-scroll/)                | Maps progress to a day/night cycle on a `<tosi-b3d-skybox>`. **tosijs-3d only** — there is no skybox inside tosijs-ui's `<tosi-3d>`. |
 | [`<tosi-scroll-animation>`](/tosi-b3d-scroll/)           | Scrubs a named BabylonJS `AnimationGroup`.                                                  |
 | [`<tosi-prism>`](/tosi-prism/)                           | Syntax-highlights its text content (PrismJS, loaded lazily).                                |
 

@@ -8,6 +8,48 @@ For releases before 0.6.1, see the git history (`git log`) and tags.
 
 ## [Unreleased]
 
+### Changed
+
+- **The 3D scroll controllers now target [tosijs-3d](https://3d.tosijs.net)'s `<tosi-b3d>`**;
+  tosijs-ui's `<tosi-3d>` is documented as the legacy path, on the expectation that its 3D is
+  deprecated. **No code changed and none needed to** — `findScene()` duck-types on a `.scene`
+  property rather than naming a host, and the controllers touch only `scene.activeCamera` and
+  `scene.animationGroups`, so they already work in any element exposing a Babylon scene. This is
+  a documentation change that records what the code always did.
+
+  Worth stating plainly: tosijs-3d is not a bigger `<tosi-3d>` but a different category — 52
+  elements covering terrain, water, skybox, clouds, particles, physics, lights, HUD and XR,
+  against `<tosi-3d>`'s four attributes.
+
+- **Demo media moved to `cdn.tosijs.net/tosijs-product/`.** ~15.5MB of video, mosaic, glb and
+  Lottie left this repo. They had been carried **twice** — in `demo/assets/` and again in the
+  committed `docs/` that GitHub Pages serves from `main` — so this takes them out of the git tree
+  and out of every page load's origin. `docs/` went 18MB → 12MB (the remainder is now mostly
+  sourcemaps). Source of truth is `../static-assets/assets/tosijs-product/`.
+
+### Fixed
+
+- **`<tosi-scroll-time>` was documented against a host that cannot satisfy it, and always had
+  been.** It drives a `<tosi-b3d-skybox>` — a **tosijs-3d** element — while its doc page opened
+  with "Scroll controllers for a tosijs-ui `<tosi-3d>`" and demoed exactly that. Inside a
+  tosijs-ui `<tosi-3d>` the `querySelector` finds nothing and the component silently does nothing.
+  The file was already split-brained: its internal JSDoc said `<tosi-b3d>` while the public block
+  said tosijs-ui. Nothing caught it because **no shipped demo has ever exercised this component** —
+  the live demo on that page is `<tosi-3d>` plus `<tosi-scroll-camera>` only. That is the review's
+  "four component families untested" gap paying out as a published component that could not work
+  as published. Docs corrected; a demo with a real skybox is tracked in `TODO.md` as the
+  regression test the coupling needs.
+
+### Added
+
+- **`src/docs/owl-pro.md`** — an Apple-style product page built as declarative HTML inside one
+  Markdown file: 10 pinned sections, 27 interpolators, 74 waypoints, **zero `<script>` tags**.
+  A `scroll="620"` section holds one subject while five headlines cross-fade on `data-scroll-range`
+  slices; six words stage individually through six overlapping ranges; a character streams from the
+  CDN and is scrubbed by `<tosi-scroll-animation name="ClimbLedge">`. Uses `layout: "full-screen"`
+  with the page `<h1>` *clipped* rather than `display:none`, so it keeps its accessibility-tree
+  presence and SEO weight while the hero opens clean.
+
 ## [0.7.0] — 2026-09-01
 
 Cut after this project's first pre-release review (`reviews/0.7.0-first-ever-review.md`), which

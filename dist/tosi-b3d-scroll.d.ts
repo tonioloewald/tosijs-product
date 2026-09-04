@@ -51,7 +51,8 @@ export declare class TosiScrollTime extends Component {
     setScrollProgress(progress: number): void;
 }
 /**
- * Scroll-driven animation scrubber for B3d scenes.
+ * Scroll-driven animation scrubber for a BabylonJS scene (tosijs-3d `<tosi-b3d>`; tosijs-ui
+ * `<tosi-3d>` is the legacy path).
  *
  * Scrubs a named BabylonJS AnimationGroup to the frame
  * corresponding to scroll progress (0→1).

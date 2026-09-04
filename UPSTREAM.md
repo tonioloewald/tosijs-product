@@ -43,6 +43,33 @@ narrative-landing capability.
 
 -->
 
+## tosijs-3d: no plain static-prop element, so the CDN kit libraries need JavaScript
+
+**Issue:** https://github.com/tonioloewald/tosijs-3d/issues/68 (filed 2026-09-04, `tosijs-3d@0.8.0`)
+
+**Context.** `cdn.tosijs.net` publishes 48 kit libraries — 5,108 models, uniform by construction
+(named root per model, `userData.library` index with categories and exact bounding boxes). Every
+model sits at the **origin with no translation**, because the format is built for
+`getObjectByName(...).clone()`. So a JS consumer reaches all of them and a declarative one reaches
+**none**: point a viewer at `cube-pets.glb` and you get 24 animals stacked inside each other.
+
+Our doc pages are Markdown with raw HTML and no `<script>` execution — that is the premise of this
+library — so there is no route to a specific model. `b3d-library` + `instantiate()` is JS.
+`b3d-loader` takes a URL and loses the canonical frame. `b3d-destroyable` *does* resolve a library
+mesh declaratively but drags a combat model along; `b3d-aircraft` frames correctly but flies.
+tosijs-3d's own source already names this gap and stops one case short of the plain static prop.
+
+**Suggestion.** `<tosi-b3d-prop library="…" mesh-name="…">` — `b3d-destroyable`'s library
+resolution plus `AbstractMesh`'s `x/y/z/rx/ry/rz`, minus the hit points. Mostly a subtraction.
+Plus: auto-frame from the library index's `size` (guessing camera `radius` cost us a black void
+once), and a `library-url` for the single-object case.
+
+**Also recorded there:** assuming tosijs-ui's `<tosi-3d>` is deprecated, our three scroll
+controllers become tosijs-3d consumers — and they already work unchanged, because `findScene()`
+duck-types on a `.scene` property rather than naming a host.
+
+---
+
 ## `version.json` restamps on every build, so a project that commits `docs/` is permanently dirty
 
 **Issue:** https://github.com/tonioloewald/tosijs-ui/issues/122 (filed 2026-09-01, `tosijs-ui@1.12.7`)

@@ -34,6 +34,7 @@
     "test": "bun test",
     "typecheck": "tsc --noEmit",
     "build": "bun bin/site.ts --build",
+    "stop": "bun bin/site.ts --stop",
     "prepublishOnly": "bun run typecheck && bun test && bun run build"
   },
   "author": "Tonio Loewald",

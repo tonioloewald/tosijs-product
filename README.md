@@ -9,7 +9,13 @@ A cinematic product page component library for `tosijs`.
 _This page is the demo._ Scroll — the hero below is a live `<tosi-product>` engine pinned to this doc's scroll container, authored entirely in the Markdown you're reading.
 
 <style>
-.doc-content:has(.tp-hero) { --doc-content-padding: 0; overflow: visible !important; }
+/* `layout: "full-screen"` sets `--doc-content-overflow: auto` on `.doc-content` at
+   (0,2,1), and `auto` makes it its own scroller — which collapses the engine's
+   runway. We need `visible` so the outer pane scrolls, so match the layout
+   selector to outrank it. tosijs-ui#119 shipped the variable in 1.14.1; before
+   that this was `overflow: visible !important`. */
+tosi-doc-system[data-layout="full-screen"] .doc-content:has(.tp-hero),
+.doc-content:has(.tp-hero) { --doc-content-padding: 0; --doc-content-overflow: visible; }
 .doc-content:has(.tp-hero) > :not(.tp-hero):not(style) { max-width: 44rem; margin-inline: auto; padding-inline: 1.25rem; box-sizing: border-box; }
 .tp-hero h1, .tp-hero h2, .tp-hero h3 { color:var(--fg); border:none; line-height:1.08; letter-spacing:-.01em; }
 .tp-hero .media-overlay h1, .tp-hero .media-overlay h2 { color:#fff; }

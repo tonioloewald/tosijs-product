@@ -10,7 +10,7 @@ progress runs 0 → 1.
 The panel below is a live `<tosi-interpolator>` — scroll it, then read its markup in **Source**
 view (top-right). No JavaScript; it is the HTML shown here.
 
-<style>.doc-content:has(.ti-demo){--doc-content-padding:0;overflow:visible !important}.doc-content:has(.ti-demo)>:not(.ti-demo):not(style){max-width:44rem;margin-inline:auto;padding-inline:1.25rem;box-sizing:border-box}.ti-demo .scene{height:var(--tosi-view-size,70vh);display:flex;align-items:center;justify-content:center;background:#08081a;border-radius:12px}.ti-demo h2{font-size:clamp(2rem,7vw,3.5rem);margin:0;font-weight:800}</style>
+<style>.doc-content:has(.ti-demo){--doc-content-padding:0;--doc-content-overflow:visible}.doc-content:has(.ti-demo)>:not(.ti-demo):not(style){max-width:44rem;margin-inline:auto;padding-inline:1.25rem;box-sizing:border-box}.ti-demo .scene{height:var(--tosi-view-size,70vh);display:flex;align-items:center;justify-content:center;background:#08081a;border-radius:12px}.ti-demo h2{font-size:clamp(2rem,7vw,3.5rem);margin:0;font-weight:800}</style>
 <tosi-product class="ti-demo">
 <tosi-product-section scroll="120">
 <div class="scene">

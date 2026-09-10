@@ -28,7 +28,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="doc-system.css" data-tosi-doc-system />
+  <link rel="stylesheet" href="doc-system.css?v=0.7.0" data-tosi-doc-system />
   <title>tosijs-product — cinematic, scroll-driven product pages in HTML</title>
   <meta name="description" content="Build Apple-style, scroll-linked product stories with declarative web components. tosijs-product pins sections and drives Lottie, video (WebP mosaics), BabylonJS 3D, and CSS interpolation from scroll position — authored in plain HTML." />
   <meta name="keywords" content="scrollytelling, scroll animation, product page, web components, custom elements, tosijs, lottie, webp mosaic, babylonjs, scroll-linked animation, cinematic landing page, apple-style scrolling" />
@@ -44,7 +44,7 @@
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="docs.json" config="{&quot;projectName&quot;:&quot;tosijs-product&quot;,&quot;projectLinks&quot;:{&quot;tosijs&quot;:&quot;https://tosijs.net&quot;,&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs-product&quot;}}" data-layout="full-screen">
+  <tosi-doc-system docs="docs.json?v=658aefaacf1a" config="{&quot;projectName&quot;:&quot;tosijs-product&quot;,&quot;projectLinks&quot;:{&quot;tosijs&quot;:&quot;https://tosijs.net&quot;,&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs-product&quot;}}" data-layout="full-screen">
   <article class="doc-content">
 <h1>tosijs-product</h1>
 <!--{ "pin": "top", "order": 1, "layout": "full-screen", "headTitle": "tosijs-product — cinematic, scroll-driven product pages in HTML", "description": "Build Apple-style, scroll-linked product stories with declarative web components. tosijs-product pins sections and drives Lottie, video (WebP mosaics), BabylonJS 3D, and CSS interpolation from scroll position — authored in plain HTML.", "keywords": ["scrollytelling", "scroll animation", "product page", "web components", "custom elements", "tosijs", "lottie", "webp mosaic", "babylonjs", "scroll-linked animation", "cinematic landing page", "apple-style scrolling"] }-->
@@ -53,7 +53,13 @@
 <p><code>tosijs-product</code> provides high-performance, scroll-linked animation components designed to create immersive, &quot;Apple-style&quot; product stories with minimal code. It unifies Lottie, video, BabylonJS 3D, Mapbox flights, themes, and declarative CSS interpolation under a single scroll engine.</p>
 <p><em>This page is the demo.</em> Scroll — the hero below is a live <code>&lt;tosi-product&gt;</code> engine pinned to this doc&#39;s scroll container, authored entirely in the Markdown you&#39;re reading.</p>
 <style>
-.doc-content:has(.tp-hero) { --doc-content-padding: 0; overflow: visible !important; }
+/* `layout: "full-screen"` sets `--doc-content-overflow: auto` on `.doc-content` at
+   (0,2,1), and `auto` makes it its own scroller — which collapses the engine's
+   runway. We need `visible` so the outer pane scrolls, so match the layout
+   selector to outrank it. tosijs-ui#119 shipped the variable in 1.14.1; before
+   that this was `overflow: visible !important`. */
+tosi-doc-system[data-layout="full-screen"] .doc-content:has(.tp-hero),
+.doc-content:has(.tp-hero) { --doc-content-padding: 0; --doc-content-overflow: visible; }
 .doc-content:has(.tp-hero) > :not(.tp-hero):not(style) { max-width: 44rem; margin-inline: auto; padding-inline: 1.25rem; box-sizing: border-box; }
 .tp-hero h1, .tp-hero h2, .tp-hero h3 { color:var(--fg); border:none; line-height:1.08; letter-spacing:-.01em; }
 .tp-hero .media-overlay h1, .tp-hero .media-overlay h2 { color:#fff; }
@@ -381,6 +387,6 @@ app.defaultTheme = &quot;midnight&quot;;
     <li><a href="https://www.npmjs.com/package/tosijs-product" data-icon="npm">npmjs</a></li>
   </ul>
   </tosi-doc-system>
-  <script type="module" src="hydrate.js"></script>
+  <script type="module" src="hydrate.js?v=0.7.0"></script>
 </body>
 </html>

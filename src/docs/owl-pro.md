@@ -7,7 +7,13 @@
    position:sticky the engine runs on — and under `full-screen` leaves the page with no
    scroll container at all. The documented escape hatch until tosijs-ui#119 lands a
    `--doc-content-overflow` variable. */
-.doc-content:has(.op) { --doc-content-padding: 0; overflow: visible !important; }
+/* `layout: "full-screen"` sets `--doc-content-overflow: auto` on `.doc-content` at
+   (0,2,1), and `auto` makes it its own scroller — which collapses the engine's
+   runway. We need `visible` so the outer pane scrolls, so match the layout
+   selector to outrank it. tosijs-ui#119 shipped the variable in 1.14.1; before
+   that this was `overflow: visible !important`. */
+tosi-doc-system[data-layout="full-screen"] .doc-content:has(.op),
+.doc-content:has(.op) { --doc-content-padding: 0; --doc-content-overflow: visible; }
 /* The page H1 is the doc-system's title and the document's SEO heading, so it is CLIPPED,
    not removed: `display:none` would take it out of the accessibility tree and let crawlers
    discount it. The hero below carries the visible wordmark. */

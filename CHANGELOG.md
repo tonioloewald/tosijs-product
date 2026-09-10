@@ -10,6 +10,32 @@ For releases before 0.6.1, see the git history (`git log`) and tags.
 
 ### Changed
 
+- **Peers move to `tosijs ^1.9.1` / `tosijs-ui ^1.14.1`, and the CDN bundle drops 75%.**
+  `dist/index.js` goes **578,618 → 145,051 bytes gzip** (1.84MB → 483kB raw), because
+  [tosijs-ui#120](https://github.com/tonioloewald/tosijs-ui/issues/120) took CodeMirror out of
+  the `.` barrel — zero `@codemirror` references remain in `tosijs-ui/dist/index.js`, and it
+  now has its own `./codemirror` subpath. That was the 92%-of-payload finding we filed; this
+  is it landing. ESM consumers get `dist/module.js`, unchanged in shape at 8.3kB gzip.
+- **`tosijs` is now a devDependency as well as a peer.** It is a peer only, so
+  `bun install` would never pull the newer copy into `node_modules` — the repo would declare
+  `^1.9.1` and keep testing against 1.8.1. That is exactly what release-doctor's
+  `peer/dev agreement` check exists to catch, and it caught it here.
+
+### Removed
+
+- **The `overflow: visible !important` escape hatch, from all seven pages.**
+  [tosijs-ui#119](https://github.com/tonioloewald/tosijs-ui/issues/119) shipped
+  `--doc-content-overflow` in 1.14.1, so the engine's `position: sticky` requirement is now
+  expressed as a variable rather than a fight with an inline style.
+
+  One wrinkle worth recording: on a `full-screen` page the layout sets that variable to `auto`
+  at specificity (0,2,1), and `auto` makes `.doc-content` its own scroller, which collapses the
+  engine's runway. Those two pages match the layout selector to outrank it; the five
+  `full-width` pages need only a plain rule. Verified in a real browser on all three page
+  shapes — engine runways of 29,032 / 20,045 / 1,524 px, `overflow: visible`, no `!important`.
+
+### Changed
+
 - **The 3D scroll controllers now target [tosijs-3d](https://3d.tosijs.net)'s `<tosi-b3d>`**;
   tosijs-ui's `<tosi-3d>` is documented as the legacy path, on the expectation that its 3D is
   deprecated. **No code changed and none needed to** — `findScene()` duck-types on a `.scene`

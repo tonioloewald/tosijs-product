@@ -12,12 +12,13 @@
         "happy-dom": "^20.7.0",
         "marked": "^16.4.2 || ^17.0.0 || ^18.0.0",
         "tjs-lang": "^0.13.6",
-        "tosijs-ui": "^1.12.7",
+        "tosijs": "^1.9.1",
+        "tosijs-ui": "^1.14.1",
         "typescript": "^5.9.3",
       },
       "peerDependencies": {
-        "tosijs": "^1.8.1",
-        "tosijs-ui": "^1.12.7",
+        "tosijs": "^1.9.1",
+        "tosijs-ui": "^1.14.1",
       },
       "optionalPeers": [
         "tosijs-ui",
@@ -101,11 +102,11 @@
 
     "tjs-lang": ["tjs-lang@0.13.6", "", { "dependencies": { "acorn": "^8.15.0", "acorn-loose": "^8.5.2", "acorn-walk": "^8.3.4", "tosijs-schema": "^1.5.1" }, "peerDependencies": { "@codemirror/autocomplete": "^6.0.0", "@codemirror/lang-javascript": "^6.0.0", "@codemirror/language": "^6.0.0", "@codemirror/state": "^6.0.0", "@codemirror/view": "^6.0.0" }, "optionalPeers": ["@codemirror/autocomplete", "@codemirror/lang-javascript", "@codemirror/language", "@codemirror/state", "@codemirror/view"], "bin": { "tjs": "src/cli/tjs.ts", "tjsx": "src/cli/tjsx.ts", "tjs-playground": "src/cli/playground.ts", "create-tjs-app": "src/cli/create-app.ts", "ajs-install-vscode": "bin/install-vscode.sh", "ajs-install-cursor": "bin/install-cursor.sh" } }, "sha512-7URqewLOr4SNcRYFAtrb19x1WQsvmiub51Pr6KyHZxoPEkDuQseGSW6Yg8yvbMuRyhHGcIMTvK8mhr2YngLzuA=="],
 
-    "tosijs": ["tosijs@1.8.1", "", { "bin": { "tosijs": "dist/cli.mjs" } }, "sha512-lUK49nDEIVQkOIk5Vk9wUuAWEMeZsTIhwWZ7ud3OgkFcoGDRxDDLnEWoSkL61XX/I4vUHXRDRf+tlVgPMUzfqw=="],
+    "tosijs": ["tosijs@1.10.1", "", { "bin": { "tosijs": "dist/cli.mjs" } }, "sha512-5Odprzo2Kup/AMLWAiulnJMC2pccG64518wlGm2nxsZbaRt1WcsBGTHe6FGBusHx9XW9vvKwjb451JHpKSkRpg=="],
 
     "tosijs-schema": ["tosijs-schema@1.5.1", "", {}, "sha512-ovWLISVLE8LBHQhX8mr3JKH2/fYFDs55fbdpIUxuXQCYB0ugSu1pTj9wA4zhQtdkxHH+MBXT1Zo7yQrtm6zQKg=="],
 
-    "tosijs-ui": ["tosijs-ui@1.12.7", "", { "dependencies": { "@codemirror/autocomplete": "^6.20.3", "@codemirror/commands": "^6.10.4", "@codemirror/lang-css": "^6.3.1", "@codemirror/lang-html": "^6.4.11", "@codemirror/lang-javascript": "^6.2.5", "@codemirror/lang-markdown": "^6.5.1", "@codemirror/language": "^6.12.4", "@codemirror/lint": "^6.9.7", "@codemirror/search": "^6.7.1", "@codemirror/state": "^6.7.1", "@codemirror/theme-one-dark": "^6.1.3", "@codemirror/view": "^6.43.7" }, "peerDependencies": { "@resvg/resvg-js": "^2.6.2", "chokidar": "^4.0.3", "happy-dom": "^20.7.0", "marked": "^16.4.2 || ^17.0.0 || ^18.0.0", "tjs-lang": "^0.13.1", "tosijs": "^1.7.8", "tosijs-schema": "^1.8.0" }, "optionalPeers": ["@resvg/resvg-js", "chokidar", "happy-dom", "tjs-lang", "tosijs-schema"], "bin": { "tosijs-make-icons": "bin/make-icon-data.js", "tosijs-dev-certs": "tls/create-dev-certs.sh", "tosijs-tunnel": "bin/tunnel.ts", "tosijs-deploy": "bin/deploy-preview.ts", "tosijs-release-notes": "bin/release-notes.ts", "tosijs-caddy-install": "bin/caddy-install.ts" } }, "sha512-Wotfyb26v+7LFTR2FVRAt3vPaK9acv/nhqWIbH/MMl/V5HDynGVDFhjzsdk0hguBGwsMA8t3fkUA/oYjqSoO1Q=="],
+    "tosijs-ui": ["tosijs-ui@1.14.1", "", { "dependencies": { "@codemirror/autocomplete": "^6.20.3", "@codemirror/commands": "^6.10.4", "@codemirror/lang-css": "^6.3.1", "@codemirror/lang-html": "^6.4.11", "@codemirror/lang-javascript": "^6.2.5", "@codemirror/lang-markdown": "^6.5.1", "@codemirror/language": "^6.12.4", "@codemirror/lint": "^6.9.7", "@codemirror/search": "^6.7.1", "@codemirror/state": "^6.7.1", "@codemirror/theme-one-dark": "^6.1.3", "@codemirror/view": "^6.43.7" }, "peerDependencies": { "@resvg/resvg-js": "^2.6.2", "chokidar": "^4.0.3", "happy-dom": "^20.7.0", "marked": "^16.4.2 || ^17.0.0 || ^18.0.0", "tjs-lang": "^0.13.1", "tosijs": "^1.9.1", "tosijs-schema": "^1.8.0" }, "optionalPeers": ["@resvg/resvg-js", "chokidar", "happy-dom", "tjs-lang", "tosijs-schema"], "bin": { "tosijs-make-icons": "bin/make-icon-data.js", "tosijs-dev-certs": "tls/create-dev-certs.sh", "tosijs-tunnel": "bin/tunnel.ts", "tosijs-deploy": "bin/deploy-preview.ts", "tosijs-release-notes": "bin/release-notes.ts", "tosijs-caddy-install": "bin/caddy-install.ts" } }, "sha512-54I8eglPkv+Kq6D15wJmRRTYatyGGpmEGsCFITGMQyHl5/CzgOMsiu8+TSIoCAPGPdw6H27luYAqm8Q8Ajo4YQ=="],
 
     "typescript": ["typescript@5.9.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw=="],
 
@@ -118,7 +119,5 @@
     "ws": ["ws@8.21.0", "", { "peerDependencies": { "bufferutil": "^4.0.1", "utf-8-validate": ">=5.0.2" }, "optionalPeers": ["bufferutil", "utf-8-validate"] }, "sha512-Vsp28b7DRcimFQvrqu2Wek3z1iYxDCWqHYB8Qsnk/S4RfaCQzPGPyBNuVjJV3cd6UiKtUtp6sNM77gWvzcCH+g=="],
 
     "tjs-lang/tosijs-schema": ["tosijs-schema@1.8.1", "", {}, "sha512-ygx1+yaGYzGtnAdlS43b/0+R99FL8Teui+UHqiRP2YK6Nhfr4M1gxtNF2RrbxDCU6DGSxltgihLlN3BvxiGVnQ=="],
-
-    "tosijs-ui/tosijs-schema": ["tosijs-schema@1.8.1", "", {}, "sha512-ygx1+yaGYzGtnAdlS43b/0+R99FL8Teui+UHqiRP2YK6Nhfr4M1gxtNF2RrbxDCU6DGSxltgihLlN3BvxiGVnQ=="],
   }
 }

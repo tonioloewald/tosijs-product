@@ -21,7 +21,7 @@ elements, against `<tosi-3d>`'s four attributes.
 > for it to find and it silently does nothing. That was true from the day it shipped while this
 > page said otherwise; see the CHANGELOG.
 
-<style>.doc-content:has(.doc-demo){--doc-content-padding:0;overflow:visible !important}.doc-content:has(.doc-demo)>:not(.doc-demo):not(style){max-width:44rem;margin-inline:auto;padding-inline:1.25rem;box-sizing:border-box}.doc-demo .media{height:var(--tosi-view-size,70vh);position:relative;overflow:hidden;background:#0a0a12}.doc-demo .media>tosi-3d{position:absolute;inset:0;width:100%;height:100%}</style>
+<style>.doc-content:has(.doc-demo){--doc-content-padding:0;--doc-content-overflow:visible}.doc-content:has(.doc-demo)>:not(.doc-demo):not(style){max-width:44rem;margin-inline:auto;padding-inline:1.25rem;box-sizing:border-box}.doc-demo .media{height:var(--tosi-view-size,70vh);position:relative;overflow:hidden;background:#0a0a12}.doc-demo .media>tosi-3d{position:absolute;inset:0;width:100%;height:100%}</style>
 <tosi-product class="doc-demo">
 <tosi-product-section scroll="150">
 <div class="media">

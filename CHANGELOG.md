@@ -10,9 +10,22 @@ For releases before 0.6.1, see the git history (`git log`) and tags.
 
 ## [0.8.0] — 2026-09-12
 
+### Breaking
+
+- **The CDN IIFE no longer registers the tosijs-ui doc-authoring elements.** Eight are gone —
+  `<tosi-code>`, `<tosi-example>`, `<tosi-doc-system>`, `<tosi-doc-system-prefs>`,
+  `<tosi-css-var-editor>`, `<tosi-line-offset-probe>`, `<tosi-test-results>`,
+  `<tosi-tests-done>` (81 → 73 registered elements). **This is the size win, not a side
+  effect of it**: those modules were 77% of the tosijs-ui barrel, and dropping them is what
+  took the bundle from 578kB to 145kB gzip. They are doc-site tooling rather than
+  product-page components, so a `<script src>` product page never wanted them — but if you
+  were relying on them from this bundle, load them from tosijs-ui's own subpaths
+  (`tosijs-ui/doc-browser`, `tosijs-ui/live-example`). `getting-started.md` claimed the
+  opposite until now and has been corrected.
+
 ### Changed
 
-- **Peers move to `tosijs ^1.9.1` / `tosijs-ui ^1.14.1`, and the CDN bundle drops 75%.**
+- **Peers move to `tosijs ^1.10.0` / `tosijs-ui ^1.14.1`, and the CDN bundle drops 75%.**
   `dist/index.js` goes **578,618 → 145,051 bytes gzip** (1.84MB → 483kB raw), because
   [tosijs-ui#120](https://github.com/tonioloewald/tosijs-ui/issues/120) took CodeMirror out of
   the `.` barrel — zero `@codemirror` references remain in `tosijs-ui/dist/index.js`, and it
@@ -24,6 +37,13 @@ For releases before 0.6.1, see the git history (`git log`) and tags.
   `peer/dev agreement` check exists to catch, and it caught it here.
 
 ### Fixed
+
+- **The declared `tosijs` floor was a version our own types do not compile against.**
+  The shipped `.d.ts` import `ComponentAttrs`, which landed in tosijs **1.10.0** — but the peer
+  was set to `^1.9.1`, the floor *tosijs-ui* needs. A consumer on 1.9.x would install cleanly and
+  get `TS2305: Module 'tosijs' has no exported member 'ComponentAttrs'` on every type import.
+  It typechecked here only because the lockfile happened to resolve 1.10.1. Floor raised to
+  `^1.10.0`, which is what this package actually requires.
 
 - **The build stopped typechecking, and I shipped it into a commit.** tosijs 1.10 removed
   `Component`'s `[key: string]: any` index signature, so `initAttributes` keys are no longer

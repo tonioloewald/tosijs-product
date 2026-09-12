@@ -236,7 +236,7 @@ The IIFE build is self-contained — a single script tag gives you `tosijs`, `to
         margin: 0;
       }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/tosijs-product@0.7.0/dist/index.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tosijs-product@0.8.0/dist/index.js"></script>
   </head>
   <body>
     <tosi-product>

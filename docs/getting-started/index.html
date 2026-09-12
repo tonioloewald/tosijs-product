@@ -30,27 +30,30 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="../doc-system.css?v=0.8.0" data-tosi-doc-system />
   <title>Getting Started — tosijs-product</title>
-  <meta name="description" content="A single script tag gives you everything — tosijs, tosijs-ui, and tosijs-product with all custom elements registered" />
+  <meta name="description" content="A single script tag gives you tosijs, tosijs-product, and the tosijs-ui components — everything a product page needs, with its custom elements registered" />
   <link rel="canonical" href="https://product.tosijs.net/getting-started/" />
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="tosijs-product" />
   <meta property="og:title" content="Getting Started — tosijs-product" />
-  <meta property="og:description" content="A single script tag gives you everything — tosijs, tosijs-ui, and tosijs-product with all custom elements registered" />
+  <meta property="og:description" content="A single script tag gives you tosijs, tosijs-product, and the tosijs-ui components — everything a product page needs, with its custom elements registered" />
   <meta property="og:url" content="https://product.tosijs.net/getting-started/" />
   <meta name="twitter:card" content="summary" />
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Getting Started","description":"A single script tag gives you everything — tosijs, tosijs-ui, and tosijs-product with all custom elements registered","url":"https://product.tosijs.net/getting-started/","inLanguage":"en","isPartOf":{"@type":"WebSite","name":"tosijs-product","url":"https://product.tosijs.net"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Getting Started","description":"A single script tag gives you tosijs, tosijs-product, and the tosijs-ui components — everything a product page needs, with its custom elements registered","url":"https://product.tosijs.net/getting-started/","inLanguage":"en","isPartOf":{"@type":"WebSite","name":"tosijs-product","url":"https://product.tosijs.net"}}</script>
   <link rel="icon" href="../favicon.svg" />
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="../docs.json?v=658aefaacf1a" config="{&quot;projectName&quot;:&quot;tosijs-product&quot;,&quot;projectLinks&quot;:{&quot;tosijs&quot;:&quot;https://tosijs.net&quot;,&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs-product&quot;}}">
+  <tosi-doc-system docs="../docs.json?v=b010d4f4b34f" config="{&quot;projectName&quot;:&quot;tosijs-product&quot;,&quot;projectLinks&quot;:{&quot;tosijs&quot;:&quot;https://tosijs.net&quot;,&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs-product&quot;}}">
   <article class="doc-content">
 <h1>Getting Started</h1>
 <h2>Installation</h2>
 <h3>Pure HTML (IIFE build)</h3>
-<p>A single script tag gives you everything — tosijs, tosijs-ui, and tosijs-product with all custom elements registered:</p>
-<pre><code class="language-markup">&lt;script src=&quot;https://cdn.jsdelivr.net/npm/tosijs-product@0.7.0/dist/index.js&quot;&gt;&lt;/script&gt;
+<p>A single script tag gives you tosijs, tosijs-product, and the tosijs-ui <strong>components</strong> — everything a product page needs, with its custom elements registered:</p>
+<pre><code class="language-markup">&lt;script src=&quot;https://cdn.jsdelivr.net/npm/tosijs-product@0.8.0/dist/index.js&quot;&gt;&lt;/script&gt;
 </code></pre>
+<blockquote>
+<p><strong>Not included since 0.8.0:</strong> the tosijs-ui <em>doc-authoring</em> elements — <code>&lt;tosi-code&gt;</code>, <code>&lt;tosi-example&gt;</code>, <code>&lt;tosi-doc-system&gt;</code>, <code>&lt;tosi-doc-system-prefs&gt;</code>, <code>&lt;tosi-css-var-editor&gt;</code>, <code>&lt;tosi-line-offset-probe&gt;</code>, <code>&lt;tosi-test-results&gt;</code>, <code>&lt;tosi-tests-done&gt;</code>. They are doc-site tooling, not product-page components, and they were most of the bundle: dropping them is what took it from 578kB to 145kB gzip. If you need them, load them from tosijs-ui&#39;s own subpaths (<code>tosijs-ui/doc-browser</code>, <code>tosijs-ui/live-example</code>) rather than from this script tag.</p>
+</blockquote>
 <h3>ESM (bundled apps)</h3>
 <pre><code class="language-bash">bun install tosijs tosijs-ui tosijs-product
 </code></pre>

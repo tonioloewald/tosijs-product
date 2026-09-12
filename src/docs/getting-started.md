@@ -4,11 +4,13 @@
 
 ### Pure HTML (IIFE build)
 
-A single script tag gives you everything — tosijs, tosijs-ui, and tosijs-product with all custom elements registered:
+A single script tag gives you tosijs, tosijs-product, and the tosijs-ui **components** — everything a product page needs, with its custom elements registered:
 
 ```markup
-<script src="https://cdn.jsdelivr.net/npm/tosijs-product@0.7.0/dist/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tosijs-product@0.8.0/dist/index.js"></script>
 ```
+
+> **Not included since 0.8.0:** the tosijs-ui *doc-authoring* elements — `<tosi-code>`, `<tosi-example>`, `<tosi-doc-system>`, `<tosi-doc-system-prefs>`, `<tosi-css-var-editor>`, `<tosi-line-offset-probe>`, `<tosi-test-results>`, `<tosi-tests-done>`. They are doc-site tooling, not product-page components, and they were most of the bundle: dropping them is what took it from 578kB to 145kB gzip. If you need them, load them from tosijs-ui's own subpaths (`tosijs-ui/doc-browser`, `tosijs-ui/live-example`) rather than from this script tag.
 
 ### ESM (bundled apps)
 

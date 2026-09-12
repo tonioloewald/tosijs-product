@@ -8,6 +8,8 @@ For releases before 0.6.1, see the git history (`git log`) and tags.
 
 ## [Unreleased]
 
+## [0.8.0] — 2026-09-12
+
 ### Changed
 
 - **Peers move to `tosijs ^1.9.1` / `tosijs-ui ^1.14.1`, and the CDN bundle drops 75%.**

@@ -43,6 +43,41 @@ narrative-landing capability.
 
 -->
 
+## `bundleRegistrations` greps for a tag name, so an inert build reports green
+
+**Issue:** https://github.com/tonioloewald/tosijs-ui/issues/159 (filed 2026-09-12, `tosijs-ui@1.14.1`)
+
+**Context.** 1.14.1 (#133) stopped re-exporting the doc-system cluster from the barrel — most of the
+1.68MB → 0.38MB win, and correct. But our hydration entry was `import "tosijs-ui"` alone, so the
+built site lost the doc system entirely and rendered as the `:not(:defined)` static fallback. The
+guard missed it because `host-preset.js:111` checks for a bare tag-name substring, and our entry
+also does `document.querySelectorAll("tosi-doc-system")` to hand the element a `context` map — the
+shape the doc system's own API invites. Measured on two committed trees: the inert build returns
+`{ docSystem: true, liveExample: false }` — a false green on the missing component, and a warning
+naming a different one.
+
+**Suggestion.** Key on `customElements.define` adjacency or a module marker, not the tag name. Also
+worth a line in the 1.14.0 notes: the barrel change is breaking for anyone who relied on
+`import "tosijs-ui"` registering the doc system, and it presents as a styling regression.
+
+---
+
+## The build-lock ships readers but not a `stop` command, so every project reimplements the policy
+
+**Issue:** https://github.com/tonioloewald/tosijs-ui/issues/160 (filed 2026-09-12, `tosijs-ui@1.14.1`)
+
+**Context.** `currentHolder` validates a lock with `process.kill(pid, 0)` — liveness, not identity —
+and locks survive SIGKILL/OOM in the system tmpdir (four stale ones found on this machine, two naming
+dead pids, one nine days old; pid counter observed wrapping within an hour). So a recycled pid makes
+`stop` signal an unrelated process. There is also no `role` gate, so `stop` can kill an in-flight
+build. tosijs-ui's own port-reclaim path already does the identity check properly two files away.
+
+**Suggestion.** `stopHolder(root, { role: 'dev-server' })` as a `tosijs-ui/site` export. If it stays
+local deliberately, record that here as a keep-decision so our twin implementation is a choice
+rather than drift. Our `bun run stop` is the second copy; tosijs-3d will be the third.
+
+---
+
 ## tosijs-3d: no plain static-prop element, so the CDN kit libraries need JavaScript
 
 **Issue:** https://github.com/tonioloewald/tosijs-3d/issues/68 (filed 2026-09-04, `tosijs-3d@0.8.0`)

@@ -2,6 +2,54 @@
 
 Follow-ups filed during releases (per the shared review/releasing practices). Newest first.
 
+## From the 0.8.0 pre-minor review (`reviews/0.8.0-pre-minor-review.md`) — BLOCK, 3 blockers cleared
+
+All three blockers were fixed before the tag (inert doc site, peer floor below the shipped types,
+undocumented IIFE element removal). These are the 18 that were not.
+
+- [ ] **`--stop` hardening (MJ1, verified).** `currentHolder()` validates the lock with
+      `process.kill(pid, 0)` — **liveness, not identity**. Locks are not cleaned up on
+      SIGKILL/OOM/power loss and live in the system tmpdir; the reviewer found four stale
+      `tosijs-build-*.lock` files on this machine, two naming dead pids (one nine days old), and
+      watched the pid counter wrap within an hour. So `bun run stop` can SIGTERM an unrelated live
+      process. Add a pid-identity cross-check (upstream's own port-reclaim path does exactly this
+      two files away: `ps -p PID -o comm=` then the process cwd), a `role === 'dev-server'` gate so
+      it does not kill an in-flight build, a one-line receipt on stderr, and ESRCH vs EPERM in the
+      catch.
+- [ ] **Document `bun run stop`.** It is in no README, no CHANGELOG entry and not in CLAUDE.md's
+      Commands block — its whole rationale lives in a comment in `bin/site.ts`, which is the one
+      place someone reaching for `pkill -f` will not be looking.
+- [ ] **Print sizes for the artefacts we actually ship.** `buildLibrary()` prints nothing for
+      `dist/module.js` or `dist/index.js`; the only size line the build emits is for `iife.js`, a
+      *different* bundle. This release's headline 75% claim was measured by hand, and nothing would
+      notice a regression — in a repo bitten by this class twice. Use `tosijs-ui/site`'s
+      `gzipSizeInChild`, optionally with a ceiling assertion.
+- [ ] **Gate owl-pro's heavy scenes on proximity.** ~13.9MB and **three live WebGL contexts** at
+      `scrollTop 0`, before any scroll. Withhold `src` (`data-src` → `src` when the owning section
+      nears `activeIdx`; the engine already computes it), and reconsider two 3D models on one page.
+      Two of the finding's superlatives were refuted in verification: the home page is heavier
+      (~18.3MB) and already ships that way, and frame time is fine (median 8.3ms).
+- [ ] **Memoise per-frame dispatch.** `_update()` re-runs full animator dispatch on every section
+      each frame even when progress is unchanged, and each interpolator rebuilds its waypoint
+      dictionary from the CSSOM per call. Measured 0.25–0.31 ms/frame on an M-series Mac — ~3% of a
+      120Hz budget, so not a problem today, but ~2.5ms on a phone 10× slower competing with three
+      WebGL loops. Skip unchanged progress in `_notify`; cache each interpolator's parsed waypoints.
+      (This is M4 from the 0.7.0 review, now measured.)
+- [ ] **Give `tosi-prism`'s security boundary a test.** Our only module that fetches and executes
+      third-party code has zero coverage, and both invariants — SRI fail-closed and the
+      `Object.hasOwn` allowlist — can be reverted with `bun test` and `bun run build` staying green.
+      Both were already hand-fixed once, in the 0.7.0 review. Factor `integrityFor(path)` /
+      `resolveLoadSet(languages)` as pure seams and add `src/prism.test.ts`.
+- [ ] The remaining minors and nits are in the report's follow-up section; work them from there.
+
+### → filed upstream (see `UPSTREAM.md`)
+- [ ] `bundleRegistrations` false green (MJ2) — greps for a bare tag name, so our inert build
+      reported `{ docSystem: true }`. This is the guard that should have caught B1 and did not.
+- [ ] `stopHolder()` as a `tosijs-ui/site` export — tosijs-ui ships the lock *readers* but not the
+      command, so tosijs-ui has one implementation, we now have a second, and tosijs-3d will be the
+      third. Role gate and pid-identity are policy, not project glue.
+
+
 ## From the 0.7.0 pre-release review (`reviews/0.7.0-first-ever-review.md`)
 
 **Filed:** 0.7.0 (2026-09-01). Items routed to this repo by the review's follow-up section.

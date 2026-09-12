@@ -1,5 +1,5 @@
 /*{ "layout": "full-width" }*/
-import { Component, elements } from "tosijs";
+import { Component, type ComponentAttrs, elements } from "tosijs";
 
 const { slot } = elements;
 
@@ -134,3 +134,11 @@ export class TosiScrollMap extends Component {
 export const tosiScrollMap = TosiScrollMap.elementCreator({
   tag: "tosi-scroll-map",
 });
+
+/*
+Declaration merge: `initAttributes` keys become instance properties at hydration, which
+the type system cannot infer from a static. tosijs 1.10 removed the `[key: string]: any`
+index signature that used to paper over this, so these are now REAL types rather than
+`any` — and a typo is a compile error.
+*/
+export interface TosiScrollMap extends ComponentAttrs<typeof TosiScrollMap.initAttributes> {}

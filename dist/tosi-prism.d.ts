@@ -1,4 +1,4 @@
-import { Component } from "tosijs";
+import { Component, type ComponentAttrs } from "tosijs";
 /**
  * Lazy-load PrismJS core + the requested grammars from jsDelivr.
  * Safe to call repeatedly; each script + theme is fetched at most once.
@@ -48,3 +48,5 @@ export declare class TosiPrism extends Component {
     private _highlight;
 }
 export declare const tosiPrism: import("tosijs").ElementCreator<TosiPrism>;
+export interface TosiPrism extends ComponentAttrs<typeof TosiPrism.initAttributes> {
+}

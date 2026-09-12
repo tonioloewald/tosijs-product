@@ -68,7 +68,7 @@ Scrubs a named BabylonJS `AnimationGroup` to the frame for the current progress 
 See also [`<tosi-scroll-map>`](/tosi-scroll-map/) and [`<tosi-product>`](/tosi-product/).
 */
 
-import { Component, elements } from "tosijs";
+import { Component, type ComponentAttrs, elements } from "tosijs";
 import { numAttr } from "./waypoints";
 
 const { slot } = elements;
@@ -318,3 +318,13 @@ export const tosiScrollTime = TosiScrollTime.elementCreator({
 export const tosiScrollAnimation = TosiScrollAnimation.elementCreator({
   tag: "tosi-scroll-animation",
 });
+
+/*
+Declaration merge: `initAttributes` keys become instance properties at hydration, which
+the type system cannot infer from a static. tosijs 1.10 removed the `[key: string]: any`
+index signature that used to paper over this, so these are now REAL types rather than
+`any` — and a typo is a compile error.
+*/
+export interface TosiScrollCamera extends ComponentAttrs<typeof TosiScrollCamera.initAttributes> {}
+export interface TosiScrollTime extends ComponentAttrs<typeof TosiScrollTime.initAttributes> {}
+export interface TosiScrollAnimation extends ComponentAttrs<typeof TosiScrollAnimation.initAttributes> {}

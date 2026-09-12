@@ -50,7 +50,7 @@ view (top-right). No JavaScript; it is the HTML shown here.
 See also [`<tosi-product>`](/tosi-product/) and [`<tosi-filmstrip>`](/tosi-filmstrip/).
 */
 
-import { Component } from "tosijs";
+import { Component, type ComponentAttrs } from "tosijs";
 import { interpolateStrings, rangeT } from "./waypoints";
 
 export class TosiInterpolator extends Component {
@@ -150,3 +150,11 @@ export const tosiInterpolator = TosiInterpolator.elementCreator({
 export const tosiWaypoint = TosiWaypoint.elementCreator({
   tag: "tosi-waypoint",
 });
+
+/*
+Declaration merge: `initAttributes` keys become instance properties at hydration, which
+the type system cannot infer from a static. tosijs 1.10 removed the `[key: string]: any`
+index signature that used to paper over this, so these are now REAL types rather than
+`any` — and a typo is a compile error.
+*/
+export interface TosiWaypoint extends ComponentAttrs<typeof TosiWaypoint.initAttributes> {}

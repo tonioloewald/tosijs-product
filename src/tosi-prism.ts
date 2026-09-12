@@ -32,7 +32,7 @@ highlightCodeBlocks(document.querySelector('.rendered-markdown'))
 See also [`<tosi-product>`](/tosi-product/).
 */
 
-import { Component } from "tosijs";
+import { Component, type ComponentAttrs } from "tosijs";
 
 /*
 Pinned exactly, not to the floating `1` it used to be, and integrity-checked.
@@ -327,3 +327,11 @@ function escapeHtml(s: string): string {
 }
 
 export const tosiPrism = TosiPrism.elementCreator({ tag: "tosi-prism" });
+
+/*
+Declaration merge: `initAttributes` keys become instance properties at hydration, which
+the type system cannot infer from a static. tosijs 1.10 removed the `[key: string]: any`
+index signature that used to paper over this, so these are now REAL types rather than
+`any` — and a typo is a compile error.
+*/
+export interface TosiPrism extends ComponentAttrs<typeof TosiPrism.initAttributes> {}

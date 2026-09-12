@@ -1,4 +1,4 @@
-import { Component } from "tosijs";
+import { Component, type ComponentAttrs } from "tosijs";
 export type ThemeMap = Record<string, string>;
 export type ThemeRegistry = Record<string, ThemeMap>;
 /** The nearest ancestor `<tosi-product-section>`, or `null` if this element isn't inside one. */
@@ -156,3 +156,7 @@ export declare class TosiProductHeader extends Component {
 export declare const tosiProduct: import("tosijs").ElementCreator<TosiProduct>;
 export declare const tosiProductSection: import("tosijs").ElementCreator<TosiProductSection>;
 export declare const tosiProductHeader: import("tosijs").ElementCreator<TosiProductHeader>;
+export interface TosiProduct extends ComponentAttrs<typeof TosiProduct.initAttributes> {
+}
+export interface TosiProductHeader extends ComponentAttrs<typeof TosiProductHeader.initAttributes> {
+}

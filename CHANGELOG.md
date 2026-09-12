@@ -21,6 +21,21 @@ For releases before 0.6.1, see the git history (`git log`) and tags.
   `^1.9.1` and keep testing against 1.8.1. That is exactly what release-doctor's
   `peer/dev agreement` check exists to catch, and it caught it here.
 
+### Fixed
+
+- **The build stopped typechecking, and I shipped it into a commit.** tosijs 1.10 removed
+  `Component`'s `[key: string]: any` index signature, so `initAttributes` keys are no longer
+  typed on `this` — and `<tosi-product debug>`'s `this.debug`, added in 0.7.0, became a hard
+  error. Fixed with the documented one-line declaration merge
+  (`export interface X extends ComponentAttrs<typeof X.initAttributes> {}`), applied to all ten
+  components. These are now **real types instead of `any`**: a typo is a compile error
+  (verified — `this.debugg` gives `TS2551: Did you mean 'debug'?`).
+
+  `TosiProductSection` is deliberately *not* merged: its `scroll` attribute collides with
+  `Element.scroll()`, which the old `any` was hiding. Nothing reads `this.scroll` — the engine
+  reads it off the child with `getAttribute` — so the collision never bit, and renaming a
+  documented attribute to satisfy a type would be a breaking change for no gain.
+
 ### Removed
 
 - **The `overflow: visible !important` escape hatch, from all seven pages.**

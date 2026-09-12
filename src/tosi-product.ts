@@ -49,7 +49,7 @@ A `<tosi-product>` placed inside a `<tosi-product-section>` becomes a **follower
 See also [`<tosi-interpolator>`](/tosi-interpolator/) and [`<tosi-filmstrip>`](/tosi-filmstrip/).
 */
 
-import { Component, elements } from "tosijs";
+import { Component, type ComponentAttrs, elements } from "tosijs";
 import { interpolateThemeValue, isColor, numAttr } from "./waypoints";
 
 const { div, slot } = elements;
@@ -753,3 +753,19 @@ export const tosiProductSection = TosiProductSection.elementCreator({
 export const tosiProductHeader = TosiProductHeader.elementCreator({
   tag: "tosi-product-header",
 });
+
+/*
+Declaration merge: `initAttributes` keys become instance properties at hydration, which
+the type system cannot infer from a static. tosijs 1.10 removed the `[key: string]: any`
+index signature that used to paper over this, so these are now REAL types rather than
+`any` — and a typo is a compile error.
+*/
+export interface TosiProduct extends ComponentAttrs<typeof TosiProduct.initAttributes> {}
+/*
+TosiProductSection is deliberately NOT merged: its `scroll` attribute collides with
+`Element.scroll()`, and declaration-merging a number over a DOM method is a type error
+(TS2320). Nothing reads `this.scroll` — the engine reads `getAttribute("scroll")` from the
+parent, which is why the collision never bit while the old `any` index signature hid it.
+Renaming the attribute would be a breaking change to the documented API for no gain.
+*/
+export interface TosiProductHeader extends ComponentAttrs<typeof TosiProductHeader.initAttributes> {}

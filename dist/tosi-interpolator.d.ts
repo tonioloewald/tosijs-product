@@ -1,4 +1,4 @@
-import { Component } from "tosijs";
+import { Component, type ComponentAttrs } from "tosijs";
 export declare class TosiInterpolator extends Component {
     static styleSpec: {
         ":host": {
@@ -20,3 +20,5 @@ export declare class TosiWaypoint extends Component {
 }
 export declare const tosiInterpolator: import("tosijs").ElementCreator<TosiInterpolator>;
 export declare const tosiWaypoint: import("tosijs").ElementCreator<TosiWaypoint>;
+export interface TosiWaypoint extends ComponentAttrs<typeof TosiWaypoint.initAttributes> {
+}

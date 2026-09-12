@@ -1,4 +1,4 @@
-import { Component } from "tosijs";
+import { Component, type ComponentAttrs } from "tosijs";
 export declare class TosiFilmstrip extends Component {
     static initAttributes: {
         src: string;
@@ -35,3 +35,5 @@ export declare class TosiFilmstrip extends Component {
     render(): void;
 }
 export declare const tosiFilmstrip: import("tosijs").ElementCreator<TosiFilmstrip>;
+export interface TosiFilmstrip extends ComponentAttrs<typeof TosiFilmstrip.initAttributes> {
+}

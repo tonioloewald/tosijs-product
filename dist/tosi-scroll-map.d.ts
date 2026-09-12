@@ -1,4 +1,4 @@
-import { Component } from "tosijs";
+import { Component, type ComponentAttrs } from "tosijs";
 export declare class TosiScrollMap extends Component {
     static initAttributes: {
         easing: string;
@@ -12,3 +12,5 @@ export declare class TosiScrollMap extends Component {
     setScrollProgress(progress: number): void;
 }
 export declare const tosiScrollMap: import("tosijs").ElementCreator<TosiScrollMap>;
+export interface TosiScrollMap extends ComponentAttrs<typeof TosiScrollMap.initAttributes> {
+}

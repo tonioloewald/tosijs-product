@@ -48,7 +48,7 @@ Produces `my-video_10x10_100.webp`. A grid (not one long strip) keeps within the
 See also [`<tosi-product>`](/tosi-product/) and [`<tosi-interpolator>`](/tosi-interpolator/).
 */
 
-import { Component, elements } from "tosijs";
+import { Component, type ComponentAttrs, elements } from "tosijs";
 
 const { canvas } = elements;
 
@@ -188,3 +188,11 @@ export class TosiFilmstrip extends Component {
 export const tosiFilmstrip = TosiFilmstrip.elementCreator({
   tag: "tosi-filmstrip",
 });
+
+/*
+Declaration merge: `initAttributes` keys become instance properties at hydration, which
+the type system cannot infer from a static. tosijs 1.10 removed the `[key: string]: any`
+index signature that used to paper over this, so these are now REAL types rather than
+`any` — and a typo is a compile error.
+*/
+export interface TosiFilmstrip extends ComponentAttrs<typeof TosiFilmstrip.initAttributes> {}

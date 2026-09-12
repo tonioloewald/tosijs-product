@@ -1,4 +1,4 @@
-import { Component } from "tosijs";
+import { Component, type ComponentAttrs } from "tosijs";
 /**
  * Scroll-driven camera controller for B3d scenes.
  *
@@ -78,3 +78,9 @@ export declare class TosiScrollAnimation extends Component {
 export declare const tosiScrollCamera: import("tosijs").ElementCreator<TosiScrollCamera>;
 export declare const tosiScrollTime: import("tosijs").ElementCreator<TosiScrollTime>;
 export declare const tosiScrollAnimation: import("tosijs").ElementCreator<TosiScrollAnimation>;
+export interface TosiScrollCamera extends ComponentAttrs<typeof TosiScrollCamera.initAttributes> {
+}
+export interface TosiScrollTime extends ComponentAttrs<typeof TosiScrollTime.initAttributes> {
+}
+export interface TosiScrollAnimation extends ComponentAttrs<typeof TosiScrollAnimation.initAttributes> {
+}

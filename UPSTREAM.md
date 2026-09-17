@@ -108,6 +108,9 @@ duck-types on a `.scene` property rather than naming a host.
 ## `version.json` restamps on every build, so a project that commits `docs/` is permanently dirty
 
 **Issue:** https://github.com/tonioloewald/tosijs-ui/issues/122 (filed 2026-09-01, `tosijs-ui@1.12.7`)
+— **RESOLVED, shipped in `tosijs-ui@1.14.1`.** The build now hashes the rest of the output into a
+`contentHash` field and preserves the previous stamp when nothing else changed. Verified here at
+0.8.0: a rebuild at `a01f34e` left `docs/` byte-identical, stamp still on `122374c`.
 
 **Context.** `build-stamp.ts` writes `git rev-parse --short HEAD` into `/version.json` on every
 build. We commit `docs/`, so: build at A stamps A, committing that produces B containing a stamp

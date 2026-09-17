@@ -262,3 +262,9 @@ consumers who never use it.
 
 **Done when:** `dist/index.js` is back near its pre-1.7 gzip size with no loss of declarative
 capability, verified on the live doc site.
+
+- **Guard our own IIFE's composition.** `dist/index.js` is what CDN consumers execute and its size
+  is set almost entirely by the tosijs-ui barrel, which we don't control — it has already swung
+  578kB -> 142kB gzip without any change on our side. A deny-list + gzip-budget assertion in
+  `bin/site.ts` would catch a re-entanglement at build time instead of in a consumer's bundle.
+  Script and both-directions verification are in tosijs-ui#166.

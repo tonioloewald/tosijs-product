@@ -333,3 +333,24 @@ deeper look before publishing.
 **Suggestion.** Once root-cause is identified, either guard inside our
 engine OR (if the doc-browser is creating stub upgrades that shouldn't be)
 fix that in tosijs-ui. Tracking here so we don't lose it.
+
+---
+
+## The barrel's composition is unguarded — editor-free is a side effect, not a property
+
+**Issue:** https://github.com/tonioloewald/tosijs-ui/issues/166 (filed 2026-09-17, `tosijs-ui@1.14.1`)
+
+**Context.** #120 is effectively resolved, but sideways: #133 moved the doc-system cluster out of
+the barrel and CodeMirror went with it. Nothing asserts the result, so the property is one `import`
+away from reverting, and the first signal would be a consumer noticing ~400kB gzip of growth long
+after the fact. Same shape as #159 (build reports green, artifact is wrong, nothing looks).
+
+**Proposed.** A ~30-line guard that bundles the `.` barrel and asserts two things: a deny-list of
+module families that must not be statically reachable (`@codemirror`, `EditorView`, `cmView`,
+`ace-builds`), and a gzip budget that catches the *next* heavy dependency nobody thought to
+deny-list. Verified both ways before filing — passes on 1.14.1 (463,160 / 138,964), and catches a
+simulated re-entanglement via `tosijs-ui/codemirror` (718,294 / 221,326, naming the leak).
+
+**For us.** Worth considering the same assertion on our own IIFE regardless of whether upstream
+adopts it: `dist/index.js` is what CDN consumers execute, and its size is set almost entirely by a
+dependency we don't control. Tracked in `TODO.md`.

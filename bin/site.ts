@@ -59,11 +59,18 @@ async function buildLibrary() {
   // Self-contained IIFE for <script src=...> consumers (CDN). Bundles
   // tosijs and tosijs-ui so the page only needs one script tag.
   //
-  // Minified deliberately: this bundles the whole tosijs-ui barrel, which since
-  // 1.12 statically drags CodeMirror in, and unminified that reached 5.38MB raw
-  // / 1.26MB gzip. It is NOT what `import 'tosijs-product'` resolves to — see
-  // the exports map in package.json, which points every module condition at
-  // dist/module.js. Only an explicit <script src> or CDN URL reaches this file.
+  // Minified deliberately: this bundles the whole tosijs-ui barrel. Unminified
+  // it is 730kB raw / 174kB gzip against 487kB / 142kB shipped.
+  //
+  // It used to be far worse — on 1.12 the barrel statically dragged CodeMirror in
+  // and this file reached 5.38MB raw / 1.26MB gzip. tosijs-ui#133 split the
+  // doc-system cluster out of the barrel, which took the editor with it: as of
+  // 1.14.1 the bundle has ZERO CodeMirror and is 487kB raw / 142kB gzip. That is
+  // also what tosijs-ui#120 asked for, so don't re-file it.
+  //
+  // This file is NOT what `import 'tosijs-product'` resolves to — see the exports
+  // map in package.json, which points every module condition at dist/module.js.
+  // Only an explicit <script src> or CDN URL reaches this file.
   await Bun.build({
     entrypoints: ["./src/index-iife.ts"],
     outdir: "dist",

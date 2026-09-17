@@ -174,6 +174,12 @@ carries a hand-written rule whose only job is to stop copy number seven reintrod
 ## The `tosijs-ui` barrel puts CodeMirror in every IIFE — 92% of our CDN bundle
 
 **Issue:** https://github.com/tonioloewald/tosijs-ui/issues/120 (filed 2026-09-01, `tosijs-ui@1.12.7`)
+— **APPARENTLY RESOLVED in `tosijs-ui@1.14.1`, awaiting maintainer confirmation.** Not fixed
+directly: #133 split the doc-system cluster out of the barrel and took CodeMirror with it. The
+figures below are the 1.12.7 measurements and no longer hold — re-measured on 1.14.1 the barrel
+alone is 463,160 raw / 138,964 gzip with zero CodeMirror, and our IIFE is 486,755 / 142kB (was
+1,839,671 / 577,813). Posted on the issue; left open because an editor-free barrel is currently a
+side effect with no regression test behind it, not a guarantee.
 
 **Context.** `tosijs-ui`'s `.` entry statically reaches CodeMirror, and an IIFE cannot code-split,
 so `dist/index.js` inlines the whole editor for every CDN consumer. Measured on 1.12.7 with

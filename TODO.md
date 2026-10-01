@@ -40,14 +40,16 @@ undocumented IIFE element removal). These are the 18 that were not.
       `Object.hasOwn` allowlist — can be reverted with `bun test` and `bun run build` staying green.
       Both were already hand-fixed once, in the 0.7.0 review. Factor `integrityFor(path)` /
       `resolveLoadSet(languages)` as pure seams and add `src/prism.test.ts`.
-- [ ] The remaining minors and nits are in the report's follow-up section; work them from there.
+The remaining minors and nits are in the report's follow-up section; work them from there.
 
 ### → filed upstream (see `UPSTREAM.md`)
-- [ ] `bundleRegistrations` false green (MJ2) — greps for a bare tag name, so our inert build
-      reported `{ docSystem: true }`. This is the guard that should have caught B1 and did not.
-- [ ] `stopHolder()` as a `tosijs-ui/site` export — tosijs-ui ships the lock *readers* but not the
-      command, so tosijs-ui has one implementation, we now have a second, and tosijs-3d will be the
-      third. Role gate and pid-identity are policy, not project glue.
+- [ ] Take tosijs-ui 1.15.0 for the `bundleRegistrations` fix (MJ2, tosijs-ui#159, fixed
+      2026-09-20). It used to grep for a bare tag name, so our inert build reported
+      `{ docSystem: true }`. This is the guard that should have caught B1 and didn't. Bump the
+      peer and devDep (and `tjs-lang` to match), then confirm the check now fails on an inert build.
+
+The `stopHolder()` export is tosijs-ui's to do: it's tosijs-ui#160, on tosijs-ui's board, and
+this project subscribes to it.
 
 
 ## From the 0.7.0 pre-release review (`reviews/0.7.0-first-ever-review.md`)
@@ -143,7 +145,7 @@ devDependency, `rm -rf dist` + `prepublishOnly`, and the capped `warnedRanges`. 
       B1 is the proof it matters — the untested half of that pair is the one that broke.
       Extract the decisions into pure exported functions, the way ownership and interpolation
       already are.
-- [ ] **Decide whether `docs/**.map` should ship at all.** `docs/iife.js.map` is 4.6MB and
+- [ ] **Decide whether the doc site's sourcemaps should ship at all** (`docs/**.map`). `docs/iife.js.map` is 4.6MB and
       `hydrate.js.map` 1.9MB, both served by GitHub Pages. They also carry haltija source text
       (from tosijs-ui's own `haltijaDev` implementation — no token, no endpoint, and the emitted
       JS is clean), which is the only wrinkle in this release's "never in `docs/`" claim.
@@ -182,8 +184,9 @@ demos and the assumptions around them.
       is exactly why it could be documented against a host that cannot satisfy it for its whole
       life without anyone noticing. A demo with `<tosi-b3d>` + `<tosi-b3d-skybox realtime-scale="0">`
       is the regression test this component's coupling needs.
-- [ ] **Blocked on [tosijs-3d#68](https://github.com/tonioloewald/tosijs-3d/issues/68)** — a plain
-      static prop element. Until that lands, the CDN's 5,108 kit models are unreachable from a page
+- [x] ✅ **Unblocked: [tosijs-3d#68](https://github.com/tonioloewald/tosijs-3d/issues/68) shipped** as
+      `<tosi-b3d-prop>` in tosijs-3d 0.8.1 (closed 2026-09-05). Before that, a plain
+      static prop element was missing. Until that lands, the CDN's 5,108 kit models are unreachable from a page
       that cannot run JavaScript, so demo 3D is limited to whatever ships as a single-root glb.
 
 ### Still open — deferred deliberately, with the reason
@@ -206,7 +209,7 @@ demos and the assumptions around them.
       review rather than riding along in a release remediation.
 
 ### Accepted risk (owner decision, not open work)
-- **Unrestricted public Mapbox token** (`src/tosi-scroll-map.ts`, `README.md`, deployed `docs/`).
+**Unrestricted public Mapbox token** (`src/tosi-scroll-map.ts`, `README.md`, deployed `docs/`).
   Confirmed by the review: the API returns 200 with a spoofed referer, so any origin can bill
   tiles to the account. **The owner accepted this on 2026-09-01** — it is a public token, which is
   designed to be client-visible, and the demo needs a live one. Restricting it to
@@ -219,10 +222,10 @@ demos and the assumptions around them.
       `tosi-scroll-map`. The 53 green tests cover `tosi-product`'s pure seams, theming, and
       interpolation/waypoints only.
 - [ ] No tests for `bin/tosi-mosaic.ts`, the package's only shipped CLI.
-      elements (migrate to `static preferredTagName`). It is the migration's only in-suite signal.
 
 ### Not ours — file upstream on tosijs-ui, then mirror in `UPSTREAM.md`
-- [ ] **(unverified)** Stale build lock double-failure in `tosijs-ui/site`'s `buildSite`: a run
+- [ ] Verify the stale-build-lock double failure in `tosijs-ui/site`, then file it on tosijs-ui's board.
+      Unverified so far. In `buildSite`, a run
       that refuses because of a dead pid re-stamps the lock with its own pid, so one crashed build
       poisons the next **two** (observed: pids 14917 → 15010 → success). When the lock's pid is
       dead, take the lock and proceed.
@@ -230,41 +233,17 @@ demos and the assumptions around them.
       should have addressed — no lens did this.
 
 
-## Why does the doc-site bundle land in `dist/hydrate/`?
+## Older standalone notes (0.6.x)
 
-**Filed:** 0.6.5 (2026-07-27). **Severity:** hygiene (npm side fixed by the `files` allowlist).
-
-The tosijs-ui 1.7 build writes a full doc-site hydration bundle (`hydrate.js`, `code-editor-cm`,
-`site-*`, sourcemaps) into `dist/hydrate/` — doc-site output that belongs in `docs/`, not `dist/`
-(the npm-publish dir). The 0.6.5 `files` allowlist stops it reaching the tarball, but it still
-bloats the git tree and is confusing. Find where it's configured (our `bin/site.ts` /
-`tosijs-product-site.config.ts`, or a tosijs-ui/site default in 1.7) and point it at `docs/`, or
-`rm -rf dist/hydrate` in `buildLibrary()` alongside the existing `dist/src`/`dist/demo` cleanup. If
-it's a tosijs-ui/site default, file upstream.
-
-## Trim the self-contained IIFE so it doesn't bundle the CodeMirror editor
-
-**Filed:** 0.6.4 (2026-07-27). **Severity:** efficiency (not a correctness regression).
-
-`dist/index.js` (the CDN `<script src>` build, from `src/index-iife.ts`) jumped ~290KB → ~650KB
-gzip on the tosijs-ui 1.7 bump, because it does `import * as tosijsUi` — the whole barrel, which
-in 1.7 statically pulls CodeMirror — and an IIFE can't code-split, so the editor is inlined. The
-ESM build (`dist/module.js`, tosijs-ui `external`) is unaffected (~9KB). We ship the editor to CDN
-consumers who never use it.
-
-**Options:**
-1. Import only the tosijs-ui components the declarative demos actually need (map, 3D, lottie, …)
-   into `src/index-iife.ts` instead of `import * as tosijsUi`, and assemble `globalThis.tosijsUi`
-   from those — but verify no declarative page relies on a component we drop.
-2. Use an editor-free tosijs-ui barrel entry if 1.7 exposes one (it has `./code-editor` /
-   `./live-example` subpaths; check whether `.` can be imported without them). If not, **file
-   upstream** (request a barrel entry that omits the editor) and mirror in `UPSTREAM.md`.
-
-**Done when:** `dist/index.js` is back near its pre-1.7 gzip size with no loss of declarative
-capability, verified on the live doc site.
-
-- **Guard our own IIFE's composition.** `dist/index.js` is what CDN consumers execute and its size
-  is set almost entirely by the tosijs-ui barrel, which we don't control — it has already swung
-  578kB -> 142kB gzip without any change on our side. A deny-list + gzip-budget assertion in
-  `bin/site.ts` would catch a re-entanglement at build time instead of in a consumer's bundle.
-  Script and both-directions verification are in tosijs-ui#166.
+- [x] ✅ **`dist/hydrate/` no longer appears.** Filed 0.6.5 (2026-07-27): the tosijs-ui 1.7 build
+      wrote a doc-site hydration bundle into `dist/`. Checked 2026-10-01: `dist/` holds only the
+      ten published artefacts, and the `files` allowlist kept it out of the tarball throughout.
+- [x] ✅ **The self-contained IIFE no longer bundles CodeMirror.** Filed 0.6.4 (2026-07-27) at about
+      650kB gzip. tosijs-ui#133 (1.14.0) took the doc-system cluster, and the editor with it,
+      out of the barrel, and tosijs-ui's `src/index.test.ts` now enforces that (#120, #166).
+      Our IIFE is 142kB gzip with zero CodeMirror.
+- [ ] **Guard our own IIFE's composition.** `dist/index.js` is what CDN consumers execute and its size
+      is set almost entirely by the tosijs-ui barrel, which we don't control — it has already swung
+      578kB -> 142kB gzip without any change on our side. A deny-list + gzip-budget assertion in
+      `bin/site.ts` would catch a re-entanglement at build time instead of in a consumer's bundle.
+      Script and both-directions verification are in tosijs-ui#166.

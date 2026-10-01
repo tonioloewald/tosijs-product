@@ -5,14 +5,22 @@ seem worth raising in tosijs-ui (or in tosijs / the broader ecosystem)
 rather than working around locally. Add new entries at the top with a
 short context block and a concrete suggestion.
 
-> **This file is a local mirror, not the channel.** Per
-> [cross-project.md](https://github.com/tonioloewald/tosijs-coding-practices/blob/main/practices/cross-project.md)
-> ("file, don't fix"), the **GitHub issue on the target repo** is how we actually tell
-> tosijs-ui something — this file just keeps the context where we work. **An entry here
-> without a filed issue is a complaint nobody will ever read.** So: file the issue, link it
-> here, and mark `✅ RESOLVED (fixed in <pkg>@<version>)` + close the issue when it lands.
+> **This file is history now; the board is the channel.** tosijs-product, tosijs-ui and tosijs-3d
+> are all on the virta task board (onboarded 2026-10-01). An ask of another board repo is a task
+> **in that project**, and we subscribe to it. Don't add entries here: file on the target's board
+> (`virta new … --project tosijs-ui`), or on its GitHub if it isn't enrolled
+> ([cross-project.md](https://github.com/tonioloewald/tosijs-coding-practices/blob/main/practices/cross-project.md)).
 >
-> All open entries below were filed as issues on 2026-07-12.
+> Our board: https://virta.tosijs.net/host/#?virta.scope=tosijs-product
+>
+> **Still open upstream** (as of 2026-10-01, both subscribed from this project):
+> tosijs-ui#9 (document the cinematic-landing-page pattern) and tosijs-ui#160 (export
+> `stopHolder()`). Everything else below is closed. The newest closures are tosijs-ui#159
+> (fixed in 1.15.0, which we haven't taken yet; that's a task on our board) and #120 and #166
+> (fixed by #133 in 1.14.0, now enforced by tosijs-ui's `src/index.test.ts`).
+>
+> The entries below keep the context we worked from. Headings record what we saw then, so
+> some state problems that have since been fixed.
 
 ## Strategic — `tosijs-product` as a first-class integration target
 

@@ -28,7 +28,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="../doc-system.css?v=0.8.0" data-tosi-doc-system />
+  <link rel="stylesheet" href="../doc-system.css?v=b979e1a7585f" data-tosi-doc-system />
   <title>Getting Started — tosijs-product</title>
   <meta name="description" content="A single script tag gives you tosijs, tosijs-product, and the tosijs-ui components — everything a product page needs, with its custom elements registered" />
   <link rel="canonical" href="https://product.tosijs.net/getting-started/" />
@@ -49,23 +49,23 @@
 <h2>Installation</h2>
 <h3>Pure HTML (IIFE build)</h3>
 <p>A single script tag gives you tosijs, tosijs-product, and the tosijs-ui <strong>components</strong> — everything a product page needs, with its custom elements registered:</p>
-<pre><code class="language-markup">&lt;script src=&quot;https://cdn.jsdelivr.net/npm/tosijs-product@0.8.0/dist/index.js&quot;&gt;&lt;/script&gt;
+<pre><code class="language-markup" data-highlighted><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>script</span> <span class="token attr-name">src</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>https://cdn.jsdelivr.net/npm/tosijs-product@0.8.0/dist/index.js<span class="token punctuation">"</span></span><span class="token punctuation">></span></span><span class="token script"></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>script</span><span class="token punctuation">></span></span>
 </code></pre>
 <blockquote>
 <p><strong>Not included since 0.8.0:</strong> the tosijs-ui <em>doc-authoring</em> elements — <code>&lt;tosi-code&gt;</code>, <code>&lt;tosi-example&gt;</code>, <code>&lt;tosi-doc-system&gt;</code>, <code>&lt;tosi-doc-system-prefs&gt;</code>, <code>&lt;tosi-css-var-editor&gt;</code>, <code>&lt;tosi-line-offset-probe&gt;</code>, <code>&lt;tosi-test-results&gt;</code>, <code>&lt;tosi-tests-done&gt;</code>. They are doc-site tooling, not product-page components, and they were most of the bundle: dropping them is what took it from 578kB to 145kB gzip. If you need them, load them from tosijs-ui&#39;s own subpaths (<code>tosijs-ui/doc-browser</code>, <code>tosijs-ui/live-example</code>) rather than from this script tag.</p>
 </blockquote>
 <h3>ESM (bundled apps)</h3>
-<pre><code class="language-bash">bun install tosijs tosijs-ui tosijs-product
+<pre><code class="language-bash" data-highlighted>bun <span class="token function">install</span> tosijs tosijs-ui tosijs-product
 </code></pre>
-<pre><code class="language-typescript">import {
-  tosiProduct,
-  tosiProductSection,
-  tosiInterpolator,
-  tosiWaypoint,
-  tosiFilmstrip,
-  tosiScrollMap,
-  tosiScrollCamera,
-} from &quot;tosijs-product&quot;;
+<pre><code class="language-typescript" data-highlighted><span class="token keyword">import</span> <span class="token punctuation">{</span>
+  tosiProduct<span class="token punctuation">,</span>
+  tosiProductSection<span class="token punctuation">,</span>
+  tosiInterpolator<span class="token punctuation">,</span>
+  tosiWaypoint<span class="token punctuation">,</span>
+  tosiFilmstrip<span class="token punctuation">,</span>
+  tosiScrollMap<span class="token punctuation">,</span>
+  tosiScrollCamera<span class="token punctuation">,</span>
+<span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"tosijs-product"</span><span class="token punctuation">;</span>
 </code></pre>
 <h2>Quick Start</h2>
 <p>Every tosijs-product page follows the same pattern:</p>
@@ -109,59 +109,59 @@
 </ul>
 <h2>Scroll ranges</h2>
 <p>Use <code>data-scroll-range</code> to constrain a child&#39;s animation to part of the section:</p>
-<pre><code class="language-markup">&lt;tosi-product-section scroll=&quot;300&quot;&gt;
-  &lt;!-- First half --&gt;
-  &lt;tosi-interpolator data-scroll-range=&quot;0,0.5&quot; easing=&quot;ease-in-out&quot;&gt;
-    &lt;tosi-waypoint progress=&quot;0&quot; style=&quot;opacity: 0&quot;&gt;&lt;/tosi-waypoint&gt;
-    &lt;tosi-waypoint progress=&quot;0.5&quot; style=&quot;opacity: 1&quot;&gt;&lt;/tosi-waypoint&gt;
-    &lt;tosi-waypoint progress=&quot;1&quot; style=&quot;opacity: 0&quot;&gt;&lt;/tosi-waypoint&gt;
-    &lt;h2&gt;Part One&lt;/h2&gt;
-  &lt;/tosi-interpolator&gt;
+<pre><code class="language-markup" data-highlighted><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>tosi-product-section</span> <span class="token attr-name">scroll</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>300<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+  <span class="token comment">&lt;!-- First half --></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>tosi-interpolator</span> <span class="token attr-name">data-scroll-range</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>0,0.5<span class="token punctuation">"</span></span> <span class="token attr-name">easing</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>ease-in-out<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>tosi-waypoint</span> <span class="token attr-name">progress</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>0<span class="token punctuation">"</span></span> <span class="token special-attr"><span class="token attr-name">style</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span><span class="token value css language-css"><span class="token property">opacity</span><span class="token punctuation">:</span> 0</span><span class="token punctuation">"</span></span></span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>tosi-waypoint</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>tosi-waypoint</span> <span class="token attr-name">progress</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>0.5<span class="token punctuation">"</span></span> <span class="token special-attr"><span class="token attr-name">style</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span><span class="token value css language-css"><span class="token property">opacity</span><span class="token punctuation">:</span> 1</span><span class="token punctuation">"</span></span></span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>tosi-waypoint</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>tosi-waypoint</span> <span class="token attr-name">progress</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>1<span class="token punctuation">"</span></span> <span class="token special-attr"><span class="token attr-name">style</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span><span class="token value css language-css"><span class="token property">opacity</span><span class="token punctuation">:</span> 0</span><span class="token punctuation">"</span></span></span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>tosi-waypoint</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>h2</span><span class="token punctuation">></span></span>Part One<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>h2</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>tosi-interpolator</span><span class="token punctuation">></span></span>
 
-  &lt;!-- Second half --&gt;
-  &lt;tosi-interpolator data-scroll-range=&quot;0.5,1&quot; easing=&quot;ease-in-out&quot;&gt;
-    &lt;tosi-waypoint progress=&quot;0&quot; style=&quot;opacity: 0&quot;&gt;&lt;/tosi-waypoint&gt;
-    &lt;tosi-waypoint progress=&quot;0.5&quot; style=&quot;opacity: 1&quot;&gt;&lt;/tosi-waypoint&gt;
-    &lt;tosi-waypoint progress=&quot;1&quot; style=&quot;opacity: 0&quot;&gt;&lt;/tosi-waypoint&gt;
-    &lt;h2&gt;Part Two&lt;/h2&gt;
-  &lt;/tosi-interpolator&gt;
-&lt;/tosi-product-section&gt;
+  <span class="token comment">&lt;!-- Second half --></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>tosi-interpolator</span> <span class="token attr-name">data-scroll-range</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>0.5,1<span class="token punctuation">"</span></span> <span class="token attr-name">easing</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>ease-in-out<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>tosi-waypoint</span> <span class="token attr-name">progress</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>0<span class="token punctuation">"</span></span> <span class="token special-attr"><span class="token attr-name">style</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span><span class="token value css language-css"><span class="token property">opacity</span><span class="token punctuation">:</span> 0</span><span class="token punctuation">"</span></span></span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>tosi-waypoint</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>tosi-waypoint</span> <span class="token attr-name">progress</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>0.5<span class="token punctuation">"</span></span> <span class="token special-attr"><span class="token attr-name">style</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span><span class="token value css language-css"><span class="token property">opacity</span><span class="token punctuation">:</span> 1</span><span class="token punctuation">"</span></span></span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>tosi-waypoint</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>tosi-waypoint</span> <span class="token attr-name">progress</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>1<span class="token punctuation">"</span></span> <span class="token special-attr"><span class="token attr-name">style</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span><span class="token value css language-css"><span class="token property">opacity</span><span class="token punctuation">:</span> 0</span><span class="token punctuation">"</span></span></span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>tosi-waypoint</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>h2</span><span class="token punctuation">></span></span>Part Two<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>h2</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>tosi-interpolator</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>tosi-product-section</span><span class="token punctuation">></span></span>
 </code></pre>
 <h2>Video scrubbing</h2>
 <p>Add <code>data-scroll-animate=&quot;currentTime&quot;</code> to any <code>&lt;video&gt;</code> element:</p>
-<pre><code class="language-markup">&lt;tosi-product-section scroll=&quot;300&quot;&gt;
-  &lt;video
-    src=&quot;clip.mp4&quot;
-    data-scroll-animate=&quot;currentTime&quot;
-    muted
-    playsinline
-    preload=&quot;auto&quot;
-  &gt;&lt;/video&gt;
-&lt;/tosi-product-section&gt;
+<pre><code class="language-markup" data-highlighted><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>tosi-product-section</span> <span class="token attr-name">scroll</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>300<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>video</span>
+    <span class="token attr-name">src</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>clip.mp4<span class="token punctuation">"</span></span>
+    <span class="token attr-name">data-scroll-animate</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>currentTime<span class="token punctuation">"</span></span>
+    <span class="token attr-name">muted</span>
+    <span class="token attr-name">playsinline</span>
+    <span class="token attr-name">preload</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>auto<span class="token punctuation">"</span></span>
+  <span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>video</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>tosi-product-section</span><span class="token punctuation">></span></span>
 </code></pre>
 <p>For smoother results, convert the video to a filmstrip mosaic (see <a href="/tosi-filmstrip/"><code>&lt;tosi-filmstrip&gt;</code></a>).</p>
 <h2>Lottie animations</h2>
-<pre><code class="language-markup">&lt;tosi-product-section scroll=&quot;200&quot;&gt;
-  &lt;tosi-lottie src=&quot;animation.json&quot; data-scroll-animate=&quot;lottie&quot;&gt;&lt;/tosi-lottie&gt;
-&lt;/tosi-product-section&gt;
+<pre><code class="language-markup" data-highlighted><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>tosi-product-section</span> <span class="token attr-name">scroll</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>200<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>tosi-lottie</span> <span class="token attr-name">src</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>animation.json<span class="token punctuation">"</span></span> <span class="token attr-name">data-scroll-animate</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>lottie<span class="token punctuation">"</span></span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>tosi-lottie</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>tosi-product-section</span><span class="token punctuation">></span></span>
 </code></pre>
 <h2>Embedding, nesting and horizontal scrolling</h2>
 <p>The engine detects the scroll container it lives in, so a <code>&lt;tosi-product&gt;</code> works inside any
 scrollable element, not just the page:</p>
-<pre><code class="language-markup">&lt;div style=&quot;height: 60vh; overflow-y: auto;&quot;&gt;
-  &lt;tosi-product&gt;
-    &lt;tosi-product-section scroll=&quot;200&quot;&gt;...&lt;/tosi-product-section&gt;
-  &lt;/tosi-product&gt;
-&lt;/div&gt;
+<pre><code class="language-markup" data-highlighted><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token special-attr"><span class="token attr-name">style</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span><span class="token value css language-css"><span class="token property">height</span><span class="token punctuation">:</span> 60vh<span class="token punctuation">;</span> <span class="token property">overflow-y</span><span class="token punctuation">:</span> auto<span class="token punctuation">;</span></span><span class="token punctuation">"</span></span></span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>tosi-product</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>tosi-product-section</span> <span class="token attr-name">scroll</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>200<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>...<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>tosi-product-section</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>tosi-product</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span>
 </code></pre>
 <p>Put a <code>&lt;tosi-product&gt;</code> <strong>inside a section</strong> and it becomes a <em>follower</em>: instead of listening to
 scroll itself, it is driven by the parent section&#39;s pin progress and sizes to fill it. That&#39;s how
 you nest a whole sub-story inside one scene of a bigger one.</p>
 <p>For horizontal scrolling, set <code>direction=&quot;horizontal&quot;</code> on the <strong><code>&lt;tosi-product&gt;</code></strong> — it&#39;s an engine
 attribute, not a section one, because the engine is what lays the runway out:</p>
-<pre><code class="language-markup">&lt;tosi-product direction=&quot;horizontal&quot;&gt;
-  &lt;tosi-product-section scroll=&quot;200&quot;&gt;...&lt;/tosi-product-section&gt;
-&lt;/tosi-product&gt;
+<pre><code class="language-markup" data-highlighted><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>tosi-product</span> <span class="token attr-name">direction</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>horizontal<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>tosi-product-section</span> <span class="token attr-name">scroll</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>200<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>...<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>tosi-product-section</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>tosi-product</span><span class="token punctuation">></span></span>
 </code></pre>
 <h2>Accessibility</h2>
 <p>When <code>prefers-reduced-motion: reduce</code> is active, all scroll-driven child animations are skipped. Only <code>scrollCallback</code> continues to fire, allowing you to provide alternative experiences.</p>
@@ -189,6 +189,6 @@ attribute, not a section one, because the engine is what lays the runway out:</p
     <li><a href="https://www.npmjs.com/package/tosijs-product" data-icon="npm">npmjs</a></li>
   </ul>
   </tosi-doc-system>
-  <script type="module" src="../hydrate.js?v=0.8.0"></script>
+  <script type="module" src="../hydrate-6vpb8eeg.js"></script>
 </body>
 </html>

@@ -28,7 +28,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="../doc-system.css?v=0.8.0" data-tosi-doc-system />
+  <link rel="stylesheet" href="../doc-system.css?v=b979e1a7585f" data-tosi-doc-system />
   <title>&lt;tosi-filmstrip&gt; — tosijs-product</title>
   <meta name="description" content="Canvas frame-animator. Rather than scrubbing a &lt;video&gt; (which stutters on random-access seeks), &lt;tosi-filmstrip&gt; blits frames from a single WebP/JPG mosaic…" />
   <link rel="canonical" href="https://product.tosijs.net/tosi-filmstrip/" />
@@ -57,9 +57,7 @@ canvas — instant, frame-perfect seeking driven by scroll.</p>
 <div class="cap">100 frames from one image</div>
 </div>
 </tosi-product-section>
-</tosi-product>
-
-<h2>Attributes</h2>
+</tosi-product><h2>Attributes</h2>
 <ul>
 <li><strong><code>src</code></strong> — the mosaic image. Filenames may encode the grid — <code>name_COLSxROWS_TOTAL.webp</code> is auto-parsed.</li>
 <li><strong><code>cols</code></strong>, <strong><code>rows</code></strong>, <strong><code>total</code></strong> — grid columns, rows and frame count (optional when encoded in the filename).</li>
@@ -68,7 +66,7 @@ canvas — instant, frame-perfect seeking driven by scroll.</p>
 <h2>Making a mosaic</h2>
 <p>The <code>tosi-mosaic</code> CLI converts a video to a grid. It needs <strong><code>ffmpeg</code> and <code>ffprobe</code> on your PATH</strong>
 (macOS: <code>brew install ffmpeg</code>) — they are not bundled:</p>
-<pre><code class="language-bash">bunx tosi-mosaic my-video.mp4 --frames 100 --width 1280
+<pre><code class="language-bash" data-highlighted>bunx tosi-mosaic my-video.mp4 <span class="token parameter variable">--frames</span> <span class="token number">100</span> <span class="token parameter variable">--width</span> <span class="token number">1280</span>
 </code></pre>
 <p>Produces <code>my-video_10x10_100.webp</code>. A grid (not one long strip) keeps within the browser&#39;s max image size while delivering every frame in a single request.</p>
 <p><code>--format jpg</code> (or <code>png</code>) if your ffmpeg was built without the webp encoder — <code>&lt;tosi-filmstrip&gt;</code> reads all three. <code>--fps</code> supplies the source frame rate for a container that misreports it; when a file reports neither a frame count nor a duration, the CLI counts frames itself and says so. It exits non-zero on failure, so <code>tosi-mosaic … &amp;&amp; deploy</code> is safe.</p>
@@ -104,6 +102,6 @@ canvas — instant, frame-perfect seeking driven by scroll.</p>
     <li><a href="https://www.npmjs.com/package/tosijs-product" data-icon="npm">npmjs</a></li>
   </ul>
   </tosi-doc-system>
-  <script type="module" src="../hydrate.js?v=0.8.0"></script>
+  <script type="module" src="../hydrate-6vpb8eeg.js"></script>
 </body>
 </html>

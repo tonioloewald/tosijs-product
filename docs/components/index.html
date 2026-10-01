@@ -28,7 +28,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="../doc-system.css?v=0.8.0" data-tosi-doc-system />
+  <link rel="stylesheet" href="../doc-system.css?v=b979e1a7585f" data-tosi-doc-system />
   <title>tosijs-product — component &amp; API reference</title>
   <meta name="description" content="Every element and exported function in tosijs-product: the scroll engine, the animators, the theme system, and the JavaScript API." />
   <meta name="keywords" content="reference, api, components, themes" />
@@ -47,9 +47,7 @@
   <tosi-doc-system docs="../docs.json?v=b010d4f4b34f" config="{&quot;projectName&quot;:&quot;tosijs-product&quot;,&quot;projectLinks&quot;:{&quot;tosijs&quot;:&quot;https://tosijs.net&quot;,&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs-product&quot;}}">
   <article class="doc-content">
 <h1>Component Reference</h1>
-<!--{ "headTitle": "tosijs-product — component & API reference", "description": "Every element and exported function in tosijs-product: the scroll engine, the animators, the theme system, and the JavaScript API.", "keywords": [ "reference", "api", "components", "themes" ] }-->
-
-<p>Each element has its own page with a live, maximizable demo — those pages are generated from the
+<!--{ "headTitle": "tosijs-product — component & API reference", "description": "Every element and exported function in tosijs-product: the scroll engine, the animators, the theme system, and the JavaScript API.", "keywords": [ "reference", "api", "components", "themes" ] }--><p>Each element has its own page with a live, maximizable demo — those pages are generated from the
 source, so they never drift from the code. This page is the index, plus the two things that span
 several elements: the <strong>theme system</strong> and the <strong>JavaScript API</strong>.</p>
 <h2>Elements</h2>
@@ -131,8 +129,8 @@ app.themes = {
 app.defaultTheme = &quot;midnight&quot;;
 </code></pre>
 <p>Sections then declare which theme is in force as they pin:</p>
-<pre><code class="language-markup">&lt;tosi-product-section theme=&quot;midnight&quot;&gt;…&lt;/tosi-product-section&gt;
-&lt;tosi-product-section theme-from=&quot;midnight&quot; theme-to=&quot;paper&quot;&gt;…&lt;/tosi-product-section&gt;
+<pre><code class="language-markup" data-highlighted><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>tosi-product-section</span> <span class="token attr-name">theme</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>midnight<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>…<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>tosi-product-section</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>tosi-product-section</span> <span class="token attr-name">theme-from</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>midnight<span class="token punctuation">"</span></span> <span class="token attr-name">theme-to</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>paper<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>…<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>tosi-product-section</span><span class="token punctuation">></span></span>
 </code></pre>
 <p><code>theme</code> holds a theme constant for the whole pin. <code>theme-from</code>/<code>theme-to</code> <strong>interpolates</strong> between
 two themes across the pin progress, so the page changes mood as you scroll through the section.</p>
@@ -174,19 +172,19 @@ scene before it.</p>
 <h2>JavaScript API</h2>
 <p>Every element also has a factory function (<code>tosiProduct()</code>, <code>tosiProductSection()</code>, …) following the
 tosijs convention. Import from <code>tosijs-product</code>:</p>
-<pre><code class="language-typescript">import {
-  tosiProduct,
-  tosiProductSection,
-  tosiProductHeader,
-  tosiInterpolator,
-  tosiWaypoint,
-  tosiFilmstrip,
-  tosiScrollMap,
-  tosiScrollCamera,
-  tosiScrollTime,
-  tosiScrollAnimation,
-  tosiPrism,
-} from &quot;tosijs-product&quot;;
+<pre><code class="language-typescript" data-highlighted><span class="token keyword">import</span> <span class="token punctuation">{</span>
+  tosiProduct<span class="token punctuation">,</span>
+  tosiProductSection<span class="token punctuation">,</span>
+  tosiProductHeader<span class="token punctuation">,</span>
+  tosiInterpolator<span class="token punctuation">,</span>
+  tosiWaypoint<span class="token punctuation">,</span>
+  tosiFilmstrip<span class="token punctuation">,</span>
+  tosiScrollMap<span class="token punctuation">,</span>
+  tosiScrollCamera<span class="token punctuation">,</span>
+  tosiScrollTime<span class="token punctuation">,</span>
+  tosiScrollAnimation<span class="token punctuation">,</span>
+  tosiPrism<span class="token punctuation">,</span>
+<span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"tosijs-product"</span><span class="token punctuation">;</span>
 </code></pre>
 <h3>Helpers</h3>
 <p>The engine&#39;s pure functions are exported too. They&#39;re the seams the test suite drives, and they&#39;re
@@ -241,14 +239,14 @@ useful if you&#39;re building your own animator or debugging why a scene isn&#39
 </tr>
 </tbody></table>
 <h3>Types</h3>
-<pre><code class="language-typescript">type ThemeMap = Record&lt;string, string&gt;;       // CSS custom property → value
-type ThemeRegistry = Record&lt;string, ThemeMap&gt;; // theme name → ThemeMap
+<pre><code class="language-typescript" data-highlighted><span class="token keyword">type</span> <span class="token class-name">ThemeMap</span> <span class="token operator">=</span> Record<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token punctuation">,</span> <span class="token builtin">string</span><span class="token operator">></span><span class="token punctuation">;</span>       <span class="token comment">// CSS custom property → value</span>
+<span class="token keyword">type</span> <span class="token class-name">ThemeRegistry</span> <span class="token operator">=</span> Record<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token punctuation">,</span> ThemeMap<span class="token operator">></span><span class="token punctuation">;</span> <span class="token comment">// theme name → ThemeMap</span>
 
-interface ThemeSource {
-  fromName: string; // theme being blended out of
-  toName: string;   // theme being blended into
-  t: number;        // 0→1 position between them
-}
+<span class="token keyword">interface</span> <span class="token class-name">ThemeSource</span> <span class="token punctuation">{</span>
+  fromName<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span> <span class="token comment">// theme being blended out of</span>
+  toName<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>   <span class="token comment">// theme being blended into</span>
+  t<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>        <span class="token comment">// 0→1 position between them</span>
+<span class="token punctuation">}</span>
 </code></pre>
 
   </article>
@@ -274,6 +272,6 @@ interface ThemeSource {
     <li><a href="https://www.npmjs.com/package/tosijs-product" data-icon="npm">npmjs</a></li>
   </ul>
   </tosi-doc-system>
-  <script type="module" src="../hydrate.js?v=0.8.0"></script>
+  <script type="module" src="../hydrate-6vpb8eeg.js"></script>
 </body>
 </html>

@@ -28,7 +28,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="../doc-system.css?v=0.8.0" data-tosi-doc-system />
+  <link rel="stylesheet" href="../doc-system.css?v=b979e1a7585f" data-tosi-doc-system />
   <title>&lt;tosi-prism&gt; — tosijs-product</title>
   <meta name="description" content="Lazy-loads PrismJS (from jsDelivr) to syntax-highlight its own text content. Set the language with language (default markup)." />
   <link rel="canonical" href="https://product.tosijs.net/tosi-prism/" />
@@ -54,18 +54,16 @@ const app = tosiProduct(
 )
 app.themes = { midnight: { '--bg': '#08081a', '--fg': '#f0f0f5' } }
 app.defaultTheme = 'midnight'
-</tosi-prism>
-
-<h2>Attributes</h2>
+</tosi-prism><h2>Attributes</h2>
 <ul>
 <li><strong><code>language</code></strong> — Prism language id (<code>markup</code>, <code>javascript</code>, <code>css</code>, <code>bash</code>, …). Default <code>markup</code>.</li>
 </ul>
 <h2>Helpers</h2>
 <p>The module also exports <code>loadPrism</code> / <code>highlightCodeBlocks</code> for post-processing other rendered code
 (e.g. markdown output):</p>
-<pre><code class="language-typescript">import { loadPrism, highlightCodeBlocks } from &#39;tosijs-product&#39;
-await loadPrism([&#39;javascript&#39;, &#39;css&#39;])
-highlightCodeBlocks(document.querySelector(&#39;.rendered-markdown&#39;))
+<pre><code class="language-typescript" data-highlighted><span class="token keyword">import</span> <span class="token punctuation">{</span> loadPrism<span class="token punctuation">,</span> highlightCodeBlocks <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'tosijs-product'</span>
+<span class="token keyword">await</span> <span class="token function">loadPrism</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token string">'javascript'</span><span class="token punctuation">,</span> <span class="token string">'css'</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+<span class="token function">highlightCodeBlocks</span><span class="token punctuation">(</span>document<span class="token punctuation">.</span><span class="token function">querySelector</span><span class="token punctuation">(</span><span class="token string">'.rendered-markdown'</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
 </code></pre>
 <blockquote>
 <p>Renamed from <code>tosi-code</code> in v0.6.x to avoid clashing with tosijs-ui&#39;s <code>&lt;tosi-code&gt;</code> code editor.</p>
@@ -95,6 +93,6 @@ highlightCodeBlocks(document.querySelector(&#39;.rendered-markdown&#39;))
     <li><a href="https://www.npmjs.com/package/tosijs-product" data-icon="npm">npmjs</a></li>
   </ul>
   </tosi-doc-system>
-  <script type="module" src="../hydrate.js?v=0.8.0"></script>
+  <script type="module" src="../hydrate-6vpb8eeg.js"></script>
 </body>
 </html>

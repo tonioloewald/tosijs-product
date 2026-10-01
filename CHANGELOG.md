@@ -8,6 +8,23 @@ For releases before 0.6.1, see the git history (`git log`) and tags.
 
 ## [Unreleased]
 
+### Changed
+
+- **The CDN IIFE now bundles tosijs-ui 1.16.2 and tosijs 1.10.6** (was 1.14.1 / 1.10.x). One
+  behaviour change reaches `<script src>` pages through it: **`<tosi-md>` sanitizes by default**
+  (tosijs-ui 1.16.0, #179). If a product page relied on raw HTML passing through `<tosi-md>`, set
+  `sanitize="off"`. The bundle grows from 486,755 to 508,628 bytes raw (+6.6kB gzip, to 151.7kB),
+  mostly tosijs-schema per upstream's notes. The ESM build is unaffected, and the peer ranges are
+  unchanged.
+
+### Fixed
+
+- **An inert doc-site bundle is now detected** (tosijs-ui#159, fixed in 1.15.0). 0.8.0's
+  blocker, a `bundleEntry` that registered no `<tosi-doc-system>`, built green with the old
+  check reporting `{ docSystem: true }`. Re-run on 1.16.2, the build now names the problem. It
+  still only *warns*, though, and exits 0; making it fatal for a site that is never headless is
+  asked of tosijs-ui (board task `enf6pb1e0xsa`).
+
 ## [0.8.0] — 2026-09-12
 
 ### Breaking

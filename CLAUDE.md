@@ -169,7 +169,8 @@ Color values blend through `color-mix(in srgb, ...)`. Numeric strings interpolat
 - **Review reports live at `reviews/<version>-<slug>.md` at the repo ROOT** — never `docs/reviews/`.
   In this project that path is doubly wrong: `buildSite` does `rm -rf docs/` on every build (the
   report is deleted), and `docs/` is the published GitHub Pages root (it would also be public).
-  Follow-ups get routed out of the report into `TODO.md` (ours) or `UPSTREAM.md` + a filed issue.
+  Follow-ups get routed out of the report onto the virta board: ours as tasks in
+  `project:tosijs-product`, asks of other repos as tasks on *their* board (see below).
 - **Build publishable artifacts from a clean dependency install.** `rm -rf node_modules && bun
   install --frozen-lockfile` first. A `node_modules` mutated by a few `bun add`/`bun remove`
   cycles leaves **nested duplicate copies of hoisted transitives** — six sibling `@codemirror`
@@ -191,7 +192,18 @@ Color values blend through `color-mix(in srgb, ...)`. Numeric strings interpolat
   older than `HEAD` is therefore correct, not lag — don't "fix" it. Verified at 0.8.0: rebuilding
   at `a01f34e` left `docs/` byte-identical with the stamp still on `122374c`.
 - **Changelog**: user-visible changes go in `CHANGELOG.md` under `## [Unreleased]` ([Keep a Changelog](https://keepachangelog.com/en/1.1.0/)), per the shared coding practices.
-- **Upstream issues**: rough edges in `tosijs-ui` are **filed as GitHub issues on that repo**, then mirrored in `UPSTREAM.md` with the issue link — "file, don't fix". An `UPSTREAM.md` entry with no filed issue is a complaint nobody will read.
+- **Tasks live on the virta board** (onboarded 2026-10-01):
+  https://virta.tosijs.net/host/#?virta.scope=tosijs-product. `virta brief` runs at session start
+  (hook in `.claude/settings.json`). `TODO.md` is a prose pointer, so **never add list items to
+  it**: they would be imported as tasks. File with
+  `virta new "…" --project tosijs-product --identity "<machine> × tosijs-product"`, and leave
+  promotion to `ready` to the owner. Owner decisions that look like open work go in `DECISIONS.md`.
+- **Upstream asks ("file, don't fix")**: tosijs-ui and tosijs-3d are on the board, so an ask of
+  either is a task **in that project** (`--project tosijs-ui`), and we subscribe to it. Filing on
+  their GitHub and mirroring it here makes a duplicate, because import dedupes by event id, not by
+  `github:` tag. Repos that aren't enrolled still get a GitHub issue. `UPSTREAM.md` is kept as
+  history. **Always run onboard with `--skip UPSTREAM.md`**: virta's parser misreads its headings
+  (tosijs-virta task `nbfj0xyyd988`) and would import four closed findings as open tasks.
 
 ### CLI tool
 

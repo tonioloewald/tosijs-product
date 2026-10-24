@@ -25,6 +25,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 bun install              # Install dependencies
 bun run start            # Build, then start the doc-site dev server (bin/site.ts)
+bun run stop             # Stop THIS checkout's dev server — never `pkill -f "bun bin/site.ts"`
 bun run build            # Build the doc site + library, then exit (bin/site.ts --build)
 bun run format           # tosijs-format: eslint --fix, then Prettier (never markdown)
 bun run format:check     # same, check only; exits 1 on any finding
@@ -165,7 +166,8 @@ Color values blend through `color-mix(in srgb, ...)`. Numeric strings interpolat
 - **`tjs-lang` tracks `tosijs-ui`**: when you bump the `tosijs-ui` peer, bump the `tjs-lang` devDependency to match, or the IIFE build breaks. (1.12.7 wants `tjs-lang ^0.13.1`; 1.6.22 wanted `^0.9.0`.)
 - **Bumping the peers is awkward in bun**: they're peer deps, so `bun install` / `bun update` will *not* pull a newer copy into `node_modules` — it just warns `incorrect peer dependency` and, worse, `bun update` rewrites your peer ranges back down to whatever is installed. Use `bun add -d tosijs@latest tosijs-ui@latest`, which installs the new versions **and** raises the peer ranges.
 - **`chokidar` is a devDependency, not optional in practice.** It's an optional peer of `tosijs-ui`, but the dev server's watcher imports it and refuses to start without it. `@resvg/resvg-js` is the other optional peer; it's only for the ePub build, which we don't use.
-- **Don't run `bun run build` while the dev server is up.** Since `tosijs-ui@1.12.5` a build lock refuses the second builder by name and pid rather than letting the two `rm -rf docs/` on each other.
+- **Don't run `bun run build` while the dev server is up.** Since `tosijs-ui@1.12.5` a build lock refuses the second builder by name and pid rather than letting the two `rm -rf docs/` on each other. The lock is keyed by checkout path, so a build in a scratch copy or worktree is unaffected.
+- **Stop the dev server with `bun run stop`, never `pkill -f "bun bin/site.ts"`.** Every project on this pipeline runs that identical command line, so `pkill` kills every checkout's server on the machine (it did, repeatedly). `stop` (bin/stop.ts) reads this checkout's lock and signals that pid only after confirming it is still a bun/node process working in this directory: locks outlive crashed servers and pids get reused, and a stale lock must not aim a SIGTERM at a stranger. It refuses a lock held by a build rather than a server, and prints what it signalled to stderr.
 - **Never run the dev server on `tosijs-ui` < 1.6.22.** `buildSite()` called `Bun.build()` in-process and Bun's bundler never returns its native arena, so RSS grew monotonically per rebuild (invisible to `Bun.gc()` and to heap profilers — the JS heap stays flat). A multi-day watch session reached **136GB RSS**. 1.6.22 moves the bundle to a child process and adds an RSS watchdog (`memoryLimitMb`, default 4096).
 - **Review reports live at `reviews/<version>-<slug>.md` at the repo ROOT** — never `docs/reviews/`.
   In this project that path is doubly wrong: `buildSite` does `rm -rf docs/` on every build (the
@@ -179,8 +181,7 @@ Color values blend through `color-mix(in srgb, ...)`. Numeric strings interpolat
   bundle**, nothing in the build output saying so. From a clean install the build is
   byte-reproducible.
 - **Verify a release from a clean tree, not your working copy.** A stale `node_modules` has twice
-  produced a red suite that was not a code defect. Recipe: `pkill -f "bun bin/site.ts"` (the build
-  lock refuses a concurrent build), refresh `bun.lock` with `bun install` after ANY `package.json`
+  produced a red suite that was not a code defect. Recipe: refresh `bun.lock` with `bun install` after ANY `package.json`
   edit, then copy `git ls-files` into a scratch dir and run `bun install --frozen-lockfile`,
   `bun x tsc --noEmit`, `bun test`, `bun run build` there. Check the tarball separately with
   `npm pack --dry-run` — `files` is an allowlist and has silently dropped `.d.ts` files before.

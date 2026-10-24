@@ -19,6 +19,10 @@ For releases before 0.6.1, see the git history (`git log`) and tags.
 
 ### Fixed
 
+- **`bun run stop` (contributors) can no longer signal an unrelated process.** It trusted the
+  build lock's pid if *any* process had it, but locks outlive crashed servers and pids get
+  reused. It now confirms the pid is a bun/node process working in this checkout, refuses a
+  lock held by a build rather than a dev server, and says what it signalled.
 - **An inert doc-site bundle is now detected** (tosijs-ui#159, fixed in 1.15.0). 0.8.0's
   blocker, a `bundleEntry` that registered no `<tosi-doc-system>`, built green with the old
   check reporting `{ docSystem: true }`. Re-run on 1.16.2, the build now names the problem. It

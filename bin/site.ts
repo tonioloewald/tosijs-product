@@ -15,12 +15,8 @@ flattened .d.ts paths).
 
 import { $ } from "bun";
 import siteConfig from "../tosijs-product-site.config";
-import {
-  buildSite,
-  currentHolder,
-  describeHolder,
-  devServer,
-} from "tosijs-ui/site";
+import { buildSite, devServer } from "tosijs-ui/site";
+import { stopDevServer } from "./stop";
 
 declare global {
   // bunlint
@@ -95,22 +91,11 @@ hypothetical: during one session here it killed another checkout's server three 
 mid-measurement, and the victim's symptom — a live pid with no listener — is
 indistinguishable from a genuine hang, so it costs a fresh diagnosis each time.
 
-`currentHolder` reads the build lock (pid, port, root) that tosijs-ui/site already
-maintains per project, so this targets exactly one server: ours.
+The lock names one pid, but a lock can outlive its process and pids get reused, so
+bin/stop.ts confirms the pid is still our dev server before signalling it.
 */
 if (process.argv.includes("--stop")) {
-  const holder = currentHolder(".");
-  if (!holder) {
-    console.log("No dev server is running for this project.");
-    process.exit(0);
-  }
-  try {
-    process.kill(holder.pid, "SIGTERM");
-    console.log(`Stopped ${describeHolder(holder)}`);
-  } catch {
-    console.log(`Could not signal pid ${holder.pid} — it may already be gone.`);
-  }
-  process.exit(0);
+  process.exit(await stopDevServer("."));
 }
 
 const buildAll = async () => {

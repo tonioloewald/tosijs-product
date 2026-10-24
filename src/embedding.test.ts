@@ -87,11 +87,11 @@ describe("nearestEnclosingProduct", () => {
     // drops exactly the nested engine's animator.
     const outerSec = at("#outer-sec");
     const owned = Array.from(
-      outerSec.querySelectorAll("[data-scroll-animate], [data-scroll-range]")
+      outerSec.querySelectorAll("[data-scroll-animate], [data-scroll-range]"),
     ).filter(
       (el) =>
         nearestEnclosingProduct(el.parentElement as HTMLElement) ===
-        outerSec.closest("tosi-product")
+        outerSec.closest("tosi-product"),
     );
     expect(owned).toEqual([at("#outer-anim")]);
   });
@@ -108,7 +108,7 @@ describe("nearestEnclosingProduct", () => {
       </tosi-product>`);
     const inner = at("#inner");
     expect(nearestEnclosingProduct(inner.parentElement as HTMLElement)).toBe(
-      at("#outer")
+      at("#outer"),
     );
   });
 });

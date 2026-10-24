@@ -77,8 +77,12 @@ function getScrollParent(el: HTMLElement): EventTarget {
   while (node) {
     const root = node.getRootNode() as ShadowRoot;
     const next: Element | null =
-      (node as HTMLElement).assignedSlot ?? node.parentElement ?? root.host ?? null;
-    if (!next || next === document.body || next === document.documentElement) break;
+      (node as HTMLElement).assignedSlot ??
+      node.parentElement ??
+      root.host ??
+      null;
+    if (!next || next === document.body || next === document.documentElement)
+      break;
     const { overflow, overflowX, overflowY } = getComputedStyle(next);
     if (/(auto|scroll)/.test(overflow + overflowX + overflowY)) return next;
     node = next;
@@ -104,7 +108,9 @@ export function findEnclosingSection(el: HTMLElement): HTMLElement | null {
  * This is how an engine decides which animators are *its own*: a nested (follower) engine owns
  * the animators inside it, so the outer engine must skip them rather than drive them twice.
  */
-export function nearestEnclosingProduct(el: HTMLElement | null): HTMLElement | null {
+export function nearestEnclosingProduct(
+  el: HTMLElement | null,
+): HTMLElement | null {
   let node = el;
   while (node) {
     if (node.tagName.toLowerCase() === "tosi-product") return node;
@@ -119,7 +125,10 @@ export function nearestEnclosingProduct(el: HTMLElement | null): HTMLElement | n
  */
 let warnedRanges: Set<string> | null = null;
 
-export function rangeProgress(progress: number, rangeStr: string | null): number {
+export function rangeProgress(
+  progress: number,
+  rangeStr: string | null,
+): number {
   /*
   Split into exactly two non-empty parts before reading numbers. `Number("")` is
   0, not NaN, so a trailing comma (`"0.5,"`) would otherwise parse as
@@ -148,7 +157,7 @@ export function rangeProgress(progress: number, rangeStr: string | null): number
     if (!warnedRanges.has(key)) {
       warnedRanges.add(key);
       console.warn(
-        `tosi-product: ignoring malformed data-scroll-range=${JSON.stringify(rangeStr)} — expected "start,end", e.g. "0,0.5". Using the full range.`
+        `tosi-product: ignoring malformed data-scroll-range=${JSON.stringify(rangeStr)} — expected "start,end", e.g. "0,0.5". Using the full range.`,
       );
     }
     return progress;
@@ -175,7 +184,7 @@ export function resolveThemeSource(
   items: readonly { element: HTMLElement }[],
   activeIdx: number,
   activeProgress: number,
-  defaultTheme: string
+  defaultTheme: string,
 ): ThemeSource {
   let fromName = defaultTheme;
   let toName = defaultTheme;
@@ -282,7 +291,7 @@ export class TosiProduct extends Component {
   content = () => [
     div(
       { class: "window", part: "window" },
-      div({ class: "stack", part: "stack" }, slot())
+      div({ class: "stack", part: "stack" }, slot()),
     ),
     div({ class: "debug-panel", part: "debug", hidden: true }),
   ];
@@ -315,7 +324,7 @@ export class TosiProduct extends Component {
     this._stack = this.shadowRoot?.querySelector(".stack") as HTMLElement;
     this._window = this.shadowRoot?.querySelector(".window") as HTMLElement;
     this._debugPanel = this.shadowRoot?.querySelector(
-      ".debug-panel"
+      ".debug-panel",
     ) as HTMLElement;
 
     // Detect nesting: if we live inside an enclosing tosi-product-section,
@@ -605,7 +614,7 @@ export class TosiProduct extends Component {
       this._items,
       activeIdx,
       activeProgress,
-      this.defaultTheme
+      this.defaultTheme,
     );
 
     const fromTheme = this.themes[fromName];
@@ -662,20 +671,20 @@ export class TosiProductSection extends Component {
     // nested engine and should not be driven from here.
     const myProduct = this.closest("tosi-product");
     const animators = this.querySelectorAll(
-      "[data-scroll-animate], [data-scroll-range]"
+      "[data-scroll-animate], [data-scroll-range]",
     );
     for (const el of Array.from(animators)) {
       const ownerProduct = nearestEnclosingProduct(
-        el === this ? null : (el.parentElement as HTMLElement | null)
+        el === this ? null : (el.parentElement as HTMLElement | null),
       );
       if (ownerProduct !== myProduct) continue;
       const localProgress = rangeProgress(
         progress,
-        el.getAttribute("data-scroll-range")
+        el.getAttribute("data-scroll-range"),
       );
       (el as HTMLElement).style.setProperty(
         "--local-progress",
-        localProgress.toString()
+        localProgress.toString(),
       );
       (el as HTMLElement).dataset.localProgress = localProgress.toFixed(3);
       if (typeof (el as any).setScrollProgress === "function") {
@@ -760,7 +769,9 @@ the type system cannot infer from a static. tosijs 1.10 removed the `[key: strin
 index signature that used to paper over this, so these are now REAL types rather than
 `any` — and a typo is a compile error.
 */
-export interface TosiProduct extends ComponentAttrs<typeof TosiProduct.initAttributes> {}
+export interface TosiProduct extends ComponentAttrs<
+  typeof TosiProduct.initAttributes
+> {}
 /*
 TosiProductSection is deliberately NOT merged: its `scroll` attribute collides with
 `Element.scroll()`, and declaration-merging a number over a DOM method is a type error
@@ -768,4 +779,6 @@ TosiProductSection is deliberately NOT merged: its `scroll` attribute collides w
 parent, which is why the collision never bit while the old `any` index signature hid it.
 Renaming the attribute would be a breaking change to the documented API for no gain.
 */
-export interface TosiProductHeader extends ComponentAttrs<typeof TosiProductHeader.initAttributes> {}
+export interface TosiProductHeader extends ComponentAttrs<
+  typeof TosiProductHeader.initAttributes
+> {}

@@ -37,7 +37,9 @@ function readMapWaypoints(host: HTMLElement): MapWaypoint[] {
         .split(",")
         .map((n) => Number(n.trim()));
       const at = (i: number, attr: string, fallback: number) =>
-        Number.isFinite(parts[i]) ? parts[i] : Number(wp.getAttribute(attr) ?? fallback);
+        Number.isFinite(parts[i])
+          ? parts[i]
+          : Number(wp.getAttribute(attr) ?? fallback);
       return {
         progress: Number(wp.getAttribute("progress") || 0),
         lat: at(0, "lat", 0),
@@ -141,4 +143,6 @@ the type system cannot infer from a static. tosijs 1.10 removed the `[key: strin
 index signature that used to paper over this, so these are now REAL types rather than
 `any` — and a typo is a compile error.
 */
-export interface TosiScrollMap extends ComponentAttrs<typeof TosiScrollMap.initAttributes> {}
+export interface TosiScrollMap extends ComponentAttrs<
+  typeof TosiScrollMap.initAttributes
+> {}

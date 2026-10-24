@@ -146,7 +146,7 @@ export class TosiFilmstrip extends Component {
 
     const frameIndex = Math.max(
       0,
-      Math.min(total - 1, Math.floor(progress * total))
+      Math.min(total - 1, Math.floor(progress * total)),
     );
     const col = frameIndex % cols;
     const row = Math.floor(frameIndex / cols);
@@ -195,4 +195,6 @@ the type system cannot infer from a static. tosijs 1.10 removed the `[key: strin
 index signature that used to paper over this, so these are now REAL types rather than
 `any` — and a typo is a compile error.
 */
-export interface TosiFilmstrip extends ComponentAttrs<typeof TosiFilmstrip.initAttributes> {}
+export interface TosiFilmstrip extends ComponentAttrs<
+  typeof TosiFilmstrip.initAttributes
+> {}

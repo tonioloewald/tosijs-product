@@ -85,7 +85,11 @@ function trimNum(v: number): string {
  * result is fractional. It is also silently wrong in the other direction — `#a0b0c0` and
  * `#d0e0f0` both scan as `0,0,0`, so the value interpolates 0→0 and never moves at all.
  */
-export function interpolateStrings(from: string, to: string, t: number): string {
+export function interpolateStrings(
+  from: string,
+  to: string,
+  t: number,
+): string {
   if (from === to || t <= 0) return from;
   if (t >= 1) return to;
   if (isColor(from) && isColor(to)) {

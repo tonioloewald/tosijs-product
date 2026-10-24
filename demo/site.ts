@@ -22,8 +22,6 @@ import "tosijs-ui/doc-system/doc-system";
 import "tosijs-ui/live-example";
 import * as tosijsProduct from "../src/index";
 
-for (const el of Array.from(
-  document.querySelectorAll("tosi-doc-system")
-)) {
+for (const el of Array.from(document.querySelectorAll("tosi-doc-system"))) {
   (el as any).context = { "tosijs-product": tosijsProduct };
 }

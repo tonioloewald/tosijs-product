@@ -103,8 +103,8 @@ function loadScript(path: string): Promise<void> {
   if (!integrity) {
     return Promise.reject(
       new Error(
-        `tosi-prism: refusing to load ${path} — no integrity hash. Add one to SUBRESOURCE_INTEGRITY.`
-      )
+        `tosi-prism: refusing to load ${path} — no integrity hash. Add one to SUBRESOURCE_INTEGRITY.`,
+      ),
     );
   }
   p = new Promise((resolve, reject) => {
@@ -114,7 +114,7 @@ function loadScript(path: string): Promise<void> {
     s.crossOrigin = "anonymous";
     const timer = setTimeout(
       () => reject(new Error(`Timed out loading ${s.src}`)),
-      LOAD_TIMEOUT_MS
+      LOAD_TIMEOUT_MS,
     );
     s.onload = () => {
       clearTimeout(timer);
@@ -207,7 +207,7 @@ function resolveLanguage(name: string): string {
  * Safe to call repeatedly; each script + theme is fetched at most once.
  */
 export async function loadPrism(
-  languages: string[] = ["markup"]
+  languages: string[] = ["markup"],
 ): Promise<void> {
   await loadTheme();
   await loadScript("components/prism-core.min.js");
@@ -334,4 +334,6 @@ the type system cannot infer from a static. tosijs 1.10 removed the `[key: strin
 index signature that used to paper over this, so these are now REAL types rather than
 `any` — and a typo is a compile error.
 */
-export interface TosiPrism extends ComponentAttrs<typeof TosiPrism.initAttributes> {}
+export interface TosiPrism extends ComponentAttrs<
+  typeof TosiPrism.initAttributes
+> {}

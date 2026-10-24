@@ -52,11 +52,11 @@ describe("interpolateThemeValue", () => {
 
   test("blends two colors through color-mix", () => {
     expect(interpolateThemeValue("#000", "#fff", 0.5)).toBe(
-      "color-mix(in srgb, #000 50%, #fff)"
+      "color-mix(in srgb, #000 50%, #fff)",
     );
     // The from-weight is (1 - t): a quarter of the way across is still 75% from.
     expect(interpolateThemeValue("#000", "#fff", 0.25)).toBe(
-      "color-mix(in srgb, #000 75%, #fff)"
+      "color-mix(in srgb, #000 75%, #fff)",
     );
   });
 
@@ -64,7 +64,7 @@ describe("interpolateThemeValue", () => {
     // (1 - 0.7) * 100 === 30.000000000000004 in IEEE754. Valid CSS, but we emit
     // a clean number so the computed custom property stays readable.
     expect(interpolateThemeValue("#000", "#fff", 0.7)).toBe(
-      "color-mix(in srgb, #000 30%, #fff)"
+      "color-mix(in srgb, #000 30%, #fff)",
     );
   });
 
@@ -85,7 +85,9 @@ describe("interpolateThemeValue", () => {
     expect(interpolateThemeValue("0px", "10px 20px", 0.6)).toBe("10px 20px");
     // No numbers at all.
     expect(interpolateThemeValue("serif", "sans-serif", 0.4)).toBe("serif");
-    expect(interpolateThemeValue("serif", "sans-serif", 0.6)).toBe("sans-serif");
+    expect(interpolateThemeValue("serif", "sans-serif", 0.6)).toBe(
+      "sans-serif",
+    );
   });
 });
 
@@ -150,7 +152,9 @@ describe("resolveThemeSource", () => {
       section({ theme: "paper" }),
       interlude(),
     ];
-    expect(resolveThemeSource(items, 2, 0.5, "midnight").fromName).toBe("paper");
+    expect(resolveThemeSource(items, 2, 0.5, "midnight").fromName).toBe(
+      "paper",
+    );
   });
 
   test("a lone theme-from (no theme-to) is treated as a constant theme", () => {

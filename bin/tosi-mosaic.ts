@@ -34,16 +34,20 @@ if (!input) {
   console.log("Options:");
   console.log("  -f, --frames   Total frames to extract (default: 60)");
   console.log("  -w, --width    Width of each frame (default: 1280)");
-  console.log("  -q, --quality  Quality 0-100, higher is better (default: 75). webp and jpg only;");
-  console.log("                 png is lossless, so the flag is ignored there.");
   console.log(
-    "  -r, --fps      Source FPS, when the container misreports it (optional)"
+    "  -q, --quality  Quality 0-100, higher is better (default: 75). webp and jpg only;",
   );
   console.log(
-    "  -t, --format   webp | jpg | png (default: webp). <tosi-filmstrip> reads all three;"
+    "                 png is lossless, so the flag is ignored there.",
   );
   console.log(
-    "                 use jpg or png if your ffmpeg was built without the webp encoder."
+    "  -r, --fps      Source FPS, when the container misreports it (optional)",
+  );
+  console.log(
+    "  -t, --format   webp | jpg | png (default: webp). <tosi-filmstrip> reads all three;",
+  );
+  console.log(
+    "                 use jpg or png if your ffmpeg was built without the webp encoder.",
   );
   console.log("\nRequires ffmpeg and ffprobe on PATH.");
   process.exit(1);
@@ -67,7 +71,7 @@ try {
   await $`ffprobe -version`.quiet();
 } catch {
   fail(
-    "ffprobe not found on PATH. Install ffmpeg (macOS: `brew install ffmpeg`)."
+    "ffprobe not found on PATH. Install ffmpeg (macOS: `brew install ffmpeg`).",
   );
 }
 
@@ -82,7 +86,7 @@ try {
     const detail = probed.stderr.toString().trim();
     fail(
       `ffprobe could not read a video stream from ${input}.` +
-        (detail ? `\n\n${detail}` : " Is it a video file?")
+        (detail ? `\n\n${detail}` : " Is it a video file?"),
     );
   }
   const [fpsStr, durationStr, nbFramesStr] = probed.stdout
@@ -102,11 +106,12 @@ try {
   const fps = parseRate(values.fps ?? fpsStr);
   const duration = parseFloat(durationStr);
   const nbFrames = Number(nbFramesStr);
-  let sourceFrames = Number.isFinite(nbFrames) && nbFrames > 0
-    ? nbFrames
-    : Number.isFinite(duration) && Number.isFinite(fps)
-      ? Math.floor(duration * fps)
-      : NaN;
+  let sourceFrames =
+    Number.isFinite(nbFrames) && nbFrames > 0
+      ? nbFrames
+      : Number.isFinite(duration) && Number.isFinite(fps)
+        ? Math.floor(duration * fps)
+        : NaN;
 
   /*
   Last resort: count the frames. Containers exist (remuxed mkv/webm, streams with
@@ -118,7 +123,7 @@ try {
   */
   if (!Number.isFinite(sourceFrames) || sourceFrames < 1) {
     console.warn(
-      `⚠️  ${input} reports neither a frame count nor a duration — counting frames (this decodes the whole file)…`
+      `⚠️  ${input} reports neither a frame count nor a duration — counting frames (this decodes the whole file)…`,
     );
     const counted =
       await $`ffprobe -v error -select_streams v:0 -count_frames -show_entries stream=nb_read_frames -of csv=p=0 ${input}`
@@ -131,7 +136,7 @@ try {
     fail(
       `Could not determine the frame count of ${input} ` +
         `(nb_frames=${nbFramesStr}, duration=${durationStr}, r_frame_rate=${fpsStr}, and counting frames failed). ` +
-        `Is it a video file?`
+        `Is it a video file?`,
     );
   }
 
@@ -151,7 +156,7 @@ try {
   const total = Math.ceil(sourceFrames / stride);
   if (total !== targetFrames) {
     console.warn(
-      `⚠️  ${input} has ${sourceFrames} frames; every ${stride}${stride === 1 ? "" : stride === 2 ? "nd" : stride === 3 ? "rd" : "th"} frame gives ${total}, not the ${targetFrames} requested. Using ${total} so the whole clip is covered.`
+      `⚠️  ${input} has ${sourceFrames} frames; every ${stride}${stride === 1 ? "" : stride === 2 ? "nd" : stride === 3 ? "rd" : "th"} frame gives ${total}, not the ${targetFrames} requested. Using ${total} so the whole clip is covered.`,
     );
   }
 
@@ -183,7 +188,10 @@ try {
     format === "webp"
       ? ["-q:v", String(q)]
       : format === "jpg"
-        ? ["-q:v", String(Math.min(31, Math.max(2, Math.round(31 - (q / 100) * 29))))]
+        ? [
+            "-q:v",
+            String(Math.min(31, Math.max(2, Math.round(31 - (q / 100) * 29)))),
+          ]
         : // PNG is LOSSLESS: `--quality` has no meaning here and is ignored. Mapping it to
           // `-compression_level` was worse than ignoring it — it ran backwards, so a user
           // following the help text ("higher is better") got `-q 100` -> level 0, the
@@ -206,7 +214,9 @@ try {
   */
   if (run.exitCode !== 0) {
     const detail = run.stderr.toString().trim();
-    fail(`ffmpeg failed (exit ${run.exitCode}).${detail ? `\n\n${detail}` : ""}`);
+    fail(
+      `ffmpeg failed (exit ${run.exitCode}).${detail ? `\n\n${detail}` : ""}`,
+    );
   }
 
   console.log("✅ Done!");

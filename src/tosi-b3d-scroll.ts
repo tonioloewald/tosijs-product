@@ -94,7 +94,7 @@ function easeInOutQuad(t: number): number {
 function interpolateWaypoints(
   progress: number,
   waypoints: Array<{ progress: number; [key: string]: number }>,
-  easing: boolean
+  easing: boolean,
 ): Record<string, number> {
   if (waypoints.length === 0) return {};
   if (waypoints.length === 1) return waypoints[0];
@@ -138,7 +138,7 @@ function readWaypoints(host: HTMLElement): Waypoint[] {
         const val = Number(attr.value);
         if (Number.isFinite(val)) {
           const key = attr.name.replace(/-([a-z])/g, (_, c: string) =>
-            c.toUpperCase()
+            c.toUpperCase(),
           );
           result[key] = val;
         }
@@ -195,7 +195,7 @@ export class TosiScrollCamera extends Component {
         camera.target.copyFromFloats(
           v.targetX ?? camera.target.x,
           v.targetY ?? camera.target.y,
-          v.targetZ ?? camera.target.z
+          v.targetZ ?? camera.target.z,
         );
       }
     }
@@ -281,7 +281,7 @@ export class TosiScrollAnimation extends Component {
 
     if (!this._animGroup || this._animGroup.name !== name) {
       this._animGroup = owner.scene.animationGroups?.find(
-        (g: any) => g.name === name
+        (g: any) => g.name === name,
       );
       this._started = false;
     }
@@ -325,6 +325,12 @@ the type system cannot infer from a static. tosijs 1.10 removed the `[key: strin
 index signature that used to paper over this, so these are now REAL types rather than
 `any` — and a typo is a compile error.
 */
-export interface TosiScrollCamera extends ComponentAttrs<typeof TosiScrollCamera.initAttributes> {}
-export interface TosiScrollTime extends ComponentAttrs<typeof TosiScrollTime.initAttributes> {}
-export interface TosiScrollAnimation extends ComponentAttrs<typeof TosiScrollAnimation.initAttributes> {}
+export interface TosiScrollCamera extends ComponentAttrs<
+  typeof TosiScrollCamera.initAttributes
+> {}
+export interface TosiScrollTime extends ComponentAttrs<
+  typeof TosiScrollTime.initAttributes
+> {}
+export interface TosiScrollAnimation extends ComponentAttrs<
+  typeof TosiScrollAnimation.initAttributes
+> {}

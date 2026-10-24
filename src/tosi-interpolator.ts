@@ -121,7 +121,7 @@ export class TosiInterpolator extends Component {
     }
 
     const targets = Array.from(this.children).filter(
-      (c) => c.tagName !== "TOSI-WAYPOINT"
+      (c) => c.tagName !== "TOSI-WAYPOINT",
     );
     targets.forEach((target) => {
       const el = target as HTMLElement;
@@ -157,4 +157,6 @@ the type system cannot infer from a static. tosijs 1.10 removed the `[key: strin
 index signature that used to paper over this, so these are now REAL types rather than
 `any` — and a typo is a compile error.
 */
-export interface TosiWaypoint extends ComponentAttrs<typeof TosiWaypoint.initAttributes> {}
+export interface TosiWaypoint extends ComponentAttrs<
+  typeof TosiWaypoint.initAttributes
+> {}

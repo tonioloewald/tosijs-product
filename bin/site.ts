@@ -15,7 +15,12 @@ flattened .d.ts paths).
 
 import { $ } from "bun";
 import siteConfig from "../tosijs-product-site.config";
-import { buildSite, currentHolder, describeHolder, devServer } from "tosijs-ui/site";
+import {
+  buildSite,
+  currentHolder,
+  describeHolder,
+  devServer,
+} from "tosijs-ui/site";
 
 declare global {
   // bunlint

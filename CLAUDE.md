@@ -26,7 +26,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 bun install              # Install dependencies
 bun run start            # Build, then start the doc-site dev server (bin/site.ts)
 bun run build            # Build the doc site + library, then exit (bin/site.ts --build)
-bun run format           # ESLint + Prettier
+bun run format           # tosijs-format: eslint --fix, then Prettier (never markdown)
+bun run format:check     # same, check only; exits 1 on any finding
 bun run test             # Bun test runner (interpolation, theme, embedding)
 bun test src/theme.test.ts           # Run a single test file
 bun tsc --noEmit         # Typecheck (NOT run by the build — see below)

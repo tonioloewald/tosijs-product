@@ -1,0 +1,15 @@
+# Generated output: the build rewrites these, so formatting them is a permanent two-way diff.
+dist/
+docs/
+llms.txt
+bun.lock
+
+# Markdown is authored prose (the README is a raw-HTML landing page that breaks on one stray
+# blank line). .prettierrc.json's requirePragma override is the rule; this is belt and braces.
+*.md
+*.markdown
+*.mdx
+
+# Written by tools (virta init, Claude Code), which would rewrite them back.
+.claude/
+.mcp.json

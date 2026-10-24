@@ -50,7 +50,7 @@ See also [`<tosi-interpolator>`](/tosi-interpolator/) and [`<tosi-filmstrip>`](/
 */
 
 import { Component, type ComponentAttrs, elements } from "tosijs";
-import { interpolateThemeValue, isColor, numAttr } from "./waypoints";
+import { interpolateThemeValue, numAttr } from "./waypoints";
 
 const { div, slot } = elements;
 

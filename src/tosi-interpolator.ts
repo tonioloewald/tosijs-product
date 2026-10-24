@@ -7,6 +7,11 @@ Declarative CSS-property interpolation between scroll **waypoints**. Wrap any el
 (numbers per-number, colours via `color-mix`) as the enclosing `<tosi-product-section>`'s pin
 progress runs 0 → 1.
 
+A property animates when every waypoint writes it in the **same shape**: the same transform
+functions in the same order, with the same units (a bare `0` adopts the other side's unit).
+`translateY(0px)` → `scale(1.2)` has no in-between, so it steps at the midpoint; write
+`translateY(0px) scale(1)` → `translateY(0px) scale(1.2)` instead.
+
 The panel below is a live `<tosi-interpolator>` — scroll it, then read its markup in **Source**
 view (top-right). No JavaScript; it is the HTML shown here.
 

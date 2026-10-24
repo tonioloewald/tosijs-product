@@ -8,6 +8,56 @@ import {
 } from "./waypoints";
 
 describe("interpolateStrings", () => {
+  describe("units (board #2513)", () => {
+    test("mismatched units step at the midpoint instead of animating in from's unit", () => {
+      expect(interpolateStrings("0.5px", "0.2em", 0.25)).toBe("0.5px");
+      expect(interpolateStrings("0.5px", "0.2em", 0.75)).toBe("0.2em");
+      expect(interpolateStrings("1rem 2px", "2rem 4em", 0.25)).toBe("1rem 2px");
+    });
+
+    test("a unitless 0 takes the other side's unit", () => {
+      expect(
+        interpolateStrings("translateX(0)", "translateX(100px)", 0.5),
+      ).toBe("translateX(50px)");
+      expect(interpolateStrings("2em", "0", 0.5)).toBe("1em");
+    });
+
+    test("a unitless nonzero is a mismatch, not a zero", () => {
+      expect(interpolateStrings("5", "10px", 0.25)).toBe("5");
+    });
+
+    test("different text between the numbers steps", () => {
+      expect(
+        interpolateStrings("translateX(0px)", "translateY(10px)", 0.25),
+      ).toBe("translateX(0px)");
+    });
+
+    test("whitespace differences still interpolate", () => {
+      expect(
+        interpolateStrings("translate(0px,0px)", "translate(10px, 20px)", 0.5),
+      ).toBe("translate(5px,10px)");
+    });
+
+    test("leading-dot decimals are one number, not a dot and an integer", () => {
+      // Read as "." + "94", `scale(.94)` → `scale(1)` emitted `scale(.70.75)`; and
+      // `translateY(0em)` → `translateY(-.8em)` moved DOWN to 6em. Both shipped in owl-pro.md.
+      expect(interpolateStrings("scale(.94)", "scale(1)", 0.25)).toBe(
+        "scale(0.955)",
+      );
+      expect(
+        interpolateStrings("translateY(0em)", "translateY(-.8em)", 0.75),
+      ).toBe("translateY(-0.6em)");
+    });
+
+    test("percent, unitless numbers and multi-letter units", () => {
+      expect(interpolateStrings("0%", "100%", 0.3)).toBe("30%");
+      expect(interpolateStrings("0.5", "1", 0.5)).toBe("0.75");
+      expect(interpolateStrings("rotate(0deg)", "rotate(90deg)", 0.5)).toBe(
+        "rotate(45deg)",
+      );
+    });
+  });
+
   test("interpolates single numeric value", () => {
     expect(
       interpolateStrings("translateY(0px)", "translateY(100px)", 0.5),

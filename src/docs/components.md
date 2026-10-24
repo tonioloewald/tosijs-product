@@ -70,8 +70,8 @@ two themes across the pin progress, so the page changes mood as you scroll throu
 | `defaultTheme`| `string`        | `""`                       | Theme in force before any section declares one.                      |
 | `themeTarget` | `HTMLElement`   | `document.documentElement` | Where resolved variables are written. A nested engine scopes to itself. |
 
-Values blend according to type: colors through `color-mix(in srgb, …)`, values containing numbers
-per-number, and everything else steps at the midpoint. Because the resolved variables land on
+Values blend according to type: colors through `color-mix(in srgb, …)`, values of the same shape
+(same numbers, units and text between them) per-number, and everything else steps at the midpoint. Because the resolved variables land on
 `document.documentElement` by default, **elements outside the engine re-theme too** — a page header,
 a sticky nav, the footer — simply by reading the same custom properties.
 
@@ -108,7 +108,7 @@ useful if you're building your own animator or debugging why a scene isn't behav
 | Function                                             | Returns                | Description                                                                                     |
 | ---------------------------------------------------- | ---------------------- | ----------------------------------------------------------------------------------------------- |
 | `rangeProgress(progress, rangeStr)`                  | `number`               | Maps a section's 0→1 progress onto a `data-scroll-range="start,end"` slice, clamped to 0→1.     |
-| `interpolateStrings(a, b, t)`                        | `string`               | Blends two CSS values at `t` — colors via `color-mix`, matching number runs per-number, anything else stepped at the midpoint. The one kernel `<tosi-interpolator>` and the theme system share. |
+| `interpolateStrings(a, b, t)`                        | `string`               | Blends two CSS values at `t` — colors via `color-mix`, same-shaped values (numbers, units, text between) per-number, anything else stepped at the midpoint. The one kernel `<tosi-interpolator>` and the theme system share. |
 | `interpolateWaypoints(progress, waypoints)`          | `number`               | Numeric interpolation across waypoints, with easeInOutQuad.                                     |
 | `interpolateThemeValue(from, to, t)`                 | `string`               | Alias of `interpolateStrings` — the name the theme system uses for the same kernel.              |
 | `isColor(s)`                                         | `boolean`              | Whether a CSS value is a color, and so should be blended rather than stepped.                   |

@@ -244,15 +244,15 @@ The IIFE build is self-contained — a single script tag gives you `tosijs`, `to
         <tosi-interpolator data-scroll-animate easing="ease-in-out">
           <tosi-waypoint
             progress="0"
-            style="opacity: 0; transform: translateY(50px)"
+            style="opacity: 0; transform: translateY(50px) scale(1)"
           ></tosi-waypoint>
           <tosi-waypoint
             progress="0.5"
-            style="opacity: 1; transform: translateY(0px)"
+            style="opacity: 1; transform: translateY(0px) scale(1)"
           ></tosi-waypoint>
           <tosi-waypoint
             progress="1"
-            style="opacity: 1; transform: scale(1.2)"
+            style="opacity: 1; transform: translateY(0px) scale(1.2)"
           ></tosi-waypoint>
           <h1 style="text-align: center;">Pinned for 2× viewport.</h1>
         </tosi-interpolator>
@@ -287,13 +287,13 @@ const app = tosiProduct(
       { "data-scroll-animate": true, easing: "ease-in-out" },
       tosiWaypoint({
         progress: 0,
-        style: "opacity: 0; transform: translateY(50px)",
+        style: "opacity: 0; transform: translateY(50px) scale(1)",
       }),
       tosiWaypoint({
         progress: 0.5,
-        style: "opacity: 1; transform: translateY(0px)",
+        style: "opacity: 1; transform: translateY(0px) scale(1)",
       }),
-      tosiWaypoint({ progress: 1, style: "opacity: 1; transform: scale(1.2)" }),
+      tosiWaypoint({ progress: 1, style: "opacity: 1; transform: translateY(0px) scale(1.2)" }),
       document.createElement("h1")
     )
   )

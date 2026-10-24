@@ -73,10 +73,65 @@ function trimNum(v: number): string {
 }
 
 /**
+ * A value read as numbers and the text between them. `units[i]` is the run of letters or `%`
+ * right after `nums[i]`, and `rests[i + 1]` is the rest of that gap; `rests[0]` is what
+ * precedes the first number. `null` when there are no numbers.
+ */
+interface NumericShape {
+  nums: number[];
+  units: string[];
+  rests: string[];
+}
+
+function numericShape(value: string): NumericShape | null {
+  const parts = value.split(/(-?(?:\d*\.)?\d+)/);
+  if (parts.length < 3) return null;
+  const nums: number[] = [];
+  const units: string[] = [];
+  const rests: string[] = [parts[0]];
+  for (let i = 1; i < parts.length; i += 2) {
+    nums.push(parseFloat(parts[i]));
+    const gap = parts[i + 1];
+    const unit = gap.match(/^(?:[a-zA-Z]+|%)/)?.[0] ?? "";
+    units.push(unit);
+    rests.push(gap.slice(unit.length));
+  }
+  return { nums, units, rests };
+}
+
+/**
+ * The unit each number interpolates in, or `null` when the two values don't line up.
+ *
+ * Substituting numbers into the FROM value's text used to keep from's units whatever `to`
+ * said, so `0px → 0.2em` animated in px and snapped to em on the last frame, a bug that
+ * shipped in the README hero. Mismatched units, or different text between the numbers, now
+ * fall through to the midpoint step, the same as any other pair with no in-between. A
+ * unitless 0 takes the other side's unit (`translateX(0)` → `translateX(100px)`): 0 is the
+ * one length CSS lets you write bare, and reading it as a mismatch would turn the commonest
+ * authoring shape into a snap. Whitespace differences don't count as a mismatch.
+ */
+function matchUnits(a: NumericShape, b: NumericShape): string[] | null {
+  const squash = (s: string) => s.replace(/\s+/g, "");
+  for (let i = 0; i < a.rests.length; i++) {
+    if (squash(a.rests[i]) !== squash(b.rests[i])) return null;
+  }
+  const units: string[] = [];
+  for (let i = 0; i < a.nums.length; i++) {
+    const [ua, ub] = [a.units[i], b.units[i]];
+    if (ua === ub) units.push(ua);
+    else if (ua === "" && a.nums[i] === 0) units.push(ub);
+    else if (ub === "" && b.nums[i] === 0) units.push(ua);
+    else return null;
+  }
+  return units;
+}
+
+/**
  * Blend one CSS value into another at `t` (0→1).
  *
- * Colors blend through `color-mix(in srgb, …)`. Values containing matching runs of numbers
- * (`0.5rem 1rem`, `translateY(20px)`) interpolate per-number. Anything else steps at the
+ * Colors blend through `color-mix(in srgb, …)`. Values with the same shape, meaning the same
+ * count of numbers in the same units with the same text between them (`0.5rem 1rem`,
+ * `translateY(20px)`), interpolate per-number. Anything else steps at the
  * midpoint, since there's no meaningful in-between for e.g. a font-family.
  *
  * **The color test must come first.** A hex color is a digit-bearing string, so a
@@ -95,22 +150,18 @@ export function interpolateStrings(
   if (isColor(from) && isColor(to)) {
     return `color-mix(in srgb, ${from} ${trimNum((1 - t) * 100)}%, ${to})`;
   }
-  const numRegex = /-?\d+(?:\.\d+)?/g;
-  const aNums = Array.from(from.matchAll(numRegex));
-  const bNums = Array.from(to.matchAll(numRegex));
-  if (aNums.length > 0 && aNums.length === bNums.length) {
-    let result = "";
-    let lastIndex = 0;
-    for (let i = 0; i < aNums.length; i++) {
-      const am = aNums[i];
-      const bm = bNums[i];
-      result += from.substring(lastIndex, am.index);
-      const v = parseFloat(am[0]) + (parseFloat(bm[0]) - parseFloat(am[0])) * t;
-      result += trimNum(v);
-      lastIndex = am.index! + am[0].length;
+  const a = numericShape(from);
+  const b = numericShape(to);
+  if (a && b && a.nums.length === b.nums.length) {
+    const units = matchUnits(a, b);
+    if (units) {
+      let result = a.rests[0];
+      for (let i = 0; i < a.nums.length; i++) {
+        result += trimNum(a.nums[i] + (b.nums[i] - a.nums[i]) * t);
+        result += units[i] + a.rests[i + 1];
+      }
+      return result;
     }
-    result += from.substring(lastIndex);
-    return result;
   }
   return t < 0.5 ? from : to;
 }

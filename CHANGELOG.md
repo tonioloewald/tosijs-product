@@ -19,6 +19,18 @@ For releases before 0.6.1, see the git history (`git log`) and tags.
 
 ### Fixed
 
+- **Waypoint values with a leading-dot decimal (`.8em`, `scale(.94)`) now interpolate.**
+  They were read as a dot followed by an integer, so `scale(.94)` → `scale(1)` emitted invalid
+  CSS (`scale(.70.75)`) mid-scroll, and `translateY(0em)` → `translateY(-.8em)` swung to `6em`
+  instead of `-0.6em`. Both shapes were in the owl-pro demo. Applies to theme values too.
+- **Mismatched units no longer animate silently in the wrong unit.** `0px` → `0.2em` used to
+  animate in px and snap to em on the last frame. Waypoint pairs whose units, or the text between
+  their numbers, differ now step at the midpoint, the way any other pair with no in-between
+  does, so the slip is visible. A bare `0` takes the other side's unit, so `translateX(0)` →
+  `translateX(100px)` animates (it used to emit the invalid `translateX(50)`). **If a page relied
+  on the old behaviour**, give each waypoint the same transform functions in the same order; the
+  README's quick-start examples were fixed this way (`translateY(0px)` → `scale(1.2)` became
+  `translateY(0px) scale(1)` → `translateY(0px) scale(1.2)`).
 - **`bun run stop` (contributors) can no longer signal an unrelated process.** It trusted the
   build lock's pid if *any* process had it, but locks outlive crashed servers and pids get
   reused. It now confirms the pid is a bun/node process working in this checkout, refuses a

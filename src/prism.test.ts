@@ -63,6 +63,20 @@ describe("resolveLoadSet", () => {
     ]);
   });
 
+  test("the exact set for javascript", () => {
+    expect(resolveLoadSet(["javascript"])).toEqual([
+      "components/prism-core.min.js",
+      "components/prism-clike.min.js",
+      "components/prism-javascript.min.js",
+    ]);
+  });
+
+  test("a path-shaped language name loads nothing beyond core", () => {
+    expect(resolveLoadSet(["../../evil/x", "javascript/../x"])).toEqual([
+      "components/prism-core.min.js",
+    ]);
+  });
+
   test("Object.prototype keys are not languages", () => {
     expect(resolveLoadSet(PROTOTYPE_KEYS)).toEqual([
       "components/prism-core.min.js",

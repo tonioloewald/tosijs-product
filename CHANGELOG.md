@@ -10,12 +10,12 @@ For releases before 0.6.1, see the git history (`git log`) and tags.
 
 ### Changed
 
-- **The CDN IIFE now bundles tosijs-ui 1.16.2 and tosijs 1.10.6** (was 1.14.1 / 1.10.x). One
+- **The CDN IIFE now bundles tosijs-ui 1.16.32 and tosijs 1.10.9** (was 1.14.1 / 1.10.x). One
   behaviour change reaches `<script src>` pages through it: **`<tosi-md>` sanitizes by default**
   (tosijs-ui 1.16.0, #179). If a product page relied on raw HTML passing through `<tosi-md>`, set
-  `sanitize="off"`. The bundle grows from 486,755 to 508,628 bytes raw (+6.6kB gzip, to 151.7kB),
-  mostly tosijs-schema per upstream's notes. The ESM build is unaffected, and the peer ranges are
-  unchanged.
+  `sanitize="off"`. The bundle grows from 486,755 to 561,477 bytes raw (+23.3kB gzip, 145.0kB → 168.3kB):
+  tosijs-schema per upstream's notes, then 1.16.32's new `<tosi-palette>` and `<tosi-affix>`.
+  The ESM build is unaffected, and the peer ranges are unchanged.
 
 ### Fixed
 

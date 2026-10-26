@@ -186,6 +186,7 @@ export async function highlightCodeBlocks(root: ParentNode): Promise<void> {
  * text content into `<pre><code>`.
  */
 export class TosiPrism extends Component {
+  static preferredTagName = "tosi-prism";
   static initAttributes = {
     language: "markup",
   };
@@ -244,7 +245,7 @@ function escapeHtml(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-export const tosiPrism = TosiPrism.elementCreator({ tag: "tosi-prism" });
+export const tosiPrism = TosiPrism.elementCreator();
 
 /*
 Declaration merge: `initAttributes` keys become instance properties at hydration, which

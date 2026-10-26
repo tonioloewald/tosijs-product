@@ -17,6 +17,12 @@ For releases before 0.6.1, see the git history (`git log`) and tags.
   tosijs-schema per upstream's notes, then 1.16.32's new `<tosi-palette>` and `<tosi-affix>`.
   The ESM build is unaffected, and the peer ranges are unchanged.
 
+- **Elements register through `static preferredTagName`**, not the deprecated
+  `elementCreator({ tag })`, and style through `static shadowStyleSpec`, not `static styleSpec`.
+  Tag names and factories are unchanged (a new test pins all eleven), and tosijs's deprecation
+  warning is gone. **If you subclass one of these elements and override `static styleSpec`,**
+  rename it to `shadowStyleSpec`: the inherited `shadowStyleSpec` now takes precedence over it.
+
 ### Fixed
 
 - **Waypoint values with a leading-dot decimal (`.8em`, `scale(.94)`) now interpolate.**

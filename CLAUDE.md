@@ -90,7 +90,7 @@ Plan (in progress): README = full declarative narrative demo; `src/docs/*` = per
 
 ### Component model
 
-All components extend `tosijs`'s `Component` class (Custom Elements with shadow DOM). Each class has a corresponding camelCase factory function created via `.elementCreator({ tag })`:
+All components extend `tosijs`'s `Component` class (Custom Elements with shadow DOM). Each class has a corresponding camelCase factory function created via `.elementCreator()`, with the tag from `static preferredTagName`:
 
 | Class                 | Tag                       | Factory               | Role                                                                                                                                                                                                                                 |
 | --------------------- | ------------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -245,8 +245,8 @@ This library builds on `tosijs` and `tosijs-ui`. Key patterns to follow:
 
 - Extend `Component` from `tosijs`. Use `static initAttributes = { ... }` for declared attributes with defaults.
 - `content()` runs once to build shadow DOM. `render()` runs on attribute changes for structural updates. Bindings handle content updates — don't manually walk the DOM in render.
-- Use `static styleSpec = { ':host': { ... } }` for component styles (`:host` is rewritten automatically).
-- Export both the class (`TosiFoo`) and a factory (`tosiFoo = TosiFoo.elementCreator({ tag: 'tosi-foo' })`). Note: tosijs now warns that both `elementCreator({ tag })` and `static styleSpec` are **deprecated** (use `static preferredTagName` / `static shadowStyleSpec`). Every factory here still uses the old form — migrating is a pending chore, so don't be surprised by the warnings in test output.
+- Use `static shadowStyleSpec = { ":host": { ... } }` for component styles (`:host` is rewritten automatically).
+- Export both the class (`TosiFoo`) and a factory (`tosiFoo = TosiFoo.elementCreator()`). The tag comes from `static preferredTagName = "tosi-foo"` and shadow styles from `static shadowStyleSpec` (migrated off the deprecated `elementCreator({ tag })` and `static styleSpec` in #2535). Add any new element to `src/registration.test.ts`, which pins every tag name.
 
 ### Element creators and elements
 

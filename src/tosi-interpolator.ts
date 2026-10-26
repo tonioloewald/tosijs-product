@@ -59,7 +59,8 @@ import { Component, type ComponentAttrs } from "tosijs";
 import { interpolateStrings, rangeT } from "./waypoints";
 
 export class TosiInterpolator extends Component {
-  static styleSpec = {
+  static preferredTagName = "tosi-interpolator";
+  static shadowStyleSpec = {
     ":host": {
       display: "contents",
     },
@@ -138,10 +139,11 @@ export class TosiInterpolator extends Component {
 }
 
 export class TosiWaypoint extends Component {
+  static preferredTagName = "tosi-waypoint";
   static initAttributes = {
     progress: 0,
   };
-  static styleSpec = {
+  static shadowStyleSpec = {
     ":host": {
       display: "none",
     },
@@ -149,12 +151,8 @@ export class TosiWaypoint extends Component {
   content = null;
 }
 
-export const tosiInterpolator = TosiInterpolator.elementCreator({
-  tag: "tosi-interpolator",
-});
-export const tosiWaypoint = TosiWaypoint.elementCreator({
-  tag: "tosi-waypoint",
-});
+export const tosiInterpolator = TosiInterpolator.elementCreator();
+export const tosiWaypoint = TosiWaypoint.elementCreator();
 
 /*
 Declaration merge: `initAttributes` keys become instance properties at hydration, which

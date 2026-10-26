@@ -165,11 +165,12 @@ function readWaypoints(host: HTMLElement): Waypoint[] {
  *   </tosi-scroll-camera>
  */
 export class TosiScrollCamera extends Component {
+  static preferredTagName = "tosi-scroll-camera";
   static initAttributes = {
     easing: "",
   };
 
-  static styleSpec = {
+  static shadowStyleSpec = {
     ":host": { display: "none" },
   };
 
@@ -221,12 +222,13 @@ export class TosiScrollCamera extends Component {
  *   <tosi-scroll-time data-scroll-animate from="6" to="18"></tosi-scroll-time>
  */
 export class TosiScrollTime extends Component {
+  static preferredTagName = "tosi-scroll-time";
   static initAttributes = {
     from: 0,
     to: 24,
   };
 
-  static styleSpec = {
+  static shadowStyleSpec = {
     ":host": { display: "none" },
   };
 
@@ -259,11 +261,12 @@ export class TosiScrollTime extends Component {
  *   <tosi-scroll-animation data-scroll-animate name="DoorOpen"></tosi-scroll-animation>
  */
 export class TosiScrollAnimation extends Component {
+  static preferredTagName = "tosi-scroll-animation";
   static initAttributes = {
     name: "",
   };
 
-  static styleSpec = {
+  static shadowStyleSpec = {
     ":host": { display: "none" },
   };
 
@@ -309,15 +312,9 @@ export class TosiScrollAnimation extends Component {
   }
 }
 
-export const tosiScrollCamera = TosiScrollCamera.elementCreator({
-  tag: "tosi-scroll-camera",
-});
-export const tosiScrollTime = TosiScrollTime.elementCreator({
-  tag: "tosi-scroll-time",
-});
-export const tosiScrollAnimation = TosiScrollAnimation.elementCreator({
-  tag: "tosi-scroll-animation",
-});
+export const tosiScrollCamera = TosiScrollCamera.elementCreator();
+export const tosiScrollTime = TosiScrollTime.elementCreator();
+export const tosiScrollAnimation = TosiScrollAnimation.elementCreator();
 
 /*
 Declaration merge: `initAttributes` keys become instance properties at hydration, which

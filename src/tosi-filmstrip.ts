@@ -53,6 +53,7 @@ import { Component, type ComponentAttrs, elements } from "tosijs";
 const { canvas } = elements;
 
 export class TosiFilmstrip extends Component {
+  static preferredTagName = "tosi-filmstrip";
   static initAttributes = {
     src: "",
     cols: 0,
@@ -67,7 +68,7 @@ export class TosiFilmstrip extends Component {
   private _loadedSrc: string = "";
   private _loadId: number = 0;
 
-  static styleSpec = {
+  static shadowStyleSpec = {
     ":host": {
       display: "block",
       position: "relative",
@@ -185,9 +186,7 @@ export class TosiFilmstrip extends Component {
   }
 }
 
-export const tosiFilmstrip = TosiFilmstrip.elementCreator({
-  tag: "tosi-filmstrip",
-});
+export const tosiFilmstrip = TosiFilmstrip.elementCreator();
 
 /*
 Declaration merge: `initAttributes` keys become instance properties at hydration, which

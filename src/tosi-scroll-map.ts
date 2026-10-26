@@ -86,11 +86,12 @@ waypoint gives a dramatic zoom-out-then-in.
 See also [`<tosi-scroll-camera>`](/tosi-b3d-scroll/) and [`<tosi-product>`](/tosi-product/).
 */
 export class TosiScrollMap extends Component {
+  static preferredTagName = "tosi-scroll-map";
   static initAttributes = {
     easing: "",
   };
 
-  static styleSpec = {
+  static shadowStyleSpec = {
     ":host": { display: "none" },
   };
 
@@ -133,9 +134,7 @@ export class TosiScrollMap extends Component {
   }
 }
 
-export const tosiScrollMap = TosiScrollMap.elementCreator({
-  tag: "tosi-scroll-map",
-});
+export const tosiScrollMap = TosiScrollMap.elementCreator();
 
 /*
 Declaration merge: `initAttributes` keys become instance properties at hydration, which

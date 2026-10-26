@@ -230,12 +230,13 @@ interface Item {
 }
 
 export class TosiProduct extends Component {
+  static preferredTagName = "tosi-product";
   static initAttributes = {
     direction: "vertical",
     debug: false,
   };
 
-  static styleSpec = {
+  static shadowStyleSpec = {
     ":host": {
       display: "block",
       position: "relative",
@@ -645,11 +646,12 @@ export class TosiProduct extends Component {
 }
 
 export class TosiProductSection extends Component {
+  static preferredTagName = "tosi-product-section";
   static initAttributes = {
     scroll: 100,
   };
 
-  static styleSpec = {
+  static shadowStyleSpec = {
     ":host": {
       display: "block",
       position: "relative",
@@ -712,11 +714,12 @@ export class TosiProductSection extends Component {
 // Inherits CSS variables (theme) from documentElement, so a tosi-product
 // driving :root will style this header in unison with its sections.
 export class TosiProductHeader extends Component {
+  static preferredTagName = "tosi-product-header";
   static initAttributes = {
     threshold: 50, // px scrolled before header becomes visible
   };
 
-  static styleSpec = {
+  static shadowStyleSpec = {
     ":host": {
       position: "fixed",
       top: "0",
@@ -753,15 +756,9 @@ export class TosiProductHeader extends Component {
   }
 }
 
-export const tosiProduct = TosiProduct.elementCreator({
-  tag: "tosi-product",
-});
-export const tosiProductSection = TosiProductSection.elementCreator({
-  tag: "tosi-product-section",
-});
-export const tosiProductHeader = TosiProductHeader.elementCreator({
-  tag: "tosi-product-header",
-});
+export const tosiProduct = TosiProduct.elementCreator();
+export const tosiProductSection = TosiProductSection.elementCreator();
+export const tosiProductHeader = TosiProductHeader.elementCreator();
 
 /*
 Declaration merge: `initAttributes` keys become instance properties at hydration, which

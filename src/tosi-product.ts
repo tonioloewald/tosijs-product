@@ -40,7 +40,7 @@ second pins. It's the HTML shown here — read it in **Source**.
 
 ## `<tosi-product-header>`
 
-A sticky overlay header that slides in once `scrollY` passes its **`threshold`** (default `50`), inheriting the active theme through the CSS cascade.
+A sticky overlay header that slides in once its scroll container (the window, or the nearest scrolling ancestor) passes its **`threshold`** in px (default `50`), inheriting the active theme through the CSS cascade.
 
 ## Nesting (follower mode)
 
@@ -738,21 +738,36 @@ export class TosiProductHeader extends Component {
   content = () => slot();
 
   private _scrollHandler = () => this._update();
+  private _scrollTarget: EventTarget = window;
 
+  /*
+  Listen to OUR scroll container, the way the engine does. Window-only scroll meant a header
+  inside an inner scroller (an embed, or the doc site) never appeared (board #2533).
+  getScrollParent falls back to `window`, so a page that scrolls the window is unchanged.
+  */
   connectedCallback() {
     super.connectedCallback();
-    window.addEventListener("scroll", this._scrollHandler, { passive: true });
+    this._scrollTarget = getScrollParent(this);
+    this._scrollTarget.addEventListener("scroll", this._scrollHandler, {
+      passive: true,
+    });
     this._update();
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
-    window.removeEventListener("scroll", this._scrollHandler);
+    this._scrollTarget.removeEventListener("scroll", this._scrollHandler);
   }
 
   private _update() {
     const threshold = numAttr(this.getAttribute("threshold"), 50);
-    this.dataset.visible = window.scrollY > threshold ? "true" : "false";
+    // Whichever axis has moved: a horizontal scroller advances scrollLeft, not scrollTop.
+    const t = this._scrollTarget;
+    const scrolled =
+      t instanceof HTMLElement
+        ? Math.max(t.scrollTop, t.scrollLeft)
+        : Math.max(window.scrollY, window.scrollX);
+    this.dataset.visible = scrolled > threshold ? "true" : "false";
   }
 }
 

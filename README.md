@@ -214,7 +214,7 @@ tosi-doc-system[data-layout="full-screen"] .doc-content:has(.tp-hero),
 
 - **`tosi-product`** — the scroll engine. Owns the runway, the sticky window, the stack translation, the theme registry. A `tosi-product` placed inside another `tosi-product`'s section automatically runs in **follower mode**, driven by the parent section's pin progress (so you can nest a horizontal engine inside a vertical one).
 - **`tosi-product-section`** — a slotted container with `scroll` (pin duration in viewport %), `theme` / `theme-from` / `theme-to`, and a `direction` inherited from its engine.
-- **`tosi-product-header`** — a sticky overlay header that slides in once `window.scrollY > threshold`. Inherits theme via the CSS cascade.
+- **`tosi-product-header`** — a sticky overlay header that slides in once its scroll container (the window, or the nearest scrolling ancestor) has scrolled past `threshold` px. Inherits theme via the CSS cascade.
 - **`tosi-interpolator`** + **`tosi-waypoint`** — declarative CSS interpolation between progress keyframes.
 - **`tosi-filmstrip`** — frame-based animator using a WebP/PNG mosaic grid for buttery-smooth video-style scrubbing.
 - **`tosi-prism`** — Prism-highlighted code block (lazy-loads PrismJS from CDN). Also exports `loadPrism` and `highlightCodeBlocks` helpers for re-highlighting other rendered HTML (e.g. markdown viewer output).

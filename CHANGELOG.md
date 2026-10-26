@@ -25,6 +25,11 @@ For releases before 0.6.1, see the git history (`git log`) and tags.
 
 ### Fixed
 
+- **`<tosi-product-header>` appears inside a scroll container.** It listened to window scroll
+  only, so on a page that scrolls an inner pane (an embed, or a doc site like this one) it
+  never appeared, and on a horizontal scroller it read the wrong axis. It now follows the same
+  scroll container the engine uses and counts either axis. Pages that scroll the window behave
+  exactly as before.
 - **Waypoint values with a leading-dot decimal (`.8em`, `scale(.94)`) now interpolate.**
   They were read as a dot followed by an integer, so `scale(.94)` → `scale(1)` emitted invalid
   CSS (`scale(.70.75)`) mid-scroll, and `translateY(0em)` → `translateY(-.8em)` swung to `6em`

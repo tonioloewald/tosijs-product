@@ -25,6 +25,11 @@ For releases before 0.6.1, see the git history (`git log`) and tags.
 
 ### Fixed
 
+- **The documented CDN `<script>` tag now has `defer`.** As written in the README quick-start (in
+  `<head>`, no `defer`), it left the page inert: tosijs observes `document.body` while loading,
+  which is still `null` in `<head>`, and the throw stops the whole bundle, so no element
+  registers. Reproduced with the published 0.8.0. If you copied the old snippet, add `defer` or
+  move the tag to the end of `<body>`. The tosijs bug is filed as board task #3511.
 - **`<tosi-product-header>` appears inside a scroll container.** It listened to window scroll
   only, so on a page that scrolls an inner pane (an embed, or a doc site like this one) it
   never appeared, and on a horizontal scroller it read the wrong axis. It now follows the same

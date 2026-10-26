@@ -61,8 +61,8 @@
     "marked": "^16.4.2 || ^17.0.0 || ^18.0.0",
     "prettier": "^3.9.10",
     "tjs-lang": "^0.13.13",
-    "tosijs": "^1.10.6",
-    "tosijs-ui": "^1.16.2",
+    "tosijs": "^1.10.9",
+    "tosijs-ui": "^1.16.32",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.72.0"
   }

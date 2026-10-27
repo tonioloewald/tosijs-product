@@ -25,7 +25,7 @@ elements, against `<tosi-3d>`'s four attributes.
 <tosi-product class="doc-demo">
 <tosi-product-section scroll="150">
 <div class="media">
-<tosi-3d src="https://cdn.tosijs.net/tosijs-product/macbook_neo.glb" hero-light fov="0.6" clear-color="transparent" data-scroll-animate>
+<tosi-3d src="https://cdn.tosijs.net/tosijs-product/macbook_neo_web.glb" hero-light fov="0.6" clear-color="transparent" data-scroll-animate>
 <tosi-scroll-camera data-scroll-animate easing="ease-in-out">
 <tosi-waypoint progress="0" alpha="-1.57" beta="1.2" radius="110" target-y="10"></tosi-waypoint>
 <tosi-waypoint progress="1" alpha="1.57" beta="1.4" radius="76" target-y="10"></tosi-waypoint>

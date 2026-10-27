@@ -25,6 +25,17 @@ For releases before 0.6.1, see the git history (`git log`) and tags.
 
 ### Fixed
 
+- **`data-scroll-animate="currentTime"` scrubs on hosts that ignore Range requests.** A browser
+  only seeks an http(s) video when the host serves byte ranges; Cloudflare Pages (and so
+  cdn.tosijs.net) answers a ranged GET with a plain `200`, so `seekable` came back `[0, 0]`, every
+  `currentTime` write was dropped, and the video sat on its first frame with nothing logged. The
+  landing page's scrub demo was frozen this way on first visits. A section now fetches such a
+  video once into a blob URL, which is always seekable. That needs the host to allow CORS; if the
+  fetch fails it says so in the console. Fully seekable videos are untouched.
+- **Lighter landing-page media.** The scrub video is now `agent-owl_scrub.mp4` (10.3 → 4.0 MB: no
+  audio track, and a keyframe every half second so backward scrubs decode at most 11 frames), and
+  the laptop is `macbook_neo_web.glb` (2.5 → 1.3 MB, right-sized textures, identical geometry).
+  The originals stay on the CDN at their old URLs.
 - **The documented CDN `<script>` tag now has `defer`.** As written in the README quick-start (in
   `<head>`, no `defer`), it left the page inert: tosijs observes `document.body` while loading,
   which is still `null` in `<head>`, and the throw stops the whole bundle, so no element

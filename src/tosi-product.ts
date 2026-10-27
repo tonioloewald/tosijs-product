@@ -167,6 +167,57 @@ export function rangeProgress(
   return Math.max(0, Math.min(1, (progress - start) / range));
 }
 
+/*
+A `currentTime` scrub needs a seekable video, and a browser only seeks over HTTP when
+the host answers Range requests. Hosts that don't (Cloudflare Pages answers a ranged
+GET with a plain 200) leave `seekable` empty or `[0, 0]`: every `currentTime` write is
+dropped and the video sits on its first frame with nothing logged. That is how the
+landing page's scrub demo froze once its media moved to cdn.tosijs.net. A blob URL is
+always seekable, so when we find an unseekable http(s) video we fetch it once into
+one. The fetch is the download the browser was making anyway under `preload="auto"`,
+and it needs the host to allow CORS (cdn.tosijs.net sends `*`).
+*/
+interface SeekableLike {
+  readyState: number;
+  duration: number;
+  currentSrc: string;
+  seekable: { length: number; end(i: number): number };
+}
+
+/** True when `video` has loaded metadata but can't be seeked across its duration over http(s). */
+export function scrubNeedsBlob(video: SeekableLike): boolean {
+  if (video.readyState < 1 || !(video.duration > 0)) return false;
+  if (!/^https?:/i.test(video.currentSrc)) return false;
+  const { seekable } = video;
+  const end = seekable.length ? seekable.end(seekable.length - 1) : 0;
+  return end < video.duration - 0.05;
+}
+
+const blobbing = new WeakSet<HTMLVideoElement>();
+
+function ensureSeekable(video: HTMLVideoElement): void {
+  if (blobbing.has(video) || !scrubNeedsBlob(video)) return;
+  blobbing.add(video);
+  const src = video.currentSrc;
+  fetch(src)
+    .then((response) => {
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return response.blob();
+    })
+    .then((blob) => {
+      // The author may have swapped the source while we were fetching.
+      if (video.currentSrc !== src) return;
+      const time = video.currentTime;
+      video.src = URL.createObjectURL(blob);
+      video.currentTime = time;
+    })
+    .catch((error) => {
+      console.warn(
+        `tosi-product: ${src} can't be seeked (its host ignores Range requests), and fetching it to scrub locally failed: ${error}. Serve it from a host that supports byte ranges, or with CORS enabled.`,
+      );
+    });
+}
+
 export interface ThemeSource {
   fromName: string;
   toName: string;
@@ -695,6 +746,7 @@ export class TosiProductSection extends Component {
         el.getAttribute("data-scroll-animate") === "currentTime" &&
         (el as any).duration
       ) {
+        ensureSeekable(el as HTMLVideoElement);
         (el as HTMLVideoElement).currentTime =
           localProgress * (el as HTMLVideoElement).duration;
       } else if (

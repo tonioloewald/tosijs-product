@@ -196,7 +196,7 @@ tosi-doc-system:has(.op) > div > header a, tosi-doc-system:has(.op) > div > head
 <tosi-product-section scroll="420">
 <div class="scene">
 <div class="stage">
-<tosi-3d src="https://cdn.tosijs.net/tosijs-product/macbook_neo.glb" hero-light fov="0.6" clear-color="transparent" data-scroll-animate>
+<tosi-3d src="https://cdn.tosijs.net/tosijs-product/macbook_neo_web.glb" hero-light fov="0.6" clear-color="transparent" data-scroll-animate>
 <tosi-scroll-camera data-scroll-animate easing="ease-in-out">
 <tosi-waypoint progress="0" alpha="-2.35" beta="1.32" radius="150" target-y="10"></tosi-waypoint>
 <tosi-waypoint progress="0.35" alpha="-1.2" beta="0.95" radius="72" target-y="10"></tosi-waypoint>

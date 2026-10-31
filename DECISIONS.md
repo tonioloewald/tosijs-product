@@ -25,6 +25,9 @@ The owner took the recommended default on each:
 - **#2515, cut the IIFE with per-component subpaths.** Measure first. The task's 578kB → 72kB
   figure predates tosijs-ui 1.14.1's editor-free barrel. Narrowing `globalThis.tosijsUi` is
   breaking, and is worth it only if the saving is large.
+  **Closed as won't-do (2026-10-31).** Measured at 170kB gzip → 81kB (scenes only) or 96kB
+  (+ `<tosi-md>`). Real, but ~1% of the landing page's ~8.6MB of media, so not worth breaking
+  CDN users who rely on other tosijs-ui elements. Page weight is the media's problem, not the code's.
 - **#2525, ship the doc-site sourcemaps.** Keep them: the source is public on GitHub anyway.
   `iife.js.map` leaves with `iife.js` when tosijs-ui #2437 ships.
 - **#2534, Prism SRI.** Closed as obsolete: it shipped in 0.7.0.

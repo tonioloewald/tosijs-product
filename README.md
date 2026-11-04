@@ -137,7 +137,7 @@ tosi-doc-system[data-layout="full-screen"] .doc-content:has(.tp-hero),
 <tosi-waypoint progress="0" style="opacity:0; transform:translateY(20px)"></tosi-waypoint>
 <tosi-waypoint progress="0.5" style="opacity:1; transform:translateY(0px)"></tosi-waypoint>
 <tosi-waypoint progress="1" style="opacity:0; transform:translateY(-20px)"></tosi-waypoint>
-<div class="media-overlay"><h2>Vector animation</h2><p>Bodymovin / Lottie JSON, scrubbed frame-by-frame by scroll.</p></div>
+<div class="media-overlay"><h2>Vector animation</h2><p>Bodymovin / Lottie JSON, scrubbed frame-by-frame by scroll. Animation by <a href="https://pro.fiverr.com/freelancers/anicoremotion" style="color:inherit; pointer-events:auto">@anicoremotion</a>.</p></div>
 </tosi-interpolator>
 <tosi-interpolator data-scroll-animate data-scroll-range="0.5,1" easing="ease-in-out">
 <tosi-waypoint progress="0" style="opacity:0; transform:translateY(20px)"></tosi-waypoint>
@@ -346,6 +346,10 @@ Produces `my-video_10x10_100.webp` (the filename encodes grid + total frames):
 ```
 
 A grid (rather than a single long strip) keeps dimensions inside the browser's max image size (commonly 16,384px) while delivering all frames in one request.
+
+## Credits
+
+The landing page's Lottie animation is by [@anicoremotion](https://pro.fiverr.com/freelancers/anicoremotion).
 
 ## License
 

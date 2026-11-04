@@ -25,6 +25,14 @@ For releases before 0.6.1, see the git history (`git log`) and tags.
 
 ### Fixed
 
+- **Doc site: the home page's Pure HTML sample renders as one code block again.** It had been
+  chopped up by empty CSS editors, one per `style="…"` attribute plus one for the `<style>`
+  body. The cause is upstream (tosijs-ui board #3820): live-example hydration treats Prism's
+  nested `token language-css` spans as CSS fences. `demo/prism-token-guard.ts` works around it
+  until the fix ships.
+- **Doc site: the Lottie animation is now credited** to
+  [@anicoremotion](https://pro.fiverr.com/freelancers/anicoremotion), on the landing page and
+  the Owl Pro demo.
 - **`data-scroll-animate="currentTime"` scrubs on hosts that ignore Range requests.** A browser
   only seeks an http(s) video when the host serves byte ranges; Cloudflare Pages (and so
   cdn.tosijs.net) answers a ranged GET with a plain `200`, so `seekable` came back `[0, 0]`, every

@@ -7,6 +7,7 @@ config) and loaded by every page. Imports register custom elements; the
 like `import { tosiProduct } from 'tosijs-product'` resolves at runtime.
 */
 
+import "./prism-token-guard";
 import "tosijs-ui";
 /*
 The DOC-SYSTEM cluster is no longer re-exported from the tosijs-ui barrel

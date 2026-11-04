@@ -188,7 +188,7 @@ tosi-doc-system:has(.op) > div > header a, tosi-doc-system:has(.op) > div > head
 <tosi-waypoint progress="1" style="opacity:1"></tosi-waypoint>
 <div class="beat" style="justify-content:flex-end; padding-bottom:8vh">
 <p class="title" style="font-size:clamp(1.7rem,4vw,3rem)">Vector, scrubbed.</p>
-<p class="lede">A Lottie timeline mapped straight onto pin progress.</p>
+<p class="lede">A Lottie timeline mapped straight onto pin progress. Animation by <a href="https://pro.fiverr.com/freelancers/anicoremotion" style="color:inherit">@anicoremotion</a>.</p>
 </div>
 </tosi-interpolator>
 </div>

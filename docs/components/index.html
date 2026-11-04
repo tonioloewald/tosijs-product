@@ -1,20 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- NB: the body is NOT hidden until hydration. It used to be (body opacity 0 +
-       a 4s safety-net timeout), because an undefined custom element is
-       display:inline, so the pre-rendered page stacked as bare text and hydration
-       reflowed the whole thing. The cost was a blank screen for as long as the
-       bundle took — ~4.5s on a cheap phone, for content already in the HTML. The
-       tosi-doc-system:not(:defined) rules in the stylesheet now lay the static page
-       out as though the chrome were there, so hydration only ADDS the chrome and
-       nothing moves. Paint immediately; don't hide readable content. -->
-  <!-- Theme, applied BEFORE first paint. Now that we paint the static page rather
-       than hiding it, a dark-mode reader would otherwise get a flash of the light
-       theme until the bundle lands and sets body.darkmode. CSS alone can't do this:
-       an explicit theme choice lives in localStorage. Mirrors applyThemePrefs()
-       (doc-system.ts) — keep the two in step. Fails safe: any error leaves the
-       light default, exactly as before. -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script>
     try {
       var p = JSON.parse(localStorage.getItem('tosi-doc-system-prefs') || '{}')
@@ -24,15 +12,14 @@
       if (p.highContrast) document.documentElement.classList.add('high-contrast')
     } catch (e) {}
   </script>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="../doc-system.css?v=b979e1a7585f" data-tosi-doc-system />
+  <link rel="stylesheet" href="../doc-system.css?v=1b547c4b42b6" data-tosi-doc-system />
   <title>tosijs-product — component &amp; API reference</title>
   <meta name="description" content="Every element and exported function in tosijs-product: the scroll engine, the animators, the theme system, and the JavaScript API." />
   <meta name="keywords" content="reference, api, components, themes" />
   <link rel="canonical" href="https://product.tosijs.net/components/" />
+  <link rel="alternate" type="text/markdown" href="index.md" title="tosijs-product — component &amp; API reference (markdown)" />
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="tosijs-product" />
   <meta property="og:title" content="tosijs-product — component &amp; API reference" />
@@ -44,13 +31,13 @@
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="../docs.json?v=b010d4f4b34f" config="{&quot;projectName&quot;:&quot;tosijs-product&quot;,&quot;projectLinks&quot;:{&quot;tosijs&quot;:&quot;https://tosijs.net&quot;,&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs-product&quot;}}">
-  <article class="doc-content">
-<h1>Component Reference</h1>
+  <tosi-doc-system docs="../docs.json?v=36c2f2ca7522" config="{&quot;projectName&quot;:&quot;tosijs-product&quot;,&quot;projectLinks&quot;:{&quot;tosijs&quot;:&quot;https://tosijs.net&quot;,&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs-product&quot;},&quot;ebooks&quot;:[]}">
+  <article class="doc-content" data-doc="components.md">
+<h1 id="component-reference">Component Reference</h1>
 <!--{ "headTitle": "tosijs-product — component & API reference", "description": "Every element and exported function in tosijs-product: the scroll engine, the animators, the theme system, and the JavaScript API.", "keywords": [ "reference", "api", "components", "themes" ] }--><p>Each element has its own page with a live, maximizable demo — those pages are generated from the
 source, so they never drift from the code. This page is the index, plus the two things that span
 several elements: the <strong>theme system</strong> and the <strong>JavaScript API</strong>.</p>
-<h2>Elements</h2>
+<h2 id="elements">Elements</h2>
 <table>
 <thead>
 <tr>
@@ -103,7 +90,7 @@ several elements: the <strong>theme system</strong> and the <strong>JavaScript A
 <td>Syntax-highlights its text content (PrismJS, loaded lazily).</td>
 </tr>
 </tbody></table>
-<h2>Driving anything with scroll</h2>
+<h2 id="driving-anything-with-scroll">Driving anything with scroll</h2>
 <p>Two attributes do the work, and they&#39;re the whole contract between the engine and an animator:</p>
 <ul>
 <li><strong><code>data-scroll-animate</code></strong> marks an element as scroll-driven. If it implements
@@ -118,7 +105,7 @@ the CSS custom property <code>--local-progress</code>, so you can use it directl
 the engine</strong>, which is all <code>&lt;tosi-scroll-map&gt;</code> and the B3d controllers are.</p>
 <p>When <code>prefers-reduced-motion: reduce</code> is set, child animations are skipped entirely; only
 <code>scrollCallback</code> fires, so you can offer a static alternative.</p>
-<h2>Theme system</h2>
+<h2 id="theme-system">Theme system</h2>
 <p>Themes are named dictionaries of CSS custom properties, registered on the <strong>engine</strong>:</p>
 <pre><code class="language-js">const app = document.querySelector(&quot;tosi-product&quot;);
 
@@ -162,14 +149,14 @@ two themes across the pin progress, so the page changes mood as you scroll throu
 <td>Where resolved variables are written. A nested engine scopes to itself.</td>
 </tr>
 </tbody></table>
-<p>Values blend according to type: colors through <code>color-mix(in srgb, …)</code>, values containing numbers
-per-number, and everything else steps at the midpoint. Because the resolved variables land on
+<p>Values blend according to type: colors through <code>color-mix(in srgb, …)</code>, values of the same shape
+(same numbers, units and text between them) per-number, and everything else steps at the midpoint. Because the resolved variables land on
 <code>document.documentElement</code> by default, <strong>elements outside the engine re-theme too</strong> — a page header,
 a sticky nav, the footer — simply by reading the same custom properties.</p>
 <p>Sections that declare no theme don&#39;t snap back to the default: the engine walks back to the nearest
 preceding theme-bearing section, so a markdown interlude between two scenes keeps the mood of the
 scene before it.</p>
-<h2>JavaScript API</h2>
+<h2 id="javascript-api">JavaScript API</h2>
 <p>Every element also has a factory function (<code>tosiProduct()</code>, <code>tosiProductSection()</code>, …) following the
 tosijs convention. Import from <code>tosijs-product</code>:</p>
 <pre><code class="language-typescript" data-highlighted><span class="token keyword">import</span> <span class="token punctuation">{</span>
@@ -186,7 +173,7 @@ tosijs convention. Import from <code>tosijs-product</code>:</p>
   tosiPrism<span class="token punctuation">,</span>
 <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"tosijs-product"</span><span class="token punctuation">;</span>
 </code></pre>
-<h3>Helpers</h3>
+<h3 id="helpers">Helpers</h3>
 <p>The engine&#39;s pure functions are exported too. They&#39;re the seams the test suite drives, and they&#39;re
 useful if you&#39;re building your own animator or debugging why a scene isn&#39;t behaving.</p>
 <table>
@@ -205,7 +192,7 @@ useful if you&#39;re building your own animator or debugging why a scene isn&#39
 <tr>
 <td><code>interpolateStrings(a, b, t)</code></td>
 <td><code>string</code></td>
-<td>Blends two CSS values at <code>t</code> — colors via <code>color-mix</code>, matching number runs per-number, anything else stepped at the midpoint. The one kernel <code>&lt;tosi-interpolator&gt;</code> and the theme system share.</td>
+<td>Blends two CSS values at <code>t</code> — colors via <code>color-mix</code>, same-shaped values (numbers, units, text between) per-number, anything else stepped at the midpoint. The one kernel <code>&lt;tosi-interpolator&gt;</code> and the theme system share.</td>
 </tr>
 <tr>
 <td><code>interpolateWaypoints(progress, waypoints)</code></td>
@@ -238,7 +225,7 @@ useful if you&#39;re building your own animator or debugging why a scene isn&#39
 <td>The nearest ancestor <code>&lt;tosi-product&gt;</code> — how an engine tells its own animators from a nested engine&#39;s.</td>
 </tr>
 </tbody></table>
-<h3>Types</h3>
+<h3 id="types">Types</h3>
 <pre><code class="language-typescript" data-highlighted><span class="token keyword">type</span> <span class="token class-name">ThemeMap</span> <span class="token operator">=</span> Record<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token punctuation">,</span> <span class="token builtin">string</span><span class="token operator">></span><span class="token punctuation">;</span>       <span class="token comment">// CSS custom property → value</span>
 <span class="token keyword">type</span> <span class="token class-name">ThemeRegistry</span> <span class="token operator">=</span> Record<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token punctuation">,</span> ThemeMap<span class="token operator">></span><span class="token punctuation">;</span> <span class="token comment">// theme name → ThemeMap</span>
 
@@ -272,6 +259,6 @@ useful if you&#39;re building your own animator or debugging why a scene isn&#39
     <li><a href="https://www.npmjs.com/package/tosijs-product" data-icon="npm">npmjs</a></li>
   </ul>
   </tosi-doc-system>
-  <script type="module" src="../hydrate-6vpb8eeg.js"></script>
+  <script type="module" src="../hydrate-mqg34kgr.js"></script>
 </body>
 </html>

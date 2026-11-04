@@ -1,20 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- NB: the body is NOT hidden until hydration. It used to be (body opacity 0 +
-       a 4s safety-net timeout), because an undefined custom element is
-       display:inline, so the pre-rendered page stacked as bare text and hydration
-       reflowed the whole thing. The cost was a blank screen for as long as the
-       bundle took — ~4.5s on a cheap phone, for content already in the HTML. The
-       tosi-doc-system:not(:defined) rules in the stylesheet now lay the static page
-       out as though the chrome were there, so hydration only ADDS the chrome and
-       nothing moves. Paint immediately; don't hide readable content. -->
-  <!-- Theme, applied BEFORE first paint. Now that we paint the static page rather
-       than hiding it, a dark-mode reader would otherwise get a flash of the light
-       theme until the bundle lands and sets body.darkmode. CSS alone can't do this:
-       an explicit theme choice lives in localStorage. Mirrors applyThemePrefs()
-       (doc-system.ts) — keep the two in step. Fails safe: any error leaves the
-       light default, exactly as before. -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script>
     try {
       var p = JSON.parse(localStorage.getItem('tosi-doc-system-prefs') || '{}')
@@ -24,14 +12,13 @@
       if (p.highContrast) document.documentElement.classList.add('high-contrast')
     } catch (e) {}
   </script>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="../doc-system.css?v=b979e1a7585f" data-tosi-doc-system />
+  <link rel="stylesheet" href="../doc-system.css?v=1b547c4b42b6" data-tosi-doc-system />
   <title>&lt;tosi-interpolator&gt; — tosijs-product</title>
   <meta name="description" content="Declarative CSS-property interpolation between scroll waypoints. Wrap any element, add &lt;tosi-waypoint progress=&quot;…&quot; style=&quot;…&quot;&gt; children, and each style property…" />
   <link rel="canonical" href="https://product.tosijs.net/tosi-interpolator/" />
+  <link rel="alternate" type="text/markdown" href="index.md" title="&lt;tosi-interpolator&gt; — tosijs-product (markdown)" />
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="tosijs-product" />
   <meta property="og:title" content="&lt;tosi-interpolator&gt; — tosijs-product" />
@@ -43,13 +30,17 @@
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="../docs.json?v=b010d4f4b34f" config="{&quot;projectName&quot;:&quot;tosijs-product&quot;,&quot;projectLinks&quot;:{&quot;tosijs&quot;:&quot;https://tosijs.net&quot;,&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs-product&quot;}}" data-layout="full-width">
-  <article class="doc-content">
-<h1><code>&lt;tosi-interpolator&gt;</code></h1>
+  <tosi-doc-system docs="../docs.json?v=36c2f2ca7522" config="{&quot;projectName&quot;:&quot;tosijs-product&quot;,&quot;projectLinks&quot;:{&quot;tosijs&quot;:&quot;https://tosijs.net&quot;,&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs-product&quot;},&quot;ebooks&quot;:[]}" data-layout="full-width">
+  <article class="doc-content" data-doc="tosi-interpolator.ts">
+<h1 id="tosi-interpolator"><code>&lt;tosi-interpolator&gt;</code></h1>
 <p>Declarative CSS-property interpolation between scroll <strong>waypoints</strong>. Wrap any element, add
 <code>&lt;tosi-waypoint progress=&quot;…&quot; style=&quot;…&quot;&gt;</code> children, and each style property is blended
 (numbers per-number, colours via <code>color-mix</code>) as the enclosing <code>&lt;tosi-product-section&gt;</code>&#39;s pin
 progress runs 0 → 1.</p>
+<p>A property animates when every waypoint writes it in the <strong>same shape</strong>: the same transform
+functions in the same order, with the same units (a bare <code>0</code> adopts the other side&#39;s unit).
+<code>translateY(0px)</code> → <code>scale(1.2)</code> has no in-between, so it steps at the midpoint; write
+<code>translateY(0px) scale(1)</code> → <code>translateY(0px) scale(1.2)</code> instead.</p>
 <p>The panel below is a live <code>&lt;tosi-interpolator&gt;</code> — scroll it, then read its markup in <strong>Source</strong>
 view (top-right). No JavaScript; it is the HTML shown here.</p>
 <style>.doc-content:has(.ti-demo){--doc-content-padding:0;--doc-content-overflow:visible}.doc-content:has(.ti-demo)>:not(.ti-demo):not(style){max-width:44rem;margin-inline:auto;padding-inline:1.25rem;box-sizing:border-box}.ti-demo .scene{height:var(--tosi-view-size,70vh);display:flex;align-items:center;justify-content:center;background:#08081a;border-radius:12px}.ti-demo h2{font-size:clamp(2rem,7vw,3.5rem);margin:0;font-weight:800}</style>
@@ -63,7 +54,7 @@ view (top-right). No JavaScript; it is the HTML shown here.</p>
 </tosi-interpolator>
 </div>
 </tosi-product-section>
-</tosi-product><h2>Attributes</h2>
+</tosi-product><h2 id="attributes">Attributes</h2>
 <p><code>&lt;tosi-interpolator&gt;</code></p>
 <ul>
 <li><strong><code>easing</code></strong> — <code>&quot;ease-in-out&quot;</code> applies easeInOutQuad between waypoints (default: linear).</li>
@@ -74,7 +65,7 @@ view (top-right). No JavaScript; it is the HTML shown here.</p>
 <li><strong><code>progress</code></strong> — 0 → 1 keyframe position.</li>
 <li><strong><code>style</code></strong> — the CSS to interpolate toward at that progress.</li>
 </ul>
-<h2>Editable example</h2>
+<h2 id="editable-example">Editable example</h2>
 <pre><code class="language-html">&lt;tosi-product&gt;
   &lt;tosi-product-section scroll=&quot;150&quot;&gt;
     &lt;tosi-interpolator data-scroll-animate easing=&quot;ease-in-out&quot;&gt;
@@ -110,6 +101,6 @@ view (top-right). No JavaScript; it is the HTML shown here.</p>
     <li><a href="https://www.npmjs.com/package/tosijs-product" data-icon="npm">npmjs</a></li>
   </ul>
   </tosi-doc-system>
-  <script type="module" src="../hydrate-6vpb8eeg.js"></script>
+  <script type="module" src="../hydrate-mqg34kgr.js"></script>
 </body>
 </html>

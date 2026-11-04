@@ -1,20 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- NB: the body is NOT hidden until hydration. It used to be (body opacity 0 +
-       a 4s safety-net timeout), because an undefined custom element is
-       display:inline, so the pre-rendered page stacked as bare text and hydration
-       reflowed the whole thing. The cost was a blank screen for as long as the
-       bundle took — ~4.5s on a cheap phone, for content already in the HTML. The
-       tosi-doc-system:not(:defined) rules in the stylesheet now lay the static page
-       out as though the chrome were there, so hydration only ADDS the chrome and
-       nothing moves. Paint immediately; don't hide readable content. -->
-  <!-- Theme, applied BEFORE first paint. Now that we paint the static page rather
-       than hiding it, a dark-mode reader would otherwise get a flash of the light
-       theme until the bundle lands and sets body.darkmode. CSS alone can't do this:
-       an explicit theme choice lives in localStorage. Mirrors applyThemePrefs()
-       (doc-system.ts) — keep the two in step. Fails safe: any error leaves the
-       light default, exactly as before. -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script>
     try {
       var p = JSON.parse(localStorage.getItem('tosi-doc-system-prefs') || '{}')
@@ -24,14 +12,13 @@
       if (p.highContrast) document.documentElement.classList.add('high-contrast')
     } catch (e) {}
   </script>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="../doc-system.css?v=b979e1a7585f" data-tosi-doc-system />
+  <link rel="stylesheet" href="../doc-system.css?v=1b547c4b42b6" data-tosi-doc-system />
   <title>&lt;tosi-scroll-map&gt; — tosijs-product</title>
   <meta name="description" content="Waypoint-driven scroll controller for a tosijs-ui &lt;tosi-map&gt; (Mapbox). Inside a &lt;tosi-map&gt; within a section, each &lt;tosi-waypoint coords=&quot;lat,lng,zoom&quot;&gt;" />
   <link rel="canonical" href="https://product.tosijs.net/tosi-scroll-map/" />
+  <link rel="alternate" type="text/markdown" href="index.md" title="&lt;tosi-scroll-map&gt; — tosijs-product (markdown)" />
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="tosijs-product" />
   <meta property="og:title" content="&lt;tosi-scroll-map&gt; — tosijs-product" />
@@ -43,9 +30,9 @@
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="../docs.json?v=b010d4f4b34f" config="{&quot;projectName&quot;:&quot;tosijs-product&quot;,&quot;projectLinks&quot;:{&quot;tosijs&quot;:&quot;https://tosijs.net&quot;,&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs-product&quot;}}" data-layout="full-width">
-  <article class="doc-content">
-<h1><code>&lt;tosi-scroll-map&gt;</code></h1>
+  <tosi-doc-system docs="../docs.json?v=36c2f2ca7522" config="{&quot;projectName&quot;:&quot;tosijs-product&quot;,&quot;projectLinks&quot;:{&quot;tosijs&quot;:&quot;https://tosijs.net&quot;,&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs-product&quot;},&quot;ebooks&quot;:[]}" data-layout="full-width">
+  <article class="doc-content" data-doc="tosi-scroll-map.ts">
+<h1 id="tosi-scroll-map"><code>&lt;tosi-scroll-map&gt;</code></h1>
 <p>Waypoint-driven scroll controller for a tosijs-ui <a href="https://ui.tosijs.net/mapbox"><code>&lt;tosi-map&gt;</code></a>
 (Mapbox). Inside a <code>&lt;tosi-map&gt;</code> within a section, each <code>&lt;tosi-waypoint coords=&quot;lat,lng,zoom&quot;&gt;</code>
 becomes a keyframe; as the section pins, the map flies between them — pure declarative HTML, no
@@ -64,7 +51,7 @@ waypoint gives a dramatic zoom-out-then-in.</p>
 </tosi-map>
 </div>
 </tosi-product-section>
-</tosi-product><h2>Attributes</h2>
+</tosi-product><h2 id="attributes">Attributes</h2>
 <p><code>&lt;tosi-scroll-map&gt;</code></p>
 <ul>
 <li><strong><code>easing</code></strong> — <code>&quot;ease-in-out&quot;</code> eases each segment (default: linear).</li>
@@ -99,6 +86,6 @@ waypoint gives a dramatic zoom-out-then-in.</p>
     <li><a href="https://www.npmjs.com/package/tosijs-product" data-icon="npm">npmjs</a></li>
   </ul>
   </tosi-doc-system>
-  <script type="module" src="../hydrate-6vpb8eeg.js"></script>
+  <script type="module" src="../hydrate-mqg34kgr.js"></script>
 </body>
 </html>

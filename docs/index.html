@@ -1,20 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- NB: the body is NOT hidden until hydration. It used to be (body opacity 0 +
-       a 4s safety-net timeout), because an undefined custom element is
-       display:inline, so the pre-rendered page stacked as bare text and hydration
-       reflowed the whole thing. The cost was a blank screen for as long as the
-       bundle took — ~4.5s on a cheap phone, for content already in the HTML. The
-       tosi-doc-system:not(:defined) rules in the stylesheet now lay the static page
-       out as though the chrome were there, so hydration only ADDS the chrome and
-       nothing moves. Paint immediately; don't hide readable content. -->
-  <!-- Theme, applied BEFORE first paint. Now that we paint the static page rather
-       than hiding it, a dark-mode reader would otherwise get a flash of the light
-       theme until the bundle lands and sets body.darkmode. CSS alone can't do this:
-       an explicit theme choice lives in localStorage. Mirrors applyThemePrefs()
-       (doc-system.ts) — keep the two in step. Fails safe: any error leaves the
-       light default, exactly as before. -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script>
     try {
       var p = JSON.parse(localStorage.getItem('tosi-doc-system-prefs') || '{}')
@@ -24,15 +12,14 @@
       if (p.highContrast) document.documentElement.classList.add('high-contrast')
     } catch (e) {}
   </script>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="doc-system.css?v=b979e1a7585f" data-tosi-doc-system />
+  <link rel="stylesheet" href="doc-system.css?v=1b547c4b42b6" data-tosi-doc-system />
   <title>tosijs-product — cinematic, scroll-driven product pages in HTML</title>
   <meta name="description" content="Build Apple-style, scroll-linked product stories with declarative web components. tosijs-product pins sections and drives Lottie, video (WebP mosaics), BabylonJS 3D, and CSS interpolation from scroll position — authored in plain HTML." />
   <meta name="keywords" content="scrollytelling, scroll animation, product page, web components, custom elements, tosijs, lottie, webp mosaic, babylonjs, scroll-linked animation, cinematic landing page, apple-style scrolling" />
   <link rel="canonical" href="https://product.tosijs.net/" />
+  <link rel="alternate" type="text/markdown" href="index.md" title="tosijs-product — cinematic, scroll-driven product pages in HTML (markdown)" />
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="tosijs-product" />
   <meta property="og:title" content="tosijs-product — cinematic, scroll-driven product pages in HTML" />
@@ -44,9 +31,9 @@
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="docs.json?v=b010d4f4b34f" config="{&quot;projectName&quot;:&quot;tosijs-product&quot;,&quot;projectLinks&quot;:{&quot;tosijs&quot;:&quot;https://tosijs.net&quot;,&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs-product&quot;}}" data-layout="full-screen">
-  <article class="doc-content">
-<h1>tosijs-product</h1>
+  <tosi-doc-system docs="docs.json?v=36c2f2ca7522" config="{&quot;projectName&quot;:&quot;tosijs-product&quot;,&quot;projectLinks&quot;:{&quot;tosijs&quot;:&quot;https://tosijs.net&quot;,&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs-product&quot;},&quot;ebooks&quot;:[]}" data-layout="full-screen">
+  <article class="doc-content" data-doc="README.md">
+<h1 id="tosijs-product">tosijs-product</h1>
 <!--{ "pin": "top", "order": 1, "layout": "full-screen", "headTitle": "tosijs-product — cinematic, scroll-driven product pages in HTML", "description": "Build Apple-style, scroll-linked product stories with declarative web components. tosijs-product pins sections and drives Lottie, video (WebP mosaics), BabylonJS 3D, and CSS interpolation from scroll position — authored in plain HTML.", "keywords": ["scrollytelling", "scroll animation", "product page", "web components", "custom elements", "tosijs", "lottie", "webp mosaic", "babylonjs", "scroll-linked animation", "cinematic landing page", "apple-style scrolling"] }--><p>A cinematic product page component library for <code>tosijs</code>.</p>
 <p><code>tosijs-product</code> provides high-performance, scroll-linked animation components designed to create immersive, &quot;Apple-style&quot; product stories with minimal code. It unifies Lottie, video, BabylonJS 3D, Mapbox flights, themes, and declarative CSS interpolation under a single scroll engine.</p>
 <p><em>This page is the demo.</em> Scroll — the hero below is a live <code>&lt;tosi-product&gt;</code> engine pinned to this doc&#39;s scroll container, authored entirely in the Markdown you&#39;re reading.</p>
@@ -140,7 +127,7 @@ tosi-doc-system[data-layout="full-screen"] .doc-content:has(.tp-hero),
 </tosi-product-section>
 <tosi-product-section scroll="300">
 <div class="media-scene">
-<video src="https://cdn.tosijs.net/tosijs-product/agent-owl.mp4" data-scroll-animate="currentTime" muted playsinline preload="auto"></video>
+<video src="https://cdn.tosijs.net/tosijs-product/agent-owl_scrub.mp4" data-scroll-animate="currentTime" muted playsinline preload="auto"></video>
 <tosi-interpolator data-scroll-animate data-scroll-range="0,0.4" easing="ease-in-out">
 <tosi-waypoint progress="0" style="opacity:0; transform:translateY(20px)"></tosi-waypoint>
 <tosi-waypoint progress="0.5" style="opacity:1; transform:translateY(0px)"></tosi-waypoint>
@@ -179,7 +166,7 @@ tosi-doc-system[data-layout="full-screen"] .doc-content:has(.tp-hero),
 <tosi-waypoint progress="0" style="opacity:0; transform:translateY(20px)"></tosi-waypoint>
 <tosi-waypoint progress="0.5" style="opacity:1; transform:translateY(0px)"></tosi-waypoint>
 <tosi-waypoint progress="1" style="opacity:0; transform:translateY(-20px)"></tosi-waypoint>
-<div class="media-overlay"><h2>Vector animation</h2><p>Bodymovin / Lottie JSON, scrubbed frame-by-frame by scroll.</p></div>
+<div class="media-overlay"><h2>Vector animation</h2><p>Bodymovin / Lottie JSON, scrubbed frame-by-frame by scroll. Animation by <a href="https://pro.fiverr.com/freelancers/anicoremotion" style="color:inherit; pointer-events:auto">@anicoremotion</a>.</p></div>
 </tosi-interpolator>
 <tosi-interpolator data-scroll-animate data-scroll-range="0.5,1" easing="ease-in-out">
 <tosi-waypoint progress="0" style="opacity:0; transform:translateY(20px)"></tosi-waypoint>
@@ -191,7 +178,7 @@ tosi-doc-system[data-layout="full-screen"] .doc-content:has(.tp-hero),
 </tosi-product-section>
 <tosi-product-section scroll="350">
 <div class="media-scene">
-<tosi-3d src="https://cdn.tosijs.net/tosijs-product/macbook_neo.glb" hero-light fov="0.6" clear-color="transparent" data-scroll-animate>
+<tosi-3d src="https://cdn.tosijs.net/tosijs-product/macbook_neo_web.glb" hero-light fov="0.6" clear-color="transparent" data-scroll-animate>
 <tosi-scroll-camera data-scroll-animate easing="ease-in-out">
 <tosi-waypoint progress="0" alpha="-1.57" beta="1.2" radius="110" target-y="10"></tosi-waypoint>
 <tosi-waypoint progress="0.5" alpha="0" beta="1.0" radius="70" target-y="10"></tosi-waypoint>
@@ -245,19 +232,19 @@ tosi-doc-system[data-layout="full-screen"] .doc-content:has(.tp-hero),
 </tosi-product-section>
 </tosi-product>
 </div><p><a href="https://tonioloewald.github.io/tosijs-product/"><strong>View the standalone demo</strong></a> · all the scenes below run the same engine.</p>
-<h2>Architecture in one paragraph</h2>
+<h2 id="architecture-in-one-paragraph">Architecture in one paragraph</h2>
 <p><code>&lt;tosi-product&gt;</code> is a <strong>scroll engine</strong>. It owns the page (or any scrollable region) it lives in: it computes a runway from its sections, hosts a sticky viewport-sized window in shadow DOM, and translates an absolute-positioned stack as you scroll. Each <code>&lt;tosi-product-section&gt;</code> declares a pin duration via <code>scroll</code>; during pin the section sits motionless at the viewport top while interpolators run, then it scrolls out at 1:1 and yields to the next. Themes are dictionaries of CSS custom properties — the engine writes the active section&#39;s resolved values to <code>:root</code>, so external siblings (page header, sticky overlay, footer) re-theme through the cascade.</p>
-<h2>Key components</h2>
+<h2 id="key-components">Key components</h2>
 <ul>
 <li><strong><code>tosi-product</code></strong> — the scroll engine. Owns the runway, the sticky window, the stack translation, the theme registry. A <code>tosi-product</code> placed inside another <code>tosi-product</code>&#39;s section automatically runs in <strong>follower mode</strong>, driven by the parent section&#39;s pin progress (so you can nest a horizontal engine inside a vertical one).</li>
 <li><strong><code>tosi-product-section</code></strong> — a slotted container with <code>scroll</code> (pin duration in viewport %), <code>theme</code> / <code>theme-from</code> / <code>theme-to</code>, and a <code>direction</code> inherited from its engine.</li>
-<li><strong><code>tosi-product-header</code></strong> — a sticky overlay header that slides in once <code>window.scrollY &gt; threshold</code>. Inherits theme via the CSS cascade.</li>
+<li><strong><code>tosi-product-header</code></strong> — a sticky overlay header that slides in once its scroll container (the window, or the nearest scrolling ancestor) has scrolled past <code>threshold</code> px. Inherits theme via the CSS cascade.</li>
 <li><strong><code>tosi-interpolator</code></strong> + <strong><code>tosi-waypoint</code></strong> — declarative CSS interpolation between progress keyframes.</li>
 <li><strong><code>tosi-filmstrip</code></strong> — frame-based animator using a WebP/PNG mosaic grid for buttery-smooth video-style scrubbing.</li>
 <li><strong><code>tosi-prism</code></strong> — Prism-highlighted code block (lazy-loads PrismJS from CDN). Also exports <code>loadPrism</code> and <code>highlightCodeBlocks</code> helpers for re-highlighting other rendered HTML (e.g. markdown viewer output).</li>
 </ul>
-<h2>Getting started</h2>
-<h3>Pure HTML (zero JS orchestration)</h3>
+<h2 id="getting-started">Getting started</h2>
+<h3 id="pure-html-zero-js-orchestration">Pure HTML (zero JS orchestration)</h3>
 <p>The IIFE build is self-contained — a single script tag gives you <code>tosijs</code>, <code>tosijsUi</code>, and <code>tosijsProduct</code> as globals, with all custom elements registered automatically:</p>
 <pre><code class="language-xml" data-highlighted><span class="token doctype"><span class="token punctuation">&lt;!</span><span class="token doctype-tag">DOCTYPE</span> <span class="token name">html</span><span class="token punctuation">></span></span>
 <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>html</span><span class="token punctuation">></span></span>
@@ -269,7 +256,7 @@ tosi-doc-system[data-layout="full-screen"] .doc-content:has(.tp-hero),
         <span class="token property">margin</span><span class="token punctuation">:</span> 0<span class="token punctuation">;</span>
       <span class="token punctuation">}</span>
     </span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>style</span><span class="token punctuation">></span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>script</span> <span class="token attr-name">src</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>https://cdn.jsdelivr.net/npm/tosijs-product@0.8.0/dist/index.js<span class="token punctuation">"</span></span><span class="token punctuation">></span></span><span class="token script"></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>script</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>script</span> <span class="token attr-name">defer</span> <span class="token attr-name">src</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>https://cdn.jsdelivr.net/npm/tosijs-product@0.8.0/dist/index.js<span class="token punctuation">"</span></span><span class="token punctuation">></span></span><span class="token script"></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>script</span><span class="token punctuation">></span></span>
   <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>head</span><span class="token punctuation">></span></span>
   <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>body</span><span class="token punctuation">></span></span>
     <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>tosi-product</span><span class="token punctuation">></span></span>
@@ -277,15 +264,15 @@ tosi-doc-system[data-layout="full-screen"] .doc-content:has(.tp-hero),
         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>tosi-interpolator</span> <span class="token attr-name">data-scroll-animate</span> <span class="token attr-name">easing</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>ease-in-out<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>tosi-waypoint</span>
             <span class="token attr-name">progress</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>0<span class="token punctuation">"</span></span>
-            <span class="token special-attr"><span class="token attr-name">style</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span><span class="token value css language-css"><span class="token property">opacity</span><span class="token punctuation">:</span> 0<span class="token punctuation">;</span> <span class="token property">transform</span><span class="token punctuation">:</span> <span class="token function">translateY</span><span class="token punctuation">(</span>50px<span class="token punctuation">)</span></span><span class="token punctuation">"</span></span></span>
+            <span class="token special-attr"><span class="token attr-name">style</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span><span class="token value css language-css"><span class="token property">opacity</span><span class="token punctuation">:</span> 0<span class="token punctuation">;</span> <span class="token property">transform</span><span class="token punctuation">:</span> <span class="token function">translateY</span><span class="token punctuation">(</span>50px<span class="token punctuation">)</span> <span class="token function">scale</span><span class="token punctuation">(</span>1<span class="token punctuation">)</span></span><span class="token punctuation">"</span></span></span>
           <span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>tosi-waypoint</span><span class="token punctuation">></span></span>
           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>tosi-waypoint</span>
             <span class="token attr-name">progress</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>0.5<span class="token punctuation">"</span></span>
-            <span class="token special-attr"><span class="token attr-name">style</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span><span class="token value css language-css"><span class="token property">opacity</span><span class="token punctuation">:</span> 1<span class="token punctuation">;</span> <span class="token property">transform</span><span class="token punctuation">:</span> <span class="token function">translateY</span><span class="token punctuation">(</span>0px<span class="token punctuation">)</span></span><span class="token punctuation">"</span></span></span>
+            <span class="token special-attr"><span class="token attr-name">style</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span><span class="token value css language-css"><span class="token property">opacity</span><span class="token punctuation">:</span> 1<span class="token punctuation">;</span> <span class="token property">transform</span><span class="token punctuation">:</span> <span class="token function">translateY</span><span class="token punctuation">(</span>0px<span class="token punctuation">)</span> <span class="token function">scale</span><span class="token punctuation">(</span>1<span class="token punctuation">)</span></span><span class="token punctuation">"</span></span></span>
           <span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>tosi-waypoint</span><span class="token punctuation">></span></span>
           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>tosi-waypoint</span>
             <span class="token attr-name">progress</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>1<span class="token punctuation">"</span></span>
-            <span class="token special-attr"><span class="token attr-name">style</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span><span class="token value css language-css"><span class="token property">opacity</span><span class="token punctuation">:</span> 1<span class="token punctuation">;</span> <span class="token property">transform</span><span class="token punctuation">:</span> <span class="token function">scale</span><span class="token punctuation">(</span>1.2<span class="token punctuation">)</span></span><span class="token punctuation">"</span></span></span>
+            <span class="token special-attr"><span class="token attr-name">style</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span><span class="token value css language-css"><span class="token property">opacity</span><span class="token punctuation">:</span> 1<span class="token punctuation">;</span> <span class="token property">transform</span><span class="token punctuation">:</span> <span class="token function">translateY</span><span class="token punctuation">(</span>0px<span class="token punctuation">)</span> <span class="token function">scale</span><span class="token punctuation">(</span>1.2<span class="token punctuation">)</span></span><span class="token punctuation">"</span></span></span>
           <span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>tosi-waypoint</span><span class="token punctuation">></span></span>
           <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>h1</span> <span class="token special-attr"><span class="token attr-name">style</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span><span class="token value css language-css"><span class="token property">text-align</span><span class="token punctuation">:</span> center<span class="token punctuation">;</span></span><span class="token punctuation">"</span></span></span><span class="token punctuation">></span></span>Pinned for 2× viewport.<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>h1</span><span class="token punctuation">></span></span>
         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>tosi-interpolator</span><span class="token punctuation">></span></span>
@@ -294,7 +281,7 @@ tosi-doc-system[data-layout="full-screen"] .doc-content:has(.tp-hero),
   <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>body</span><span class="token punctuation">></span></span>
 <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>html</span><span class="token punctuation">></span></span>
 </code></pre>
-<h3>Modern web app (ESM)</h3>
+<h3 id="modern-web-app-esm">Modern web app (ESM)</h3>
 <p>Install from npm using bun, npm or whatever package manager you prefer:</p>
 <pre><code class="language-bash" data-highlighted>bun <span class="token function">add</span> tosijs-product tosijs tosijs-ui
 </code></pre>
@@ -313,13 +300,13 @@ tosi-doc-system[data-layout="full-screen"] .doc-content:has(.tp-hero),
       <span class="token punctuation">{</span> <span class="token string-property property">"data-scroll-animate"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span> easing<span class="token operator">:</span> <span class="token string">"ease-in-out"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
       <span class="token function">tosiWaypoint</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
         progress<span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span>
-        style<span class="token operator">:</span> <span class="token string">"opacity: 0; transform: translateY(50px)"</span><span class="token punctuation">,</span>
+        style<span class="token operator">:</span> <span class="token string">"opacity: 0; transform: translateY(50px) scale(1)"</span><span class="token punctuation">,</span>
       <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
       <span class="token function">tosiWaypoint</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
         progress<span class="token operator">:</span> <span class="token number">0.5</span><span class="token punctuation">,</span>
-        style<span class="token operator">:</span> <span class="token string">"opacity: 1; transform: translateY(0px)"</span><span class="token punctuation">,</span>
+        style<span class="token operator">:</span> <span class="token string">"opacity: 1; transform: translateY(0px) scale(1)"</span><span class="token punctuation">,</span>
       <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
-      <span class="token function">tosiWaypoint</span><span class="token punctuation">(</span><span class="token punctuation">{</span> progress<span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span> style<span class="token operator">:</span> <span class="token string">"opacity: 1; transform: scale(1.2)"</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+      <span class="token function">tosiWaypoint</span><span class="token punctuation">(</span><span class="token punctuation">{</span> progress<span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span> style<span class="token operator">:</span> <span class="token string">"opacity: 1; transform: translateY(0px) scale(1.2)"</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
       document<span class="token punctuation">.</span><span class="token function">createElement</span><span class="token punctuation">(</span><span class="token string">"h1"</span><span class="token punctuation">)</span>
     <span class="token punctuation">)</span>
   <span class="token punctuation">)</span>
@@ -327,9 +314,9 @@ tosi-doc-system[data-layout="full-screen"] .doc-content:has(.tp-hero),
 
 document<span class="token punctuation">.</span>body<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span>app<span class="token punctuation">)</span><span class="token punctuation">;</span>
 </code></pre>
-<h2>The <code>scroll</code> attribute</h2>
+<h2 id="the-scroll-attribute">The <code>scroll</code> attribute</h2>
 <p><code>scroll</code> on a section is its <strong>pin duration</strong>, expressed as a percentage of the viewport. <code>scroll=&quot;200&quot;</code> means &quot;pin this section for 2× viewport of scroll.&quot; When pin progress reaches 1, the section enters its <strong>exit phase</strong> and scrolls out at 1:1 over its own height. So total scroll claimed = <code>(scroll / 100) * viewport + naturalSize</code>.</p>
-<h2>Themes</h2>
+<h2 id="themes">Themes</h2>
 <p>Register themes (each is a dictionary of CSS custom properties) and reference them from sections:</p>
 <pre><code class="language-typescript" data-highlighted><span class="token keyword">const</span> app <span class="token operator">=</span> <span class="token function">tosiProduct</span><span class="token punctuation">(</span>
   <span class="token function">tosiProductSection</span><span class="token punctuation">(</span><span class="token punctuation">{</span> scroll<span class="token operator">:</span> <span class="token number">100</span><span class="token punctuation">,</span> theme<span class="token operator">:</span> <span class="token string">"midnight"</span> <span class="token punctuation">}</span> <span class="token comment">/* ... */</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
@@ -346,7 +333,7 @@ app<span class="token punctuation">.</span>themes <span class="token operator">=
 app<span class="token punctuation">.</span>defaultTheme <span class="token operator">=</span> <span class="token string">"midnight"</span><span class="token punctuation">;</span>
 </code></pre>
 <p>The transition section interpolates its CSS variables (color values use <code>color-mix(in srgb, …)</code>) over its pin progress, and writes them to <code>document.documentElement</code>. Anything cascading from <code>:root</code> — including a <code>&lt;tosi-product-header&gt;</code> overlay outside the engine — re-themes in unison.</p>
-<h2>Frame-based animation</h2>
+<h2 id="frame-based-animation">Frame-based animation</h2>
 <p>Standard video scrubbing (<code>video.currentTime</code>) often stutters because decoders aren&#39;t designed for random-access seeking. The <code>tosi-mosaic</code> CLI converts a video to a single WebP mosaic grid, and <code>&lt;tosi-filmstrip&gt;</code> scrubs through it using a hardware-accelerated canvas. (The CLI needs <code>ffmpeg</code> and <code>ffprobe</code> on your PATH — macOS: <code>brew install ffmpeg</code>.)</p>
 <pre><code class="language-bash" data-highlighted>bunx tosi-mosaic my-video.mp4 <span class="token parameter variable">--frames</span> <span class="token number">100</span> <span class="token parameter variable">--width</span> <span class="token number">1280</span>
 </code></pre>
@@ -357,7 +344,9 @@ app<span class="token punctuation">.</span>defaultTheme <span class="token opera
 <span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>tosi-filmstrip</span><span class="token punctuation">></span></span>
 </code></pre>
 <p>A grid (rather than a single long strip) keeps dimensions inside the browser&#39;s max image size (commonly 16,384px) while delivering all frames in one request.</p>
-<h2>License</h2>
+<h2 id="credits">Credits</h2>
+<p>The landing page&#39;s Lottie animation is by <a href="https://pro.fiverr.com/freelancers/anicoremotion">@anicoremotion</a>.</p>
+<h2 id="license">License</h2>
 <p>Licensed under the Apache License, Version 2.0. See <a href="LICENSE">LICENSE</a> for details.</p>
 
   </article>
@@ -383,6 +372,6 @@ app<span class="token punctuation">.</span>defaultTheme <span class="token opera
     <li><a href="https://www.npmjs.com/package/tosijs-product" data-icon="npm">npmjs</a></li>
   </ul>
   </tosi-doc-system>
-  <script type="module" src="hydrate-6vpb8eeg.js"></script>
+  <script type="module" src="hydrate-mqg34kgr.js"></script>
 </body>
 </html>

@@ -1,20 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- NB: the body is NOT hidden until hydration. It used to be (body opacity 0 +
-       a 4s safety-net timeout), because an undefined custom element is
-       display:inline, so the pre-rendered page stacked as bare text and hydration
-       reflowed the whole thing. The cost was a blank screen for as long as the
-       bundle took — ~4.5s on a cheap phone, for content already in the HTML. The
-       tosi-doc-system:not(:defined) rules in the stylesheet now lay the static page
-       out as though the chrome were there, so hydration only ADDS the chrome and
-       nothing moves. Paint immediately; don't hide readable content. -->
-  <!-- Theme, applied BEFORE first paint. Now that we paint the static page rather
-       than hiding it, a dark-mode reader would otherwise get a flash of the light
-       theme until the bundle lands and sets body.darkmode. CSS alone can't do this:
-       an explicit theme choice lives in localStorage. Mirrors applyThemePrefs()
-       (doc-system.ts) — keep the two in step. Fails safe: any error leaves the
-       light default, exactly as before. -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script>
     try {
       var p = JSON.parse(localStorage.getItem('tosi-doc-system-prefs') || '{}')
@@ -24,15 +12,14 @@
       if (p.highContrast) document.documentElement.classList.add('high-contrast')
     } catch (e) {}
   </script>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="../doc-system.css?v=b979e1a7585f" data-tosi-doc-system />
+  <link rel="stylesheet" href="../doc-system.css?v=1b547c4b42b6" data-tosi-doc-system />
   <title>Owl Pro — a scroll-driven product page built entirely in Markdown</title>
   <meta name="description" content="An Apple-style product landing page — a hero that pins across five beats, word-by-word type, scrubbed video, a 3D model and a map flight — built with tosijs-product as declarative HTML inside a Markdown file. No JavaScript." />
   <meta name="keywords" content="scrollytelling, apple style, product page, scroll animation, web components, tosijs, demo" />
   <link rel="canonical" href="https://product.tosijs.net/owl-pro/" />
+  <link rel="alternate" type="text/markdown" href="index.md" title="Owl Pro — a scroll-driven product page built entirely in Markdown (markdown)" />
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="tosijs-product" />
   <meta property="og:title" content="Owl Pro — a scroll-driven product page built entirely in Markdown" />
@@ -44,9 +31,9 @@
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="../docs.json?v=b010d4f4b34f" config="{&quot;projectName&quot;:&quot;tosijs-product&quot;,&quot;projectLinks&quot;:{&quot;tosijs&quot;:&quot;https://tosijs.net&quot;,&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs-product&quot;}}" data-layout="full-screen">
-  <article class="doc-content">
-<h1>Owl Pro</h1>
+  <tosi-doc-system docs="../docs.json?v=36c2f2ca7522" config="{&quot;projectName&quot;:&quot;tosijs-product&quot;,&quot;projectLinks&quot;:{&quot;tosijs&quot;:&quot;https://tosijs.net&quot;,&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs-product&quot;},&quot;ebooks&quot;:[]}" data-layout="full-screen">
+  <article class="doc-content" data-doc="owl-pro.md">
+<h1 id="owl-pro">Owl Pro</h1>
 <!--{ "layout": "full-screen", "order": 2, "headTitle": "Owl Pro — a scroll-driven product page built entirely in Markdown", "description": "An Apple-style product landing page — a hero that pins across five beats, word-by-word type, scrubbed video, a 3D model and a map flight — built with tosijs-product as declarative HTML inside a Markdown file. No JavaScript.", "keywords": [ "scrollytelling", "apple style", "product page", "scroll animation", "web components", "tosijs", "demo" ] }--><style>
 /* `.doc-content` gets `overflow: hidden` inline from the doc-browser, which kills the
    position:sticky the engine runs on — and under `full-screen` leaves the page with no
@@ -233,7 +220,7 @@ tosi-doc-system:has(.op) > div > header a, tosi-doc-system:has(.op) > div > head
 <tosi-waypoint progress="1" style="opacity:1"></tosi-waypoint>
 <div class="beat" style="justify-content:flex-end; padding-bottom:8vh">
 <p class="title" style="font-size:clamp(1.7rem,4vw,3rem)">Vector, scrubbed.</p>
-<p class="lede">A Lottie timeline mapped straight onto pin progress.</p>
+<p class="lede">A Lottie timeline mapped straight onto pin progress. Animation by <a href="https://pro.fiverr.com/freelancers/anicoremotion" style="color:inherit">@anicoremotion</a>.</p>
 </div>
 </tosi-interpolator>
 </div>
@@ -241,7 +228,7 @@ tosi-doc-system:has(.op) > div > header a, tosi-doc-system:has(.op) > div > head
 <tosi-product-section scroll="420">
 <div class="scene">
 <div class="stage">
-<tosi-3d src="https://cdn.tosijs.net/tosijs-product/macbook_neo.glb" hero-light fov="0.6" clear-color="transparent" data-scroll-animate>
+<tosi-3d src="https://cdn.tosijs.net/tosijs-product/macbook_neo_web.glb" hero-light fov="0.6" clear-color="transparent" data-scroll-animate>
 <tosi-scroll-camera data-scroll-animate easing="ease-in-out">
 <tosi-waypoint progress="0" alpha="-2.35" beta="1.32" radius="150" target-y="10"></tosi-waypoint>
 <tosi-waypoint progress="0.35" alpha="-1.2" beta="0.95" radius="72" target-y="10"></tosi-waypoint>
@@ -407,6 +394,6 @@ tosi-doc-system:has(.op) > div > header a, tosi-doc-system:has(.op) > div > head
     <li><a href="https://www.npmjs.com/package/tosijs-product" data-icon="npm">npmjs</a></li>
   </ul>
   </tosi-doc-system>
-  <script type="module" src="../hydrate-6vpb8eeg.js"></script>
+  <script type="module" src="../hydrate-mqg34kgr.js"></script>
 </body>
 </html>

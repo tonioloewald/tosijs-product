@@ -1,20 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- NB: the body is NOT hidden until hydration. It used to be (body opacity 0 +
-       a 4s safety-net timeout), because an undefined custom element is
-       display:inline, so the pre-rendered page stacked as bare text and hydration
-       reflowed the whole thing. The cost was a blank screen for as long as the
-       bundle took — ~4.5s on a cheap phone, for content already in the HTML. The
-       tosi-doc-system:not(:defined) rules in the stylesheet now lay the static page
-       out as though the chrome were there, so hydration only ADDS the chrome and
-       nothing moves. Paint immediately; don't hide readable content. -->
-  <!-- Theme, applied BEFORE first paint. Now that we paint the static page rather
-       than hiding it, a dark-mode reader would otherwise get a flash of the light
-       theme until the bundle lands and sets body.darkmode. CSS alone can't do this:
-       an explicit theme choice lives in localStorage. Mirrors applyThemePrefs()
-       (doc-system.ts) — keep the two in step. Fails safe: any error leaves the
-       light default, exactly as before. -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script>
     try {
       var p = JSON.parse(localStorage.getItem('tosi-doc-system-prefs') || '{}')
@@ -24,14 +12,13 @@
       if (p.highContrast) document.documentElement.classList.add('high-contrast')
     } catch (e) {}
   </script>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="../doc-system.css?v=b979e1a7585f" data-tosi-doc-system />
+  <link rel="stylesheet" href="../doc-system.css?v=1b547c4b42b6" data-tosi-doc-system />
   <title>Getting Started — tosijs-product</title>
   <meta name="description" content="A single script tag gives you tosijs, tosijs-product, and the tosijs-ui components — everything a product page needs, with its custom elements registered" />
   <link rel="canonical" href="https://product.tosijs.net/getting-started/" />
+  <link rel="alternate" type="text/markdown" href="index.md" title="Getting Started — tosijs-product (markdown)" />
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="tosijs-product" />
   <meta property="og:title" content="Getting Started — tosijs-product" />
@@ -43,18 +30,23 @@
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="../docs.json?v=b010d4f4b34f" config="{&quot;projectName&quot;:&quot;tosijs-product&quot;,&quot;projectLinks&quot;:{&quot;tosijs&quot;:&quot;https://tosijs.net&quot;,&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs-product&quot;}}">
-  <article class="doc-content">
-<h1>Getting Started</h1>
-<h2>Installation</h2>
-<h3>Pure HTML (IIFE build)</h3>
+  <tosi-doc-system docs="../docs.json?v=36c2f2ca7522" config="{&quot;projectName&quot;:&quot;tosijs-product&quot;,&quot;projectLinks&quot;:{&quot;tosijs&quot;:&quot;https://tosijs.net&quot;,&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs-product&quot;},&quot;ebooks&quot;:[]}">
+  <article class="doc-content" data-doc="getting-started.md">
+<h1 id="getting-started">Getting Started</h1>
+<h2 id="installation">Installation</h2>
+<h3 id="pure-html-iife-build">Pure HTML (IIFE build)</h3>
 <p>A single script tag gives you tosijs, tosijs-product, and the tosijs-ui <strong>components</strong> — everything a product page needs, with its custom elements registered:</p>
-<pre><code class="language-markup" data-highlighted><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>script</span> <span class="token attr-name">src</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>https://cdn.jsdelivr.net/npm/tosijs-product@0.8.0/dist/index.js<span class="token punctuation">"</span></span><span class="token punctuation">></span></span><span class="token script"></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>script</span><span class="token punctuation">></span></span>
+<pre><code class="language-markup" data-highlighted><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>script</span> <span class="token attr-name">defer</span> <span class="token attr-name">src</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>https://cdn.jsdelivr.net/npm/tosijs-product@0.8.0/dist/index.js<span class="token punctuation">"</span></span><span class="token punctuation">></span></span><span class="token script"></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>script</span><span class="token punctuation">></span></span>
 </code></pre>
+<p><strong>Keep the <code>defer</code></strong> (or put the tag at the end of <code>&lt;body&gt;</code>). Without it, a tag in <code>&lt;head&gt;</code> runs
+before <code>&lt;body&gt;</code> exists, tosijs throws while loading, and nothing on the page registers. This is
+a tosijs bug, filed as board task #3511. Scripts of your own that use the <code>tosijs</code>, <code>tosijsUi</code> or
+<code>tosijsProduct</code> globals run after it if they are also <code>defer</code> (deferred scripts run in order), or
+inside a <code>DOMContentLoaded</code> listener.</p>
 <blockquote>
 <p><strong>Not included since 0.8.0:</strong> the tosijs-ui <em>doc-authoring</em> elements — <code>&lt;tosi-code&gt;</code>, <code>&lt;tosi-example&gt;</code>, <code>&lt;tosi-doc-system&gt;</code>, <code>&lt;tosi-doc-system-prefs&gt;</code>, <code>&lt;tosi-css-var-editor&gt;</code>, <code>&lt;tosi-line-offset-probe&gt;</code>, <code>&lt;tosi-test-results&gt;</code>, <code>&lt;tosi-tests-done&gt;</code>. They are doc-site tooling, not product-page components, and they were most of the bundle: dropping them is what took it from 578kB to 145kB gzip. If you need them, load them from tosijs-ui&#39;s own subpaths (<code>tosijs-ui/doc-browser</code>, <code>tosijs-ui/live-example</code>) rather than from this script tag.</p>
 </blockquote>
-<h3>ESM (bundled apps)</h3>
+<h3 id="esm-bundled-apps">ESM (bundled apps)</h3>
 <pre><code class="language-bash" data-highlighted>bun <span class="token function">install</span> tosijs tosijs-ui tosijs-product
 </code></pre>
 <pre><code class="language-typescript" data-highlighted><span class="token keyword">import</span> <span class="token punctuation">{</span>
@@ -67,14 +59,14 @@
   tosiScrollCamera<span class="token punctuation">,</span>
 <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"tosijs-product"</span><span class="token punctuation">;</span>
 </code></pre>
-<h2>Quick Start</h2>
+<h2 id="quick-start">Quick Start</h2>
 <p>Every tosijs-product page follows the same pattern:</p>
 <ol>
 <li>Wrap everything in <code>&lt;tosi-product&gt;</code></li>
 <li>Create <code>&lt;tosi-product-section&gt;</code> elements — each one pins its content and converts scroll distance to 0-1 progress</li>
 <li>Inside sections, use <code>data-scroll-animate</code> on children to drive them with scroll progress</li>
 </ol>
-<h3>Minimal example</h3>
+<h3 id="minimal-example">Minimal example</h3>
 <pre><code class="language-html">&lt;tosi-product&gt;
   &lt;tosi-product-section scroll=&quot;200&quot;&gt;
     &lt;tosi-interpolator data-scroll-animate easing=&quot;ease-in-out&quot;&gt;
@@ -100,14 +92,14 @@
 &lt;/tosi-product&gt;
 </code></pre>
 <p>The <code>scroll=&quot;200&quot;</code> means the section creates 2x the viewport height of scroll distance. As the user scrolls through it, progress goes from 0 to 1, and the interpolator fades the heading in and out.</p>
-<h2>The scroll attribute</h2>
+<h2 id="the-scroll-attribute">The scroll attribute</h2>
 <p>The <code>scroll</code> attribute is a <strong>viewport-relative percentage</strong>, not pixels:</p>
 <ul>
 <li><code>scroll=&quot;100&quot;</code> — 1x the container dimension (default)</li>
 <li><code>scroll=&quot;300&quot;</code> — 3x, giving more scroll distance for slower animations</li>
 <li><code>scroll=&quot;500&quot;</code> — 5x, for long sequences like map flights</li>
 </ul>
-<h2>Scroll ranges</h2>
+<h2 id="scroll-ranges">Scroll ranges</h2>
 <p>Use <code>data-scroll-range</code> to constrain a child&#39;s animation to part of the section:</p>
 <pre><code class="language-markup" data-highlighted><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>tosi-product-section</span> <span class="token attr-name">scroll</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>300<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
   <span class="token comment">&lt;!-- First half --></span>
@@ -127,7 +119,7 @@
   <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>tosi-interpolator</span><span class="token punctuation">></span></span>
 <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>tosi-product-section</span><span class="token punctuation">></span></span>
 </code></pre>
-<h2>Video scrubbing</h2>
+<h2 id="video-scrubbing">Video scrubbing</h2>
 <p>Add <code>data-scroll-animate=&quot;currentTime&quot;</code> to any <code>&lt;video&gt;</code> element:</p>
 <pre><code class="language-markup" data-highlighted><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>tosi-product-section</span> <span class="token attr-name">scroll</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>300<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
   <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>video</span>
@@ -140,12 +132,12 @@
 <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>tosi-product-section</span><span class="token punctuation">></span></span>
 </code></pre>
 <p>For smoother results, convert the video to a filmstrip mosaic (see <a href="/tosi-filmstrip/"><code>&lt;tosi-filmstrip&gt;</code></a>).</p>
-<h2>Lottie animations</h2>
+<h2 id="lottie-animations">Lottie animations</h2>
 <pre><code class="language-markup" data-highlighted><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>tosi-product-section</span> <span class="token attr-name">scroll</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>200<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
   <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>tosi-lottie</span> <span class="token attr-name">src</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>animation.json<span class="token punctuation">"</span></span> <span class="token attr-name">data-scroll-animate</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>lottie<span class="token punctuation">"</span></span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>tosi-lottie</span><span class="token punctuation">></span></span>
 <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>tosi-product-section</span><span class="token punctuation">></span></span>
 </code></pre>
-<h2>Embedding, nesting and horizontal scrolling</h2>
+<h2 id="embedding-nesting-and-horizontal-scrolling">Embedding, nesting and horizontal scrolling</h2>
 <p>The engine detects the scroll container it lives in, so a <code>&lt;tosi-product&gt;</code> works inside any
 scrollable element, not just the page:</p>
 <pre><code class="language-markup" data-highlighted><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token special-attr"><span class="token attr-name">style</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span><span class="token value css language-css"><span class="token property">height</span><span class="token punctuation">:</span> 60vh<span class="token punctuation">;</span> <span class="token property">overflow-y</span><span class="token punctuation">:</span> auto<span class="token punctuation">;</span></span><span class="token punctuation">"</span></span></span><span class="token punctuation">></span></span>
@@ -163,7 +155,7 @@ attribute, not a section one, because the engine is what lays the runway out:</p
   <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>tosi-product-section</span> <span class="token attr-name">scroll</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>200<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>...<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>tosi-product-section</span><span class="token punctuation">></span></span>
 <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>tosi-product</span><span class="token punctuation">></span></span>
 </code></pre>
-<h2>Accessibility</h2>
+<h2 id="accessibility">Accessibility</h2>
 <p>When <code>prefers-reduced-motion: reduce</code> is active, all scroll-driven child animations are skipped. Only <code>scrollCallback</code> continues to fire, allowing you to provide alternative experiences.</p>
 
   </article>
@@ -189,6 +181,6 @@ attribute, not a section one, because the engine is what lays the runway out:</p
     <li><a href="https://www.npmjs.com/package/tosijs-product" data-icon="npm">npmjs</a></li>
   </ul>
   </tosi-doc-system>
-  <script type="module" src="../hydrate-6vpb8eeg.js"></script>
+  <script type="module" src="../hydrate-mqg34kgr.js"></script>
 </body>
 </html>
